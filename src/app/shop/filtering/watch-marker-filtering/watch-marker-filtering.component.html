@@ -1,0 +1,14 @@
+<div class="sidebar__widget mb-20">
+  <div class="sidebar__widget-title mb-10">
+    <h3>Watch Marker</h3>
+  </div>
+  <div class="sidebar__widget-content">
+    <div class="filter-shop">
+      <select (change)="handleWatchMarkerRoute($event)">
+        <option *ngFor="let w of watchMarkers" [value]="w">
+          {{ w }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>

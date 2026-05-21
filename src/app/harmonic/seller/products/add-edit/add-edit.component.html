@@ -1,0 +1,690 @@
+<app-breadcrumb-two
+  [title]="productData ? 'Edit Product' : 'Add Product'"
+  subtitle="Product Details"
+></app-breadcrumb-two>
+
+<section class="product-insert-area pt-100 pb-100">
+  <div class="container">
+    <mat-vertical-stepper [linear]="isLinear" #stepper>
+      <mat-step [stepControl]="basicProductInformation">
+        <form [formGroup]="basicProductInformation">
+          <ng-template matStepLabel>Basic Product Information</ng-template>
+          <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="productName"
+                  >Product Name <span class="required">*</span></label
+                >
+                <input
+                  id="productName"
+                  type="text"
+                  placeholder="Enter the product name"
+                  formControlName="productName"
+                />
+                <span
+                  *ngIf="
+                    productName?.hasError('required') && productName?.touched
+                  "
+                  class="text-danger"
+                  >Product Name is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="brand"
+                    >Brand <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('brand')"
+                    title="Add new Brand"
+                    aria-label="Add new Brand"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="brand" formControlName="brandId">
+                  <option value="" disabled>- Please select -</option>
+                  <option *ngFor="let brand of brands" [value]="brand._id">
+                    {{ brand.BrandName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="brandId?.hasError('required') && brandId?.touched"
+                  class="text-danger"
+                  >Brand is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="category"
+                    >Category <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('category')"
+                    title="Add new Category"
+                    aria-label="Add new Category"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="category" formControlName="categoryId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let category of categories"
+                    [value]="category._id"
+                  >
+                    {{ category.CategoryName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    categoryId?.hasError('required') && categoryId?.touched
+                  "
+                  class="text-danger"
+                  >Category is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="collection"
+                    >Collection<span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('collection')"
+                    title="Add new Collection"
+                    aria-label="Add new Collection"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="collection" formControlName="collectionId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let collection of collections"
+                    [value]="collection._id"
+                  >
+                    {{ collection.CollectionName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    collectionId?.hasError('required') && collectionId?.touched
+                  "
+                  class="text-danger"
+                  >Collection is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="price">Price<span class="required">*</span></label>
+                <input
+                  id="price"
+                  type="number"
+                  placeholder="Enter Price"
+                  formControlName="price"
+                />
+                <span
+                  *ngIf="price?.hasError('required') && price?.touched"
+                  class="text-danger"
+                  >Price is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="recipientId"
+                    >Recipient <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('recipient')"
+                    title="Add new Recipient"
+                    aria-label="Add new Recipient"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="recipientId" formControlName="recipientId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let recipient of recipients"
+                    [value]="recipient._id"
+                  >
+                    {{ recipient.RecipientName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    recipientId?.hasError('required') && recipientId?.touched
+                  "
+                  class="text-danger"
+                  >Recipient is required</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="d-md-flex justify-content-end">
+            <button
+              mat-button
+              matStepperNext
+              (click)="stepperNext(1, stepper)"
+              class="os-btn"
+            >
+              Next
+            </button>
+          </div>
+        </form>
+      </mat-step>
+      <mat-step [stepControl]="productInformation">
+        <form [formGroup]="productInformation">
+          <ng-template matStepLabel>Product Specifications</ng-template>
+          <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="dialColorId"
+                    >Dial Color <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('dialColor')"
+                    title="Add new Dial Color"
+                    aria-label="Add new Dial Color"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="dialColorId" formControlName="dialColorId">
+                  <option value="" disabled>- Please select -</option>
+                  <option *ngFor="let color of dialColors" [value]="color._id">
+                    {{ color.DialColorName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    dialColorId?.hasError('required') && dialColorId?.touched
+                  "
+                  class="text-danger"
+                  >Dial Color is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="diameter"
+                  >Diameter <span class="required">*</span></label
+                >
+                <input
+                  id="diameter"
+                  type="text"
+                  placeholder="Enter Diameter"
+                  formControlName="diameter"
+                />
+                <span
+                  *ngIf="diameter?.hasError('required') && diameter?.touched"
+                  class="text-danger"
+                  >Diameter is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <label for="waterResistant">Water Resistant </label>
+                <select id="waterResistant" formControlName="waterResistant">
+                  <option value="" disabled>- Please select -</option>
+                  <option *ngFor="let type of waterResistant" [value]="type.id">
+                    {{ type.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="movementId"
+                    >Movement <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('movement')"
+                    title="Add new Movement"
+                    aria-label="Add new Movement"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="movementId" formControlName="movementId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let movement of movements"
+                    [value]="movement._id"
+                  >
+                    {{ movement.MovementName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    movementId?.hasError('required') && movementId?.touched
+                  "
+                  class="text-danger"
+                  >Movement is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="strapMaterialId"
+                    >Strap Material <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('strapMaterial')"
+                    title="Add new Strap Material"
+                    aria-label="Add new Strap Material"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="strapMaterialId" formControlName="strapMaterialId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let strapMaterial of strapMaterials"
+                    [value]="strapMaterial._id"
+                  >
+                    {{ strapMaterial.StrapMaterialName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    strapMaterialId?.hasError('required') &&
+                    strapMaterialId?.touched
+                  "
+                  class="text-danger"
+                  >Strap Material is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="caseMaterialId"
+                    >Case Material <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('caseMaterial')"
+                    title="Add new Case Material"
+                    aria-label="Add new Case Material"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="caseMaterialId" formControlName="caseMaterialId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let caseMaterial of caseMaterials"
+                    [value]="caseMaterial._id"
+                  >
+                    {{ caseMaterial.CaseMaterialName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    caseMaterialId?.hasError('required') &&
+                    caseMaterialId?.touched
+                  "
+                  class="text-danger"
+                  >Case Material is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="watchMarkersId"
+                    >Watch Markers <span class="required">*</span></label
+                  >
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('watchMarker')"
+                    title="Add new Watch Markers"
+                    aria-label="Add new Watch Markers"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="watchMarkersId" formControlName="watchMarkersId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let watchMarker of watchMarkers"
+                    [value]="watchMarker._id"
+                  >
+                    {{ watchMarker.WatchMarkerName }}
+                  </option>
+                </select>
+                <span
+                  *ngIf="
+                    watchMarkersId?.hasError('required') &&
+                    watchMarkersId?.touched
+                  "
+                  class="text-danger"
+                  >Watch Markers is required</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="manufacturerProductNumber"
+                  >Manufacturer Product Number</label
+                >
+                <input
+                  id="manufacturerProductNumber"
+                  type="text"
+                  placeholder="Enter Manufacturer Product Number"
+                  formControlName="manufacturerProductNumber"
+                />
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="guarantee">Guarantee</label>
+                <input
+                  id="guarantee"
+                  type="text"
+                  placeholder="Enter Guarantee"
+                  formControlName="guarantee"
+                />
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <div class="lookup-label-row">
+                  <label for="deliveryOptionId">Delivery Option</label>
+                  <button
+                    type="button"
+                    class="add-lookup-icon"
+                    (click)="openAddLookup('deliveryOption')"
+                    title="Add new Delivery Option"
+                    aria-label="Add new Delivery Option"
+                  >
+                    +
+                  </button>
+                </div>
+                <select id="deliveryOptionId" formControlName="deliveryOptionId">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let deliveryOptions of deliveryOptions"
+                    [value]="deliveryOptions._id"
+                  >
+                    {{ deliveryOptions.DeliveryOptionName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="d-md-flex justify-content-end">
+            <button mat-button matStepperPrevious class="os-btn mr-5">
+              Back
+            </button>
+            <button mat-button matStepperNext class="os-btn">Next</button>
+          </div>
+        </form>
+      </mat-step>
+      <mat-step [stepControl]="productDescription">
+        <form [formGroup]="productDescription">
+          <ng-template matStepLabel>Product Description</ng-template>
+          <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="shortTitle">Short Title</label>
+                <input
+                  id="shortTitle"
+                  type="text"
+                  placeholder="Short Title"
+                  formControlName="shortTitle"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="detailedDescription">Detailed Description</label>
+                <textarea
+                  id="detailedDescription"
+                  placeholder="Enter Detailed Description"
+                  formControlName="detailedDescription"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="additionalDescription">Additional Details</label>
+                <textarea
+                  id="additionalDescription"
+                  placeholder="Enter Additional Description"
+                  formControlName="additionalDescription"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="d-md-flex justify-content-end">
+            <button mat-button matStepperPrevious class="os-btn mr-5">
+              Back
+            </button>
+            <button mat-button matStepperNext class="os-btn">Next</button>
+          </div>
+        </form>
+      </mat-step>
+      <mat-step [stepControl]="deliveryAndReturns">
+        <form [formGroup]="deliveryAndReturns">
+          <ng-template matStepLabel>Delivery & Returns</ng-template>
+          <div class="row">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="deliveryInfo">Delivery Information</label>
+                <textarea
+                  id="deliveryInfo"
+                  placeholder="Enter Delivery Information"
+                  formControlName="deliveryInfo"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="returnsPolicy">Returns Policy</label>
+                <textarea
+                  id="returnsPolicy"
+                  placeholder="Enter Returns Policy"
+                  formControlName="returnsPolicy"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="d-md-flex justify-content-end">
+            <button mat-button matStepperPrevious class="os-btn mr-5">
+              Back
+            </button>
+            <button mat-button matStepperNext class="os-btn">Next</button>
+          </div>
+        </form>
+      </mat-step>
+      <mat-step [stepControl]="media">
+        <form [formGroup]="media" (ngSubmit)="onSubmit()">
+          <ng-template matStepLabel>Media</ng-template>
+          <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="productImages"
+                  >Upload Images (Min: 2, Max: 5)</label
+                >
+                <input
+                  id="productImages"
+                  type="file"
+                  (change)="onImageUpload($event)"
+                  multiple
+                  accept="image/jpeg, image/png, image/jpg"
+                />
+                <div *ngIf="errorMessage" class="text-danger">
+                  {{ errorMessage }}
+                </div>
+                <span *ngIf="uploadedImages.length < 2" class="text-danger"
+                  >Please upload at least 2 images.</span
+                >
+                <span *ngIf="uploadedImages.length > 5" class="text-danger"
+                  >You can upload a maximum of 5 images.</span
+                >
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="row" *ngIf="uploadedImages.length > 0">
+                <div
+                  class="col-auto m-2"
+                  *ngFor="let img of uploadedImages; let i = index"
+                >
+                  <div class="position-relative image-container">
+                    <img
+                      [src]="img.url"
+                      alt="product-img"
+                      class="uploaded-img m-2"
+                    />
+                    <a
+                      (click)="removeImage(img, i)"
+                      class="position-absolute top-0 end-0 text-danger cursor-pointer"
+                    >
+                      <i class="fa fa-times"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-md-flex justify-content-end">
+            <button mat-button matStepperPrevious class="os-btn mr-5">
+              Back
+            </button>
+            <button mat-button matStepperNext class="os-btn">
+              {{ !productData ? "Create Product" : "Update Product" }}
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-vertical-stepper>
+  </div>
+</section>
+
+<!-- Reusable "Add new lookup" modal -->
+<div
+  *ngIf="isAddLookupModalOpen && activeLookupConfig"
+  class="modal fade show add-lookup-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add {{ activeLookupConfig.label }}</h5>
+        <button
+          type="button"
+          class="add-lookup-close"
+          aria-label="Close"
+          (click)="closeAddLookup()"
+        >
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- A collection belongs to a brand, so let the user pick it here. -->
+        <div
+          *ngIf="activeLookupKey === 'collection'"
+          class="country-select mb-3"
+        >
+          <label for="newLookupBrand"
+            >Brand <span class="required">*</span></label
+          >
+          <select
+            id="newLookupBrand"
+            [(ngModel)]="newLookupBrandId"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option value="" disabled>- Please select -</option>
+            <option *ngFor="let brand of brands" [value]="brand._id">
+              {{ brand.BrandName }}
+            </option>
+          </select>
+        </div>
+        <div class="checkout-form-list">
+          <label for="newLookupName"
+            >{{ activeLookupConfig.label }} Name
+            <span class="required">*</span></label
+          >
+          <input
+            id="newLookupName"
+            type="text"
+            [(ngModel)]="newLookupName"
+            [ngModelOptions]="{ standalone: true }"
+            (keyup.enter)="saveLookup()"
+            [placeholder]="'Enter ' + activeLookupConfig.label + ' name'"
+          />
+          <span *ngIf="lookupError" class="text-danger">{{ lookupError }}</span>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-end">
+        <button
+          type="button"
+          class="os-btn mr-5"
+          (click)="closeAddLookup()"
+          [disabled]="isSavingLookup"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="os-btn"
+          (click)="saveLookup()"
+          [disabled]="isSavingLookup"
+        >
+          {{ isSavingLookup ? "Saving..." : "Save" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isAddLookupModalOpen" class="modal-backdrop fade show"></div>

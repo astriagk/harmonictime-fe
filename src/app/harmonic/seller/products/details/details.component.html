@@ -1,0 +1,10 @@
+<app-breadcrumb-two
+  title="Product Details"
+  subtitle="Product Details"
+></app-breadcrumb-two>
+
+<div *ngIf="product">
+  <app-product-details-area-seller
+    [product]="product"
+  ></app-product-details-area-seller>
+</div>

@@ -1,0 +1,537 @@
+<app-breadcrumb-two title="Checkout" subtitle="Checkout"></app-breadcrumb-two>
+<section class="coupon-area pt-100 pb-30" *ngIf="cartItems.length > 0">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="coupon-accordion" *ngIf="!userData">
+          <h3>
+            Returning customer?
+            <span id="showlogin" (click)="handleOpenLogin()"
+              >Click here to login</span
+            >
+          </h3>
+          <div *ngIf="isOpenLogin" id="checkout-login" class="coupon-content">
+            <div class="coupon-info">
+              <p class="coupon-text">
+                If you already have an account, please login below to continue
+                with your order.
+              </p>
+              <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+                <p class="form-row-first">
+                  <label>Email <span class="required">*</span></label>
+                  <input type="text" formControlName="email" />
+                  <span
+                    *ngIf="
+                      loginEmail?.invalid &&
+                      (loginEmail?.touched || loginSubmitted)
+                    "
+                    class="text-danger"
+                  >
+                    A valid email is required
+                  </span>
+                </p>
+                <p class="form-row-last">
+                  <label>Password <span class="required">*</span></label>
+                  <input
+                    [type]="showLoginPassword ? 'text' : 'password'"
+                    formControlName="password"
+                  />
+                  <span
+                    *ngIf="
+                      loginPassword?.invalid &&
+                      (loginPassword?.touched || loginSubmitted)
+                    "
+                    class="text-danger"
+                  >
+                    Password is required
+                  </span>
+                </p>
+                <p class="form-row">
+                  <button class="os-btn os-btn-black" type="submit">
+                    Login
+                  </button>
+                  <label>
+                    <input type="checkbox" (change)="toggleLoginPassword()" />
+                    Show password
+                  </label>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="coupon-accordion" *ngIf="!userData">
+          <h3>
+            New customer?
+            <span id="showregister" (click)="handleOpenRegister()"
+              >Click here to register</span
+            >
+          </h3>
+          <div
+            *ngIf="isOpenRegister"
+            id="checkout-register"
+            class="coupon-content"
+          >
+            <div class="coupon-info">
+              <p class="coupon-text">
+                Create an account to track your orders and check out faster.
+              </p>
+              <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+                <p class="form-row-first">
+                  <label>Email <span class="required">*</span></label>
+                  <input type="text" formControlName="email" />
+                  <span
+                    *ngIf="
+                      registerEmail?.invalid &&
+                      (registerEmail?.touched || registerSubmitted)
+                    "
+                    class="text-danger"
+                  >
+                    A valid email is required
+                  </span>
+                </p>
+                <p class="form-row-first">
+                  <label>Password <span class="required">*</span></label>
+                  <input
+                    [type]="showRegisterPassword ? 'text' : 'password'"
+                    formControlName="password"
+                  />
+                  <span
+                    *ngIf="
+                      registerPassword?.invalid &&
+                      (registerPassword?.touched || registerSubmitted)
+                    "
+                    class="text-danger"
+                  >
+                    Password must be at least 6 characters and include
+                    uppercase, lowercase, a number and a special character
+                  </span>
+                </p>
+                <p class="form-row-last">
+                  <label
+                    >Confirm Password <span class="required">*</span></label
+                  >
+                  <input
+                    [type]="showRegisterConfirmPassword ? 'text' : 'password'"
+                    formControlName="confirmPassword"
+                  />
+                  <span
+                    *ngIf="
+                      registerForm.hasError('passwordsMismatch') &&
+                      (registerConfirmPassword?.dirty || registerSubmitted)
+                    "
+                    class="text-danger"
+                  >
+                    Passwords do not match
+                  </span>
+                </p>
+                <p class="form-row">
+                  <button class="os-btn os-btn-black" type="submit">
+                    Register
+                  </button>
+                  <label>
+                    <input
+                      type="checkbox"
+                      (change)="toggleRegisterPassword('password')"
+                    />
+                    Show password
+                  </label>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="col-md-6">
+        <div class="coupon-accordion">
+          <h3>
+            Have a coupon?
+            <span id="showcoupon" (click)="handleOpenCoupon()"
+              >Click here to enter your code</span
+            >
+          </h3>
+          <div
+            *ngIf="isOpenCoupon"
+            id="checkout_coupon"
+            class="coupon-checkout-content"
+          >
+            <div class="coupon-info">
+              <form action="#">
+                <p class="checkout-coupon">
+                  <input type="text" placeholder="Coupon Code" />
+                  <button class="os-btn os-btn-black" type="submit">
+                    Apply Coupon
+                  </button>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div> -->
+    </div>
+  </div>
+</section>
+<section class="checkout-area pb-70">
+  <div class="container">
+    <div
+      *ngIf="cartItems.length === 0; else checkoutBlock"
+      class="text-center pt-80 pb-30"
+    >
+      <h3 class="py-2">No items found in cart to checkout</h3>
+      <a routerLink="/buyer/products" class="os-btn os-btn-black">
+        Return to shop
+      </a>
+    </div>
+
+    <ng-template #checkoutBlock>
+      <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="checkbox-form">
+              <h3>Billing Details</h3>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="country-select">
+                    <label>Country <span class="required">*</span></label>
+                    <select formControlName="country">
+                      <option
+                        *ngFor="let country of countries"
+                        [value]="country"
+                      >
+                        {{ country }}
+                      </option>
+                    </select>
+                    <span
+                      *ngIf="
+                        country?.hasError('required') &&
+                        (country?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      Country is required
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="checkout-form-list">
+                    <label>First Name <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      placeholder=""
+                      formControlName="firstName"
+                    />
+                    <span
+                      *ngIf="
+                        firstName?.hasError('required') &&
+                        (firstName?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      First Name is required
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="checkout-form-list">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      placeholder=""
+                      formControlName="lastName"
+                    />
+                    <span
+                      *ngIf="
+                        lastName?.hasError('required') &&
+                        (lastName?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      Last Name is required
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkout-form-list">
+                    <label>Address <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      id="address"
+                      placeholder="Street address"
+                      formControlName="address"
+                    />
+                    <span
+                      *ngIf="
+                        address?.hasError('required') &&
+                        (address?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      Address is required
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkout-form-list">
+                    <input
+                      id="apartment"
+                      type="text"
+                      formControlName="apartment"
+                      placeholder="Apartment, suite, unit etc. (optional)"
+                    />
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="checkout-form-list">
+                    <label>Town / City <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      id="city"
+                      placeholder="Town / City"
+                      formControlName="city"
+                    />
+                    <span
+                      *ngIf="
+                        city?.hasError('required') &&
+                        (city?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      City is required
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="checkout-form-list">
+                    <label
+                      >State / County <span class="required">*</span></label
+                    >
+                    <input
+                      type="text"
+                      id="state"
+                      placeholder=""
+                      formControlName="state"
+                    />
+                    <span
+                      *ngIf="
+                        state?.hasError('required') &&
+                        (state?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      State is required
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="checkout-form-list">
+                    <label
+                      >Postcode / Zip <span class="required">*</span></label
+                    >
+                    <input
+                      type="text"
+                      id="zipCode"
+                      placeholder="Postcode / Zip"
+                      formControlName="zipCode"
+                    />
+                    <span
+                      *ngIf="
+                        zipCode?.hasError('required') &&
+                        (zipCode?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      ZipCode is required
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="checkout-form-list">
+                    <label>Email Address <span class="required">*</span></label>
+                    <input
+                      type="email"
+                      placeholder=""
+                      id="email"
+                      formControlName="email"
+                    />
+                    <span
+                      *ngIf="
+                        (email?.hasError('required') && email?.touched) ||
+                        (email?.hasError('email') && email?.dirty) ||
+                        (formSubmitted && !email?.value)
+                      "
+                      class="text-danger"
+                    >
+                      Email is required and must be a valid email address
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="checkout-form-list">
+                    <label>Phone <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      placeholder="Phone"
+                      id="phone"
+                      formControlName="phone"
+                    />
+                    <span
+                      *ngIf="
+                        phone?.hasError('required') &&
+                        (phone?.touched || formSubmitted)
+                      "
+                      class="text-danger"
+                    >
+                      Last Name is required
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="different-address">
+                <div class="order-notes">
+                  <div class="checkout-form-list">
+                    <label>Order Notes</label>
+                    <textarea
+                      formControlName="orderNote"
+                      id="checkout-mess"
+                      cols="30"
+                      rows="10"
+                      placeholder="Notes about your order, e.g. special notes for delivery."
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="your-order mb-30">
+              <h3>Your order</h3>
+              <div class="your-order-table table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="product-name">Product</th>
+                      <th class="product-total">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of cartItems" class="cart_item">
+                      <td class="product-name">
+                        {{ item.ProductName }}
+                      </td>
+                      <td class="product-total">
+                        <span class="amount">{{
+                          item.Price | currency: "INR"
+                        }}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="cart-subtotal">
+                      <th>Cart Subtotal</th>
+                      <td>
+                        <span class="amount">{{
+                          cartService.computeCheckoutSummary(cartItems).subtotal
+                            | currency: "INR"
+                        }}</span>
+                      </td>
+                    </tr>
+                    <tr class="cart-subtotal additional-charges">
+                      <th>
+                        <button
+                          class="charges-toggle"
+                          [class.collapsed]="!showChargesDetails"
+                          type="button"
+                          [attr.aria-expanded]="showChargesDetails"
+                          (click)="showChargesDetails = !showChargesDetails"
+                        >
+                          Additional Charges
+                        </button>
+                      </th>
+                      <td>
+                        <span class="amount">{{
+                          cartService.computeCheckoutSummary(cartItems).charges
+                            | currency: "INR"
+                        }}</span>
+                      </td>
+                    </tr>
+                    <tr *ngIf="showChargesDetails" class="cart-subtotal charges-detail">
+                      <th>Platform Charges (2%)</th>
+                      <td>
+                        <span class="amount">{{
+                          cartService.computeCheckoutSummary(cartItems).platform
+                            | currency: "INR"
+                        }}</span>
+                      </td>
+                    </tr>
+                    <tr *ngIf="showChargesDetails" class="cart-subtotal charges-detail">
+                      <th>Extra Charges</th>
+                      <td>
+                        <span class="amount">{{
+                          cartService.computeCheckoutSummary(cartItems).extra
+                            | currency: "INR"
+                        }}</span>
+                      </td>
+                    </tr>
+                    <tr class="order-total">
+                      <th>Order Total</th>
+                      <td>
+                        <strong
+                          ><span class="amount">
+                            {{
+                              cartService.computeCheckoutSummary(cartItems)
+                                .grandTotal | currency: "INR"
+                            }}
+                          </span></strong
+                        >
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <div class="payment-method">
+                <div class="accordion" id="accordionExample">
+                  <div class="card">
+                    <div class="card-header" id="headingThree">
+                      <h5 class="mb-0">
+                        <button
+                          class="btn-link collapsed"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#collapseThree"
+                          aria-expanded="false"
+                          aria-controls="collapseThree"
+                        >
+                          PayPal
+                        </button>
+                      </h5>
+                    </div>
+                    <div
+                      id="collapseThree"
+                      class="collapse"
+                      aria-labelledby="headingThree"
+                      data-bs-parent="#accordionExample"
+                    >
+                      <div class="card-body">
+                        Pay via PayPal; you can pay with your credit card if you
+                        don’t have a PayPal account.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="order-button-payment mt-20">
+                  <button type="submit" class="os-btn os-btn-black">
+                    Place order
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </ng-template>
+  </div>
+</section>

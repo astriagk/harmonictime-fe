@@ -1,0 +1,15 @@
+<div class="sidebar__widget mb-20">
+  <div class="sidebar__widget-title mb-10">
+    <h3>Filter By Price</h3>
+  </div>
+  <div class="sidebar__widget-content">
+    <div class="filter-shop">
+      <select (change)="handlePriceRoute($event)">
+        <option value="" disabled>- Please select -</option>
+        <option *ngFor="let price of prices" [value]="price.value">
+          {{ price.label }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>

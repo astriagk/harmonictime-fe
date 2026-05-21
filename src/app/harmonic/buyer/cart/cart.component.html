@@ -1,0 +1,112 @@
+<app-breadcrumb-two title="Cart" subtitle="Cart"></app-breadcrumb-two>
+<section class="cart-area pt-100 pb-100">
+  <div class="container">
+    <div *ngIf="cartItems.length === 0" class="text-center pt-50">
+      <h3>No Cart Items Found</h3>
+      <a routerLink="/buyer/products" class="os-btn os-btn-black"
+        >Continue Shopping</a
+      >
+    </div>
+
+    <div *ngIf="cartItems.length > 0" class="row">
+      <div class="col-12">
+        <div class="table-content table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="product-thumbnail">Images</th>
+                <th class="cart-product-name">Product</th>
+                <th class="product-price">Unit Price</th>
+                <th class="product-quantity">Quantity</th>
+                <th class="product-remove">Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of cartItems">
+                <td class="product-thumbnail">
+                  <a [routerLink]="['/shop/shop-details', item._id]">
+                    <img [src]="item.Images[0]?.ImageURL" alt="product-img" />
+                  </a>
+                </td>
+                <td class="product-name">
+                  <a [routerLink]="['/shop/shop-details', item._id]">{{
+                    item.ProductName
+                  }}</a>
+                </td>
+                <td class="product-price">
+                  <span class="amount">{{
+                    item.Price | currency : "INR"
+                  }}</span>
+                </td>
+                <td class="product-quantity">
+                  <div class="cart-plus-minus">
+                    <span class="amount">1</span>
+                  </div>
+                </td>
+                <td class="product-remove">
+                  <a
+                    (click)="cartService.removeCartProduct(item)"
+                    class="cursor-pointer"
+                  >
+                    <i class="fa fa-times"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- <div class="row">
+          <div class="col-12">
+            <div class="coupon-all">
+              <form (ngSubmit)="handleCouponSubmit()">
+                <div class="coupon">
+                  <input
+                    id="coupon_code"
+                    class="input-text"
+                    name="coupon_code"
+                    value=""
+                    placeholder="Coupon code"
+                    type="text"
+                  />
+                  <button
+                    class="os-btn os-btn-black"
+                    name="apply_coupon"
+                    type="submit"
+                  >
+                    Apply coupon
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div> -->
+        <div class="row">
+          <div class="col-md-5 ml-auto">
+            <div class="cart-page-total">
+              <h2>Cart totals</h2>
+              <ul class="mb-20">
+                <li>
+                  Subtotal
+                  <span>{{
+                    cartService.computeCartTotal(cartItems).total
+                      | currency : "INR"
+                  }}</span>
+                </li>
+                <li>
+                  Total
+                  <span>{{
+                    cartService.computeCartTotal(cartItems).total
+                      | currency : "INR"
+                  }}</span>
+                </li>
+              </ul>
+              <a class="os-btn" routerLink="/buyer/checkout"
+                >Proceed to checkout</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

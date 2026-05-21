@@ -1,0 +1,48 @@
+import { Component } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-blog-reply-form',
+  templateUrl: './blog-reply-form.component.html',
+  styleUrls: ['./blog-reply-form.component.scss'],
+})
+export class BlogReplyFormComponent {
+  public blogReplyForm!: FormGroup;
+  public formSubmitted = false;
+
+  constructor(private toastrService: ToastrService) {}
+
+  ngOnInit() {
+    this.blogReplyForm = new FormGroup({
+      name: new FormControl(null, Validators.required),
+      email: new FormControl(null, [Validators.required, Validators.email]),
+      subject: new FormControl(null, Validators.required),
+      comment: new FormControl(null, Validators.required),
+    });
+  }
+
+  onSubmit() {
+    this.formSubmitted = true;
+    if (this.blogReplyForm.valid) {
+      this.toastrService.success(`Message sent successfully`);
+
+      // Reset the form
+      this.blogReplyForm.reset();
+      this.formSubmitted = false; // Reset formSubmitted to false
+    }
+  }
+
+  get name() {
+    return this.blogReplyForm.get('name');
+  }
+  get email() {
+    return this.blogReplyForm.get('email');
+  }
+  get subject() {
+    return this.blogReplyForm.get('subject');
+  }
+  get comment() {
+    return this.blogReplyForm.get('comment');
+  }
+}

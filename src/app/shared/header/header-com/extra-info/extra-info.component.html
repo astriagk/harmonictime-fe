@@ -1,0 +1,21 @@
+<ul class="extra-info">
+  <li>
+    <div class="my-account">
+      <div class="extra-title">
+        <h5>My Account</h5>
+      </div>
+      <ul>
+        <ng-container *ngIf="userData">
+          <li><a routerLink="/buyer/wishlist">Wishlist</a></li>
+          <li><a routerLink="/buyer/cart">Cart</a></li>
+          <li><a routerLink="/buyer/checkout">Checkout</a></li>
+          <!-- <li><a routerLink="/auth/register">Create Account</a></li> -->
+          <li><a routerLink="/buyer/account">Account</a></li>
+          <li>
+            <a routerLink="/auth/login" (click)="navigate()">Logout</a>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+  </li>
+</ul>

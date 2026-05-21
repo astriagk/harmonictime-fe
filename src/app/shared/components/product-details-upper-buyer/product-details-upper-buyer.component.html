@@ -1,0 +1,188 @@
+<div class="row">
+  <div
+    [ngClass]="
+      style_2
+        ? 'col-xl-5 col-lg-5 col-md-6 col-sm-12 col-12'
+        : 'col-xl-6 col-lg-6'
+    "
+  >
+    <div *ngIf="!style_2" class="product__modal-box d-flex">
+      <div class="product__modal-nav mr-20">
+        <nav>
+          <div class="nav nav-tabs" id="product-details" role="tablist">
+            <a
+              *ngFor="let img of product.Images"
+              class="nav-item nav-link mb-1 cursor-pointer"
+              [class.active]="img.ImageURL === productService.activeImg"
+            >
+              <div
+                class="product__nav-img w-img"
+                (click)="productService.handleImageActive(img.ImageURL)"
+              >
+                <img
+                  [src]="img.ImageURL"
+                  alt="product-img"
+                  style="width: 92px; height: 117px"
+                />
+              </div>
+            </a>
+          </div>
+        </nav>
+      </div>
+      <div class="mb-20">
+        <div class="product__modal-img product__thumb w-img">
+          <img [src]="productService.activeImg" alt="product-img" />
+          <!-- <div *ngIf="product.discount || product.new" class="product__sale">
+            <span *ngIf="product.new || product.discount" class="new">new</span>
+            <span *ngIf="product.discount" class="percent"
+              >-{{ product.discount }}%</span
+            >
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="style_2" class="product__modal-box">
+      <div class="mb-20">
+        <div class="product__modal-img w-img">
+          <img [src]="productService.activeImg" alt="product-img" />
+        </div>
+      </div>
+      <nav>
+        <div class="nav nav-tabs" id="product-details" role="tablist">
+          <a
+            *ngFor="let img of product.Images"
+            class="nav-item nav-link mb-1 cursor-pointer"
+            [class.active]="img.ImageURL === productService.activeImg"
+          >
+            <div
+              class="product__nav-img w-img"
+              (click)="productService.handleImageActive(img.ImageURL)"
+            >
+              <img
+                [src]="img.ImageURL"
+                alt="product-img"
+                style="width: 92px; height: 117px"
+              />
+            </div>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <div
+    [ngClass]="
+      style_2
+        ? 'col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12'
+        : 'col-xl-6 col-lg-6'
+    "
+  >
+    <div class="product__modal-content product__modal-content-2">
+      <h4>
+        <a [routerLink]="['/shop/shop-details', product._id]">{{
+          product.Details.BrandName
+        }}</a>
+      </h4>
+      <h5>
+        <a [routerLink]="['/shop/shop-details', product._id]">{{
+          product.ProductName
+        }}</a>
+      </h5>
+      <div class="product__price-2 mb-25">
+        <span>{{ product.Price | currency: "INR" }}</span>
+      </div>
+      <div class="product__modal-des mb-25" *ngIf="product.Description.Content">
+        <p>{{ product.Description.Content }}</p>
+      </div>
+      <div class="product__modal-form mb-25">
+        <div class="product__tag mb-25">
+          <span>Manufacturer Product Number :</span>
+          <span
+            ><a class="cursor-pointer">{{
+              product.Details.ManufacturerProductNumber
+            }}</a></span
+          >
+        </div>
+        <div class="product__tag mb-25">
+          <span>Color :</span>
+          <span>
+            <a class="cursor-pointer">{{ product.Details.DialColorName }}</a>
+          </span>
+        </div>
+      </div>
+
+      <div class="rating rating-shop mb-25">
+        <ul>
+          <li>
+            <span><i class="fas fa-star"></i></span>
+          </li>
+          <li>
+            <span><i class="fas fa-star"></i></span>
+          </li>
+          <li>
+            <span><i class="fas fa-star"></i></span>
+          </li>
+          <li>
+            <span><i class="fas fa-star"></i></span>
+          </li>
+          <li>
+            <span><i class="fal fa-star"></i></span>
+          </li>
+        </ul>
+        <span class="rating-no ml-10 rating-left"> 3 rating(s) </span>
+        <span class="review rating-left"
+          ><a
+            class="cursor-pointer"
+            data-bs-toggle="modal"
+            [attr.data-bs-target]="'#review-modal-' + product._id"
+            >Add your Review</a
+          ></span
+        >
+      </div>
+
+      <div class="pro-cart-btn">
+        <a
+          *ngIf="!isItemInCart(product)"
+          (click)="cartService.addCartProduct(product)"
+          class="add-cart-btn mb-20 cursor-pointer"
+        >
+          + Add to Cart
+        </a>
+        <a
+          *ngIf="isItemInCart(product)"
+          routerLink="/buyer/cart"
+          class="add-cart-btn mb-20 cursor-pointer"
+        >
+          View Cart
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add review modal -->
+<div
+  #reviewModal
+  class="modal fade"
+  [id]="'review-modal-' + product._id"
+  tabindex="-1"
+  [attr.aria-labelledby]="'review-modal-' + product._id"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" data-bs-dismiss="modal" aria-label="Close">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h4 class="mb-20">Add a Review</h4>
+          <app-review-form [productId]="product._id"></app-review-form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+<div class="sidebar__widget mb-20">
+  <div class="sidebar__widget-title mb-10">
+    <h3>Brand</h3>
+  </div>
+  <div class="sidebar__widget-content">
+    <div class="filter-shop">
+      <select (change)="handleBrandRoute($event)">
+        <option *ngFor="let b of brands" [value]="b">
+          {{ b }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>

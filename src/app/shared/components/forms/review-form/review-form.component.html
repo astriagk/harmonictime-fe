@@ -1,0 +1,78 @@
+<form
+  id="contacts-form"
+  class="conatct-post-form"
+  [formGroup]="reviewForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="row">
+    <div class="col-xl-12 mb-4">
+      <div class="review-rating">
+        <ul class="rating-stars">
+          <li
+            *ngFor="let star of stars"
+            class="cursor-pointer"
+            (click)="setRating(star)"
+            (mouseenter)="hoverRating = star"
+            (mouseleave)="hoverRating = 0"
+          >
+            <i
+              class="fa-star"
+              [ngClass]="(hoverRating || rating) >= star ? 'fas' : 'fal'"
+            ></i>
+          </li>
+        </ul>
+        <span *ngIf="formSubmitted && !rating" class="text-danger d-block mt-1">
+          Please select a rating
+        </span>
+      </div>
+    </div>
+    <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
+      <div class="contact-icon p-relative contacts-name">
+        <input type="text" placeholder="Name *" formControlName="name" />
+        <span
+          *ngIf="reviewForm.get('name')?.invalid && formSubmitted"
+          class="text-danger"
+        >
+          Name is required
+        </span>
+      </div>
+    </div>
+    <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
+      <div class="contact-icon p-relative contacts-name">
+        <input type="email" placeholder="Email *" formControlName="email" />
+        <span
+          *ngIf="reviewForm.get('email')?.invalid && formSubmitted"
+          class="text-danger"
+        >
+          A valid email is required
+        </span>
+      </div>
+    </div>
+    <div class="col-xl-12 mb-4">
+      <div class="contact-icon p-relative contacts-email">
+        <input type="text" placeholder="Subject" formControlName="subject" />
+      </div>
+    </div>
+    <div class="col-xl-12 mb-4">
+      <div class="contact-icon p-relative contacts-message">
+        <textarea
+          name="comments"
+          id="comments"
+          cols="30"
+          rows="10"
+          placeholder="Comments *"
+          formControlName="comment"
+        ></textarea>
+        <span
+          *ngIf="reviewForm.get('comment')?.invalid && formSubmitted"
+          class="text-danger"
+        >
+          Please write your review
+        </span>
+      </div>
+    </div>
+    <div class="col-xl-12">
+      <button class="os-btn os-btn-black" type="submit">Post comment</button>
+    </div>
+  </div>
+</form>

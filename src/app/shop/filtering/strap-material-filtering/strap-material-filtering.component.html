@@ -1,0 +1,14 @@
+<div class="sidebar__widget mb-20">
+  <div class="sidebar__widget-title mb-10">
+    <h3>Strap Material</h3>
+  </div>
+  <div class="sidebar__widget-content">
+    <div class="filter-shop">
+      <select (change)="handleStrapMaterialRoute($event)">
+        <option *ngFor="let s of strapMaterials" [value]="s">
+          {{ s }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>

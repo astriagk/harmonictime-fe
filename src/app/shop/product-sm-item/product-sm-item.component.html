@@ -1,0 +1,37 @@
+<div class="features__product-wrapper d-flex mb-20">
+  <div class="features__product-thumb mr-15">
+    <a [routerLink]="['/buyer/product-details', product._id]">
+      <img [src]="product.img" alt="pro-sm-1" width="86" height="110" />
+    </a>
+  </div>
+  <div class="features__product-content">
+    <h5>
+      <a
+        [routerLink]="['/buyer/product-details', product._id]"
+        [innerHTML]="product.title"
+      ></a>
+    </h5>
+    <div class="price">
+      <span>${{ product.price }}</span>
+      <span *ngIf="product.old_price" class="price-old"
+        >${{ product.old_price }}</span
+      >
+      <div class="add-cart p-absolute transition-3">
+        <a
+          *ngIf="!(isProductInCart$(product._id) | async)"
+          (click)="addToCart(product)"
+          class="cursor-pointer"
+        >
+          + Add to Cart
+        </a>
+        <a
+          *ngIf="isProductInCart$(product._id) | async"
+          routerLink="/buyer/cart"
+          class="cursor-pointer"
+        >
+          View Cart
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

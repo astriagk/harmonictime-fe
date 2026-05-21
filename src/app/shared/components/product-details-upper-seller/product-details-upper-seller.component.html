@@ -1,0 +1,104 @@
+<div class="row">
+  <div
+    [ngClass]="
+      style_2
+        ? 'col-xl-5 col-lg-5 col-md-6 col-sm-12 col-12'
+        : 'col-xl-6 col-lg-6'
+    "
+  >
+    <div *ngIf="!style_2" class="product__modal-box d-flex">
+      <div class="product__modal-nav mr-20">
+        <nav>
+          <div class="nav nav-tabs" id="product-details" role="tablist">
+            <a
+              *ngFor="let img of product.Images"
+              class="nav-item nav-link mb-1 cursor-pointer"
+              [class.active]="img.ImageURL === productService.activeImg"
+            >
+              <div
+                class="product__nav-img w-img"
+                (click)="productService.handleImageActive(img.ImageURL)"
+              >
+                <img
+                  [src]="img.ImageURL"
+                  alt="product-img"
+                  style="width: 92px; height: 117px"
+                />
+              </div>
+            </a>
+          </div>
+        </nav>
+      </div>
+      <div class="mb-20">
+        <div class="product__modal-img product__thumb w-img">
+          <img [src]="productService.activeImg" alt="product-img" />
+          <!-- <div *ngIf="product.discount || product.new" class="product__sale">
+            <span *ngIf="product.new || product.discount" class="new">new</span>
+            <span *ngIf="product.discount" class="percent"
+              >-{{ product.discount }}%</span
+            >
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="style_2" class="product__modal-box">
+      <div class="mb-20">
+        <div class="product__modal-img w-img">
+          <img [src]="productService.activeImg" alt="product-img" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    [ngClass]="
+      style_2
+        ? 'col-xl-7 col-lg-7 col-md-6 col-sm-12 col-12'
+        : 'col-xl-6 col-lg-6'
+    "
+  >
+    <div class="product__modal-content product__modal-content-2">
+      <h4>
+        <a [routerLink]="['/shop/shop-details', product._id]">{{
+          product.Details.BrandName
+        }}</a>
+      </h4>
+      <h5>
+        <a [routerLink]="['/shop/shop-details', product._id]">{{
+          product.ProductName
+        }}</a>
+      </h5>
+      <div class="product__price-2 mb-25">
+        <span>{{ product.Price | currency : "INR" }}</span>
+      </div>
+      <div class="product__modal-des mb-30" *ngIf="product.Description.Content">
+        <p>{{ product.Description.Content }}</p>
+      </div>
+      <div class="product__modal-form mb-30">
+        <div class="product__tag mb-25">
+          <span>Manufacturer Product Number :</span>
+          <span
+            ><a class="cursor-pointer">{{
+              product.Details.ManufacturerProductNumber
+            }}</a></span
+          >
+        </div>
+        <div class="product__tag mb-25">
+          <span>Color :</span>
+          <span>
+            <a class="cursor-pointer">{{ product.Details.DialColorName }}</a>
+          </span>
+        </div>
+      </div>
+      <div class="pro-cart-btn mt-30">
+        <a
+          (click)="editProduct(product)"
+          class="add-cart-btn mb-20 cursor-pointer"
+        >
+          Edit
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

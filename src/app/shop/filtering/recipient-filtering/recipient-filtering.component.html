@@ -1,0 +1,14 @@
+<div class="sidebar__widget mb-20">
+  <div class="sidebar__widget-title mb-10">
+    <h3>Recipient</h3>
+  </div>
+  <div class="sidebar__widget-content">
+    <div class="filter-shop">
+      <select (change)="handleRecipientRoute($event)">
+        <option *ngFor="let r of recipients" [value]="r">
+          {{ r }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>

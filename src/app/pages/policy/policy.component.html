@@ -1,0 +1,42 @@
+<app-header-four></app-header-four>
+
+<main>
+  <app-breadcrumb-two
+    [title]="page ? page.title : 'Page Not Found'"
+    [subtitle]="page ? page.title : 'Not Found'"
+    bg="/assets/img/page-title/page-title-2.jpg"
+  ></app-breadcrumb-two>
+
+  <section class="policy__area pb-100 pt-95">
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-12">
+          <!-- Content switches based on the footer link clicked.
+               Replace / add copy in src/app/shared/data/policy-data.ts -->
+          <div class="policy__content" *ngIf="page; else notFound">
+            <p class="policy__intro" *ngIf="page.intro">{{ page.intro }}</p>
+
+            <div class="policy__section" *ngFor="let section of page.sections">
+              <h4 *ngIf="section.heading">{{ section.heading }}</h4>
+              <p>{{ section.content }}</p>
+            </div>
+          </div>
+
+          <ng-template #notFound>
+            <div class="policy__content text-center">
+              <p>
+                The page you are looking for is not available yet. Please check
+                back later.
+              </p>
+              <a routerLink="/" class="tp-btn">Back to Home</a>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-subscribe-area></app-subscribe-area>
+</main>
+
+<app-footer-one></app-footer-one>

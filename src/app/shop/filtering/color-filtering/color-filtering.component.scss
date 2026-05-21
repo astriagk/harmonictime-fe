@@ -1,0 +1,10 @@
+.color {
+  background: var(--swatch-background, #d4d4d4);
+  border: var(--swatch-border, 1px solid transparent);
+  box-shadow: var(--swatch-shadow, none);
+}
+
+.color:hover::after,
+.color.active::after {
+  border-color: var(--swatch-accent, #fbaf5d) !important;
+}

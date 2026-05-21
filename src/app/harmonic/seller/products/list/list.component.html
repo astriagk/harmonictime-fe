@@ -1,0 +1,58 @@
+<app-breadcrumb-two title="Products" subtitle="List"></app-breadcrumb-two>
+
+<section class="order-info container">
+  <header
+    class="order-info__header d-flex justify-content-between align-items-center pt-40"
+  >
+    <h2 class="order-info__title">My Products</h2>
+    <div class="order__info-btn">
+      <app-pagination
+        [data]="orders"
+        [paginate]="paginate"
+        (setPage)="setPage($event)"
+      >
+      </app-pagination>
+    </div>
+  </header>
+
+  <div class="order-list white-bg table-responsive pt-40">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Brand Name</th>
+          <th scope="col">Product Name</th>
+          <th scope="col">Price</th>
+          <th scope="col">Available</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let order of paginationOrders; let i = index">
+          <tr
+            [routerLink]="
+              order.IsSold ? null : ['/seller/product-details', order._id]
+            "
+            [class.clickable-row]="!order.IsSold"
+            [attr.aria-label]="'View order #' + order.id + ' details'"
+          >
+            <td>{{ i + 1 }}</td>
+            <td>{{ order.Details.BrandName }}</td>
+            <td>{{ order.ProductName }}</td>
+            <td>{{ order.Price | currency: "INR" }}</td>
+            <td (click)="$event.stopPropagation()">
+              <span *ngIf="order.IsSold" class="sold-badge">Sold</span>
+              <label *ngIf="!order.IsSold" class="availability-switch">
+                <input
+                  type="checkbox"
+                  [checked]="order.IsAvailable"
+                  (change)="toggleAvailability(order, $event)"
+                />
+                <span class="slider"></span>
+              </label>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,184 @@
+<app-breadcrumb-two title="Orders" subtitle="List"></app-breadcrumb-two>
+
+<section class="order-info container">
+  <header
+    class="order-info__header d-flex justify-content-between align-items-center pt-40"
+  >
+    <h2 class="order-info__title">My Orders</h2>
+  </header>
+
+  <div class="order-list white-bg table-responsive pt-40">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Product</th>
+          <th scope="col">Ship To</th>
+          <th scope="col">Date</th>
+          <th scope="col">Payment</th>
+          <th scope="col">Delivery</th>
+          <th scope="col">Tracking</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let order of paginationOrders; let i = index">
+          <tr class="clickable-row">
+            <td>{{ paginate.startIndex + i + 1 }}</td>
+            <td>
+              <div
+                *ngFor="let product of order.Products"
+                class="d-flex align-items-center mb-2"
+              >
+                <img
+                  [src]="product.ImageURL"
+                  [alt]="product.ProductName"
+                  style="width: 48px; height: 48px; object-fit: cover"
+                  class="mr-10"
+                />
+                <span>
+                  {{ product.ProductName }}
+                  <small class="d-block text-muted">
+                    {{ product.Price | currency: "INR" }}
+                  </small>
+                </span>
+              </div>
+            </td>
+            <td>
+              {{ order.ShippingAddress?.FirstName }}
+              {{ order.ShippingAddress?.LastName }}
+              <small class="d-block text-muted">
+                {{ order.ShippingAddress?.AddressLine1 }},
+                {{ order.ShippingAddress?.City }},
+                {{ order.ShippingAddress?.State }}
+                {{ order.ShippingAddress?.PostalCode }}
+              </small>
+            </td>
+            <td>{{ order.CheckoutDate | date: "mediumDate" }}</td>
+            <td>{{ order.PaymentStatus }}</td>
+            <td>{{ order.DeliveryStatus }}</td>
+            <td>
+              <button class="os-btn" (click)="addTracking(order)">
+                {{ isShipped(order) ? "Edit" : "Add" }}
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+  <div class="order__info-btn d-flex justify-content-end mb-20">
+    <app-pagination
+      [data]="orders"
+      [paginate]="paginate"
+      (setPage)="setPage($event)"
+    >
+    </app-pagination>
+  </div>
+</section>
+
+<!-- Add tracking ID modal -->
+<div
+  *ngIf="isTrackingModalOpen"
+  class="modal fade show add-lookup-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editingShipmentId ? "Edit Tracking Details" : "Add Tracking ID" }}
+        </h5>
+        <button
+          type="button"
+          class="add-lookup-close"
+          aria-label="Close"
+          (click)="closeTracking()"
+        >
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="checkout-form-list">
+          <label for="courier"
+            >Courier <span class="required">*</span></label
+          >
+          <input
+            id="courier"
+            type="text"
+            [(ngModel)]="courier"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="e.g. BlueDart"
+          />
+        </div>
+        <div class="checkout-form-list">
+          <label for="trackingId"
+            >Tracking ID <span class="required">*</span></label
+          >
+          <input
+            id="trackingId"
+            type="text"
+            [(ngModel)]="trackingId"
+            [ngModelOptions]="{ standalone: true }"
+            (keyup.enter)="saveTracking()"
+            placeholder="Enter tracking ID"
+          />
+        </div>
+        <div class="checkout-form-list">
+          <label for="trackingUrl">Tracking URL</label>
+          <input
+            id="trackingUrl"
+            type="text"
+            [(ngModel)]="trackingUrl"
+            [ngModelOptions]="{ standalone: true }"
+            (keyup.enter)="saveTracking()"
+            placeholder="Optional"
+          />
+        </div>
+        <div class="country-select">
+          <label for="shipmentStatus">Shipment Status</label>
+          <select
+            id="shipmentStatus"
+            [(ngModel)]="shipmentStatus"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option
+              *ngFor="let status of shipmentStatuses"
+              [value]="status.value"
+            >
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+        <span *ngIf="trackingError" class="text-danger">{{
+          trackingError
+        }}</span>
+      </div>
+      <div class="modal-footer d-flex justify-content-end">
+        <button
+          type="button"
+          class="os-btn mr-5"
+          (click)="closeTracking()"
+          [disabled]="isSavingTracking"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="os-btn"
+          (click)="saveTracking()"
+          [disabled]="isSavingTracking"
+        >
+          {{
+            isSavingTracking
+              ? "Saving..."
+              : editingShipmentId
+              ? "Update"
+              : "Save"
+          }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isTrackingModalOpen" class="modal-backdrop fade show"></div>
