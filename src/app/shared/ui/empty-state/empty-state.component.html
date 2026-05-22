@@ -1,0 +1,9 @@
+<div class="text-center pt-50">
+  <h3>{{ message }}</h3>
+  <a
+    *ngIf="actionLabel && actionLink"
+    [routerLink]="actionLink"
+    class="os-btn os-btn-black mt-20 cursor-pointer"
+    >{{ actionLabel }}</a
+  >
+</div>

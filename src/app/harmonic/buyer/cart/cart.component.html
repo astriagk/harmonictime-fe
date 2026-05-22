@@ -1,12 +1,12 @@
 <app-breadcrumb-two title="Cart" subtitle="Cart"></app-breadcrumb-two>
 <section class="cart-area pt-100 pb-100">
   <div class="container">
-    <div *ngIf="cartItems.length === 0" class="text-center pt-50">
-      <h3>No Cart Items Found</h3>
-      <a routerLink="/buyer/products" class="os-btn os-btn-black"
-        >Continue Shopping</a
-      >
-    </div>
+    <app-empty-state
+      *ngIf="cartItems.length === 0"
+      message="No Cart Items Found"
+      actionLabel="Continue Shopping"
+      actionLink="/buyer/products"
+    ></app-empty-state>
 
     <div *ngIf="cartItems.length > 0" class="row">
       <div class="col-12">
