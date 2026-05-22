@@ -4,7 +4,7 @@
       <img [src]="product?.Images[0]?.ImageURL" alt="product-img" />
       <img
         class="product__thumb-2"
-        [src]="product?.Images[0]?.ImageURL"
+        [src]="product?.Images[1]?.ImageURL || product?.Images[0]?.ImageURL"
         alt="product-img"
       />
     </a>
@@ -17,7 +17,11 @@
         data-placement="top"
         title="Add to Wishlist"
       >
-        <i [ngClass]="isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'"></i>
+        <i
+          [ngClass]="
+            isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'
+          "
+        ></i>
       </a>
       <!-- <a
         (click)="addToCompare(product)"
@@ -56,7 +60,7 @@
         ></a>
       </h4>
       <div class="product__price transition-3">
-        <span>{{ product.Price | currency : "INR" }}</span>
+        <span>{{ product.Price | currency: "INR" }}</span>
         <!-- <span *ngIf="product.old_price" class="old-price"
           >${{ product.old_price.toFixed(2) }}</span
         > -->

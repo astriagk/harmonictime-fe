@@ -102,23 +102,20 @@
 
   <div
     class="video__area-df"
-    style="background-image: url(/assets/img/bg/01.jpg)"
+    [style.backgroundImage]="'url(' + video_area.bgImg + ')'"
   >
     <div class="container">
       <div class="video__content text-center">
         <div class="video__button mb-60">
           <a
-            (click)="utilsService.playVideo('8nsL3Uryv0U')"
+            (click)="utilsService.playVideo(video_area.videoId)"
             class="cursor-pointer"
           >
             <i class="fas fa-play"></i>
           </a>
         </div>
-        <h5 class="video__title">Art of Restoring</h5>
-        <p>
-          "Art of Restoring" is dedicated to reviving the beauty and precision
-          of vintage and pre-owned watches.
-        </p>
+        <h5 class="video__title">{{ video_area.videoTitle }}</h5>
+        <p>{{ video_area.description }}</p>
       </div>
     </div>
   </div>

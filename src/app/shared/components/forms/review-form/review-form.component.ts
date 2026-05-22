@@ -1,11 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Store } from '@ngrx/store';
-import { take } from 'rxjs/operators';
 import { GenericService } from '@shared/services/generic.service';
 import { POST_REVIEW } from '@config/index';
-import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
 @Component({
   selector: 'app-review-form',
@@ -24,13 +21,11 @@ export class ReviewFormComponent {
   constructor(
     private fb: FormBuilder,
     private toastrService: ToastrService,
-    private genericService: GenericService,
-    private store: Store
+    private genericService: GenericService
   ) {
     this.reviewForm = this.fb.group({
       name: [null, Validators.required],
       email: [null, [Validators.required, Validators.email]],
-      subject: [null],
       rating: [0, [Validators.required, Validators.min(1)]],
       comment: [null, Validators.required],
     });
@@ -60,32 +55,25 @@ export class ReviewFormComponent {
       return;
     }
 
-    this.store
-      .select(selectUserData)
-      .pipe(take(1))
-      .subscribe((state: any) => {
-        const formValue = this.reviewForm.value;
-        const payload = {
-          ProductID: this.productId,
-          UserID: state?.user?.data?._id ?? null,
-          ReviewerName: formValue.name,
-          ReviewerEmail: formValue.email,
-          Title: formValue.subject,
-          Rating: formValue.rating,
-          Comment: formValue.comment,
-        };
+    const formValue = this.reviewForm.value;
+    const payload = {
+      ProductID: this.productId,
+      Rating: formValue.rating,
+      Name: formValue.name,
+      Email: formValue.email,
+      Comment: formValue.comment,
+    };
 
-        this.genericService.postObservable(POST_REVIEW, payload).subscribe({
-          next: () => {
-            this.toastrService.success('Review submitted successfully!');
-            this.reviewForm.reset({ rating: 0 });
-            this.formSubmitted = false;
-            this.reviewSubmitted.emit();
-          },
-          error: () => {
-            this.toastrService.error('Failed to submit review');
-          },
-        });
-      });
+    this.genericService.postObservable(POST_REVIEW, payload).subscribe({
+      next: () => {
+        this.toastrService.success('Review submitted successfully!');
+        this.reviewForm.reset({ rating: 0 });
+        this.formSubmitted = false;
+        this.reviewSubmitted.emit();
+      },
+      error: () => {
+        this.toastrService.error('Failed to submit review');
+      },
+    });
   }
 }

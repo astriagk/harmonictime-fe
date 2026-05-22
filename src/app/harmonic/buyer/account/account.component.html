@@ -8,7 +8,7 @@
         <div class="col-xxl-6 col-md-6">
           <div class="profile__basic d-md-flex align-items-center">
             <div class="profile__basic-thumb mr-30">
-              <img src="/assets/img/testimonial/person-1.jpg" alt="" />
+              <img src="assets/img/blog/comments/avater-3.png" alt="" />
             </div>
             <div class="profile__basic-content">
               <h3 class="profile__basic-title">Welcome Back</h3>
@@ -162,38 +162,44 @@
                     <thead>
                       <tr>
                         <th style="width: 100px">Image</th>
-                        <th style="width: 300px">Product Name</th>
-                        <th style="width: 150px">Price</th>
-                        <th style="width: 150px">Tracking ID</th>
+                        <th style="width: 220px">Name</th>
+                        <th style="width: 120px">Price</th>
+                        <th style="width: 220px">Shipping Details</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr *ngFor="let order of orders">
-                        <td
-                          *ngFor="let product of order.Products"
-                          class="product-cell"
-                        >
+                        <td class="product-cell">
                           <img
+                            *ngFor="let product of order.Products"
                             [src]="product.ImageURL"
                             alt="{{ product.ProductName }}"
-                            class="product-img"
+                            class="product-img d-block mb-1"
                             style="width: 120px"
                           />
                         </td>
-                        <td
-                          *ngFor="let product of order.Products"
-                          class="order__title pr-2 pl-2"
-                        >
-                          {{ product.ProductName }}
+                        <td class="order__title pr-2 pl-2">
+                          <span
+                            *ngFor="let product of order.Products"
+                            class="d-block"
+                          >
+                            {{ product.ProductName }}
+                          </span>
                         </td>
                         <td class="order__title pr-2 pl-2">
-                          {{ order.TotalAmount | currency : "INR" }}
+                          {{ order.TotalAmount | currency: "INR" }}
                         </td>
-                        <td
-                          *ngFor="let product of order.Products"
-                          class="order__title pr-2 pl-2"
-                        >
-                          {{ product.Tracking }}
+                        <td class="order__title pr-2 pl-2">
+                          <span class="d-block">
+                            Status: {{ order.DeliveryStatus || "Pending" }}
+                          </span>
+                          <span class="d-block">
+                            Courier: {{ order.Shipments?.[0]?.Courier || "-" }}
+                          </span>
+                          <span class="d-block">
+                            Tracking:
+                            {{ order.Shipments?.[0]?.TrackingNumber || "-" }}
+                          </span>
                         </td>
                       </tr>
                     </tbody>

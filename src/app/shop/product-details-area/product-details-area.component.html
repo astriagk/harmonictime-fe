@@ -2,7 +2,11 @@
   <div class="shop__top grey-bg-6 pt-100 pb-90">
     <div class="container">
       <app-product-details-upper-buyer
+        *ngIf="product"
         [product]="product!"
+        [reviewCount]="reviewCount"
+        [averageRating]="averageRating"
+        (reviewSubmitted)="loadReviews()"
       ></app-product-details-upper-buyer>
     </div>
   </div>
@@ -10,7 +14,7 @@
     <div class="container">
       <div class="row">
         <div class="col-xl-12">
-          <div class="product__details-tab">
+          <div class="product__details-tab" *ngIf="product">
             <div class="product__details-tab-nav text-center mb-45">
               <nav>
                 <div
@@ -56,6 +60,7 @@
                     role="tab"
                     aria-controls="review"
                     aria-selected="false"
+                    (click)="loadReviews()"
                     >Reviews</a
                   >
                 </div>
@@ -176,40 +181,60 @@
                 <div class="product__details-review">
                   <div class="postbox__comments">
                     <div class="postbox__comment-title mb-30">
-                      <h3>Reviews ({{ reviews.length }})</h3>
+                      <h3>
+                        Reviews<span *ngIf="reviewCount > 0">
+                          ({{ reviewCount }})</span
+                        >
+                      </h3>
+                    </div>
+                    <div
+                      *ngIf="reviewsLoaded && reviews.length === 0"
+                      class="text-center pt-50"
+                    >
+                      <h3>No Reviews Found</h3>
+                      <a
+                        class="os-btn os-btn-black mt-20 cursor-pointer"
+                        data-bs-toggle="modal"
+                        [attr.data-bs-target]="'#review-modal-' + product._id"
+                        >Add your Review</a
+                      >
                     </div>
                     <div class="latest-comments mb-30">
                       <ul>
                         <li *ngFor="let r of reviews">
                           <div class="comments-box">
                             <div class="comments-avatar">
-                              <img [src]="r.img" alt="user" />
+                              <img
+                                src="assets/img/blog/comments/avater-3.png"
+                                alt="user"
+                              />
                             </div>
                             <div class="comments-text">
                               <div class="avatar-name">
-                                <h5>{{ r.name }}</h5>
-                                <span> - {{ r.time }} </span>
+                                <h5>{{ r.Name }}</h5>
+                                <span *ngIf="r.CreatedAt || r.createdAt">
+                                  -
+                                  {{
+                                    r.CreatedAt || r.createdAt
+                                      | date: "mediumDate"
+                                  }}
+                                </span>
                               </div>
                               <div class="user-rating">
                                 <ul>
-                                  <li>
-                                    <a href="#"><i class="fas fa-star"></i></a>
-                                  </li>
-                                  <li>
-                                    <a href="#"><i class="fas fa-star"></i></a>
-                                  </li>
-                                  <li>
-                                    <a href="#"><i class="fas fa-star"></i></a>
-                                  </li>
-                                  <li>
-                                    <a href="#"><i class="fas fa-star"></i></a>
-                                  </li>
-                                  <li>
-                                    <a href="#"><i class="fal fa-star"></i></a>
+                                  <li *ngFor="let s of stars">
+                                    <a class="cursor-pointer">
+                                      <i
+                                        class="fa-star"
+                                        [ngClass]="
+                                          s <= r.Rating ? 'fas' : 'fal'
+                                        "
+                                      ></i>
+                                    </a>
                                   </li>
                                 </ul>
                               </div>
-                              <p>{{ r.review_desc }}</p>
+                              <p>{{ r.Comment }}</p>
                             </div>
                           </div>
                         </li>

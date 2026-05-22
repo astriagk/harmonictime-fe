@@ -16,6 +16,7 @@ import {
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { UserService } from '@shared/services/user.service';
 import { CartService } from '@shared/services/cart.service';
+import { WishlistService } from '@shared/services/wishlist.service';
 
 @Injectable()
 export class UserEffects {
@@ -23,7 +24,8 @@ export class UserEffects {
     private actions$: Actions,
     private genericService: GenericService,
     public userService: UserService,
-    private cartService: CartService
+    private cartService: CartService,
+    private wishlistService: WishlistService
   ) {}
 
   registerUser$ = createEffect(() =>
@@ -94,8 +96,8 @@ export class UserEffects {
     )
   );
 
-  // After the user loads, merge any guest (session-storage) cart into the
-  // server cart. mergeGuestCart dispatches loadCart once the merge completes.
+  // After the user loads, merge any guest (session-storage) cart and wishlist
+  // into the server. Each merge dispatches its load action once it completes.
   mergeGuestCartOnLogin$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -104,6 +106,7 @@ export class UserEffects {
           const userId = action?.user?.data?._id;
           if (userId) {
             this.cartService.mergeGuestCart(userId);
+            this.wishlistService.mergeGuestWishlist(userId);
           }
         })
       ),

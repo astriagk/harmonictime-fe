@@ -1,34 +1,34 @@
-// --- app/store/wishlist/wishlist.reducer.ts ---
 import { createReducer, on } from '@ngrx/store';
-import * as WishlistActions from '../actions/wishlist.actions';
-import { Product } from '../models/product.models';
+import {
+  loadWishlistFailure,
+  loadWishlistSuccess,
+  updateWishlist,
+} from '../actions/wishlist.actions';
 
 export interface WishlistState {
-  items: Product[];
-  loading: boolean;
+  wishlist: any[];
   error: string | null;
 }
 
-const initialState: WishlistState = {
-  items: [],
-  loading: false,
+export const initialState: WishlistState = {
+  wishlist: [],
   error: null,
 };
 
 export const wishlistReducer = createReducer(
   initialState,
-  on(WishlistActions.loadWishlist, (state) => ({ ...state, loading: true })),
-  on(WishlistActions.loadWishlistSuccess, (state, { items }) => ({
+  on(loadWishlistSuccess, (state, { wishlist }) => ({
     ...state,
-    items,
-    loading: false,
+    wishlist,
+    error: null,
   })),
-  on(WishlistActions.addToWishlist, (state, { product }) => ({
+  on(loadWishlistFailure, (state, { error }) => ({
     ...state,
-    items: [...state.items, product],
+    wishlist: [],
+    error,
   })),
-  on(WishlistActions.removeFromWishlist, (state, { productId }) => ({
+  on(updateWishlist, (state, { wishlist }) => ({
     ...state,
-    items: state.items.filter((item) => item.id !== productId),
+    wishlist,
   }))
 );

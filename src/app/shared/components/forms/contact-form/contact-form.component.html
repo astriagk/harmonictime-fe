@@ -22,6 +22,14 @@
   <div class="row">
       <div class="col-xl-12">
           <div class="contact__input mb-20">
+              <label>Phone</label>
+              <input type="tel" id="phone" formControlName="phone">
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col-xl-12">
+          <div class="contact__input mb-20">
               <label>Subject <span class="required">*</span></label>
               <input type="text" id="subject" formControlName="subject">
               <span *ngIf="subject?.hasError('required') && (subject?.touched || formSubmitted)" class="text-danger">
@@ -44,7 +52,7 @@
   <div class="row">
       <div class="col-xl-12">
           <div class="contact__submit">
-              <button type="submit" class="os-btn os-btn-black">Send Message</button>
+              <button type="submit" class="os-btn os-btn-black" [disabled]="submitting">{{ submitting ? 'Sending…' : 'Send Message' }}</button>
           </div>
       </div>
   </div>

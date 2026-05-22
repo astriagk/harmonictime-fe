@@ -81,9 +81,20 @@ export const USER_CART = `${baseUrl}/cart/user/`; // append the user id
 export const ADD_TO_CART = `${baseUrl}/cart`;
 export const DELETE_CART_ITEM = `${baseUrl}/cart/`; // append the cart id
 
+// wishlist
+export const USER_WISHLIST = `${baseUrl}/wishlist/user/`; // append the user id
+export const ADD_TO_WISHLIST = `${baseUrl}/wishlist`;
+export const DELETE_WISHLIST_ITEM = `${baseUrl}/wishlist/`; // append the wishlist id
+
 // payments
 export const CREATE_PAYMENT_ORDER = `${baseUrl}/payments/create-order`;
 export const VERIFY_PAYMENT_ORDER = `${baseUrl}/payments/verify`;
+
+// contact / help — stores the message and emails the team
+export const POST_CONTACT = `${baseUrl}/contact`;
+
+// site content — CMS-managed blocks (hero slider, etc.) keyed by `type`
+export const GET_SITE_CONTENT = `${baseUrl}/site-content`;
 
 // address
 export const CREATE_ADDRESS = `${baseUrl}/address`;

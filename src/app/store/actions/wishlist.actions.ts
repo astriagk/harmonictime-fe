@@ -1,17 +1,20 @@
-// --- app/store/wishlist/wishlist.actions.ts ---
 import { createAction, props } from '@ngrx/store';
-import { Product } from '../models/product.models';
 
+// Load Wishlist
 export const loadWishlist = createAction('[Wishlist] Load Wishlist');
+
 export const loadWishlistSuccess = createAction(
   '[Wishlist] Load Wishlist Success',
-  props<{ items: Product[] }>()
+  props<{ wishlist: any[] }>()
 );
-export const addToWishlist = createAction(
-  '[Wishlist] Add to Wishlist',
-  props<{ product: Product }>()
+
+export const loadWishlistFailure = createAction(
+  '[Wishlist] Load Wishlist Failure',
+  props<{ error: any }>()
 );
-export const removeFromWishlist = createAction(
-  '[Wishlist] Remove from Wishlist',
-  props<{ productId: number }>()
+
+// Update Wishlist (e.g., adding or removing items for guest users)
+export const updateWishlist = createAction(
+  '[Wishlist] Update Wishlist',
+  props<{ wishlist: any[] }>()
 );

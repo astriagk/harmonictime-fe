@@ -2,12 +2,14 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import Swiper from 'swiper';
 import { HeroSliderData } from 'src/app/shared/data/hero-slider-data';
 import { IHeroSlider } from 'src/app/shared/types/hero-slider-t';
+import { IVideoArea } from 'src/app/shared/types/video-area-t';
 import { EffectFade, Pagination } from 'swiper/modules';
 import { IProduct } from 'src/app/shared/types/product-d-t';
 import { ProductService } from 'src/app/shared/services/product.service';
 import IBlogType from 'src/app/shared/types/blog-d-t';
 import blog_data from 'src/app/shared/data/blog-data';
 import { UtilsService } from 'src/app/shared/services/utils.service';
+import { SiteContentService } from 'src/app/shared/services/site-content.service';
 
 @Component({
   selector: 'app-home-seven',
@@ -28,6 +30,15 @@ export class HomeSevenComponent {
   public hero_slider_data: IHeroSlider[] = HeroSliderData.hero_slider_seven;
   public blog_items: IBlogType[] = blog_data.filter((b) => b.blog === 'home-7');
 
+  // Static fallback until the CMS `video_area` block loads.
+  public video_area: IVideoArea = {
+    bgImg: '/assets/img/bg/01.jpg',
+    videoTitle: 'Art of Restoring',
+    videoId: '8nsL3Uryv0U',
+    description:
+      '"Art of Restoring" is dedicated to reviving the beauty and precision of vintage and pre-owned watches.',
+  };
+
   public big_item_1: IProduct | undefined;
   public big_item_2: IProduct | undefined;
   public trending_products: IProduct[] = [];
@@ -35,13 +46,61 @@ export class HomeSevenComponent {
 
   constructor(
     private productService: ProductService,
-    public utilsService: UtilsService
+    public utilsService: UtilsService,
+    private siteContentService: SiteContentService
   ) {
     this.productService.products.subscribe((products) => {
       const best_sale_prd = products.filter((p) => p.bestSeller);
       this.big_item_1 = best_sale_prd.filter((p) => p.big_img)[0];
       this.big_item_2 = best_sale_prd.filter((p) => p.big_img)[1];
       this.sm_best_prd = best_sale_prd.filter((p) => !p.big_img);
+    });
+  }
+
+  ngOnInit() {
+    this.loadHeroSlider();
+    this.loadVideoArea();
+  }
+
+  // Pull the video area block from the CMS (/site-content); keep the static
+  // fallback above if it's absent.
+  private loadVideoArea() {
+    this.siteContentService
+      .getBlock<IVideoArea>('video_area')
+      .subscribe((items) => {
+        if (items.length) {
+          this.video_area = items[0];
+        }
+      });
+  }
+
+  // Pull the hero slider block from the CMS (/site-content) and swap it in.
+  // Falls back to the static data above if it's absent.
+  private loadHeroSlider() {
+    this.siteContentService
+      .getBlock<IHeroSlider>('hero_slider')
+      .subscribe((slides) => {
+        if (slides.length) {
+          this.hero_slider_data = slides;
+          // Slides change after init, so rebuild the Swiper once Angular
+          // has rendered the new *ngFor items.
+          setTimeout(() => this.initHeroSwiper());
+        }
+      });
+  }
+
+  private initHeroSwiper() {
+    this.swiperInstance?.destroy(true, true);
+    this.swiperInstance = new Swiper('.slider-active-3', {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      loop: false,
+      effect: 'fade',
+      modules: [Pagination, EffectFade],
+      pagination: {
+        clickable: true,
+        el: '.tp-slider-dot',
+      },
     });
   }
 
@@ -58,17 +117,7 @@ export class HomeSevenComponent {
 
   ngAfterViewInit() {
     if (this.heroSliderContainer) {
-      this.swiperInstance = new Swiper('.slider-active-3', {
-        slidesPerView: 1,
-        spaceBetween: 0,
-        loop: false,
-        effect: 'fade',
-        modules: [Pagination, EffectFade],
-        pagination: {
-          clickable: true,
-          el: '.tp-slider-dot',
-        },
-      });
+      this.initHeroSwiper();
     }
 
     if (this.productSliderContainer) {
