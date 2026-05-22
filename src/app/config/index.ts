@@ -6,6 +6,9 @@ const baseUrl = environment.apiBaseUrl;
 export const REGISTER_USER = `${baseUrl}/auth/register`;
 export const LOGIN_USER = `${baseUrl}/auth/login`;
 export const USER = `${baseUrl}/users/profile`;
+// password reset — request an OTP by email, then submit the OTP + new password
+export const VERIFY_EMAIL = `${baseUrl}/auth/verify-email`;
+export const RESET_PASSWORD = `${baseUrl}/auth/reset-password`;
 
 // catalog lookups
 export const GET_BRANDS = `${baseUrl}/brands`;
