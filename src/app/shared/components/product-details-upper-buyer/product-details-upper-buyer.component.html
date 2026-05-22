@@ -114,23 +114,18 @@
 
       <div class="rating rating-shop mb-25">
         <ul>
-          <li>
-            <span><i class="fas fa-star"></i></span>
-          </li>
-          <li>
-            <span><i class="fas fa-star"></i></span>
-          </li>
-          <li>
-            <span><i class="fas fa-star"></i></span>
-          </li>
-          <li>
-            <span><i class="fas fa-star"></i></span>
-          </li>
-          <li>
-            <span><i class="fal fa-star"></i></span>
+          <li *ngFor="let s of stars">
+            <span>
+              <i
+                class="fa-star"
+                [ngClass]="s <= averageRating ? 'fas' : 'fal'"
+              ></i>
+            </span>
           </li>
         </ul>
-        <span class="rating-no ml-10 rating-left"> 3 rating(s) </span>
+        <span *ngIf="reviewCount > 0" class="rating-no ml-10 rating-left">
+          {{ reviewCount }} rating(s)
+        </span>
         <span class="review rating-left"
           ><a
             class="cursor-pointer"
@@ -180,7 +175,10 @@
         </div>
         <div class="product__modal-inner p-30">
           <h4 class="mb-20">Add a Review</h4>
-          <app-review-form [productId]="product._id"></app-review-form>
+          <app-review-form
+            [productId]="product._id"
+            (reviewSubmitted)="onReviewSubmitted()"
+          ></app-review-form>
         </div>
       </div>
     </div>

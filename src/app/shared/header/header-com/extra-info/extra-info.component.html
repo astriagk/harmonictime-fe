@@ -6,8 +6,16 @@
       </div>
       <ul>
         <ng-container *ngIf="userData">
-          <li><a routerLink="/buyer/wishlist">Wishlist</a></li>
-          <li><a routerLink="/buyer/cart">Cart</a></li>
+          <li>
+            <a routerLink="/buyer/wishlist"
+              >Wishlist <span>({{ wishlistCount }})</span></a
+            >
+          </li>
+          <li>
+            <a routerLink="/buyer/cart"
+              >Cart <span>({{ cartCount }})</span></a
+            >
+          </li>
           <li><a routerLink="/buyer/checkout">Checkout</a></li>
           <!-- <li><a routerLink="/auth/register">Create Account</a></li> -->
           <li><a routerLink="/buyer/account">Account</a></li>

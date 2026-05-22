@@ -21,12 +21,18 @@ import { ReviewFormComponent } from '../forms/review-form/review-form.component'
   templateUrl: './product-details-upper-buyer.component.html',
   styleUrls: ['./product-details-upper-buyer.component.scss'],
 })
-export class ProductDetailsUpperBuyerComponent implements AfterViewInit, OnDestroy {
+export class ProductDetailsUpperBuyerComponent
+  implements AfterViewInit, OnDestroy
+{
   @Input() product!: any; //  Product;
   @Input() bottomShow: boolean = true;
   @Input() style_2: boolean = false;
+  @Input() reviewCount: number = 0;
+  @Input() averageRating: number = 0;
   @Output() itemDetails: EventEmitter<any> = new EventEmitter<any>();
+  @Output() reviewSubmitted: EventEmitter<void> = new EventEmitter<void>();
   cartItems: any = [];
+  stars = [1, 2, 3, 4, 5];
 
   @ViewChild('reviewModal') reviewModalRef?: ElementRef<HTMLElement>;
   @ViewChild(ReviewFormComponent) reviewFormCmp?: ReviewFormComponent;
@@ -34,7 +40,7 @@ export class ProductDetailsUpperBuyerComponent implements AfterViewInit, OnDestr
   constructor(
     public productService: ProductService,
     public cartService: CartService,
-    public store: Store
+    public store: Store,
   ) {}
 
   // Reset the review form whenever the modal is closed
@@ -43,14 +49,14 @@ export class ProductDetailsUpperBuyerComponent implements AfterViewInit, OnDestr
   ngAfterViewInit(): void {
     this.reviewModalRef?.nativeElement.addEventListener(
       'hidden.bs.modal',
-      this.onModalHidden
+      this.onModalHidden,
     );
   }
 
   ngOnDestroy(): void {
     this.reviewModalRef?.nativeElement.removeEventListener(
       'hidden.bs.modal',
-      this.onModalHidden
+      this.onModalHidden,
     );
   }
 
@@ -72,5 +78,15 @@ export class ProductDetailsUpperBuyerComponent implements AfterViewInit, OnDestr
 
   isItemInCart(item: any): boolean {
     return this.cartItems.some((prd: any) => prd.ProductID === item._id);
+  }
+
+  // Close the review modal after a successful post and let the parent reload the list
+  onReviewSubmitted(): void {
+    const closeBtn =
+      this.reviewModalRef?.nativeElement.querySelector<HTMLElement>(
+        '[data-bs-dismiss="modal"]',
+      );
+    closeBtn?.click();
+    this.reviewSubmitted.emit();
   }
 }

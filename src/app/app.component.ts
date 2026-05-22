@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { CartService } from '@shared/services/cart.service';
+import { WishlistService } from '@shared/services/wishlist.service';
 import { UserService } from '@shared/services/user.service';
 import { loadUser } from './store/actions/user.actions';
 
@@ -15,7 +16,8 @@ export class AppComponent {
   constructor(
     private userService: UserService,
     private store: Store,
-    public cartService: CartService
+    public cartService: CartService,
+    public wishlistService: WishlistService
   ) {}
 
   ngOnInit(): void {
@@ -25,8 +27,9 @@ export class AppComponent {
       this.userService.loadUserFromLocalStorage();
       this.store.dispatch(loadUser());
     } else {
-      // Guests have no server cart; hydrate the store from session storage
+      // Guests have no server cart/wishlist; hydrate the store from session storage
       this.cartService.loadGuestCart();
+      this.wishlistService.loadGuestWishlist();
     }
   }
 }

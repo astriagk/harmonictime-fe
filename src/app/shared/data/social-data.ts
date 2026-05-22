@@ -6,24 +6,19 @@ export type ISocial =  {
 
 const social_links:ISocial[] = [
   {
-    link: "http://facebook.com",
-    icon: "fab fa-facebook-f",
-    name: "Facebook",
+    link: "https://www.instagram.com/harmonic_time/",
+    icon: "fab fa-instagram",
+    name: "Instagram",
   },
   {
-    link: "http://twitter.com",
+    link: "https://x.com",
     icon: "fab fa-twitter",
-    name: "Twitter",
+    name: "X",
   },
   {
-    link: "https://www.behance.net/",
-    icon: "fab fa-behance",
-    name: "Behance",
-  },
-  {
-    link: "https://dribbble.com/",
-    icon: "fab fa-dribbble",
-    name: "Dribbble",
+    link: "https://www.linkedin.com",
+    icon: "fab fa-linkedin-in",
+    name: "LinkedIn",
   },
 ]
 

@@ -57,9 +57,9 @@
             <td>{{ order.PaymentStatus }}</td>
             <td>{{ order.DeliveryStatus }}</td>
             <td>
-              <button class="os-btn" (click)="addTracking(order)">
-                {{ isShipped(order) ? "Edit" : "Add" }}
-              </button>
+              <a class="tracking-link cursor-pointer" (click)="addTracking(order)">
+                {{ isShipped(order) ? "Update Tracking" : "Add Tracking" }}
+              </a>
             </td>
           </tr>
         </ng-container>

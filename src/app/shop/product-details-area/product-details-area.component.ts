@@ -1,39 +1,92 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
-import { IProduct } from 'src/app/shared/types/product-d-t';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { GET_PRODUCT_REVIEWS } from '@config/index';
+import { GenericService } from '@shared/services/generic.service';
 
 @Component({
   selector: 'app-product-details-area',
   templateUrl: './product-details-area.component.html',
   styleUrls: ['./product-details-area.component.scss'],
 })
-export class ProductDetailsAreaComponent {
+export class ProductDetailsAreaComponent implements OnChanges {
   @Input() product: any;
 
-  // Dummy reviews until a reviews API is wired up
-  public reviews = [
-    {
-      img: 'assets/img/blog/comments/avater-1.png',
-      name: 'Arthur Holloway',
-      time: '2 days ago',
-      rating: 5,
-      review_desc:
-        'Absolutely stunning timepiece. The finish is flawless and it feels even better on the wrist than in the photos.',
-    },
-    {
-      img: 'assets/img/blog/comments/avater-1.png',
-      name: 'Mei Tanaka',
-      time: '1 week ago',
-      rating: 4,
-      review_desc:
-        'Beautiful watch and great craftsmanship. Delivery was quick and the packaging felt premium.',
-    },
-    {
-      img: 'assets/img/blog/comments/avater-1.png',
-      name: 'Daniel Okafor',
-      time: '3 weeks ago',
-      rating: 5,
-      review_desc:
-        'Exceeded my expectations. Keeps perfect time and the strap is very comfortable for daily wear.',
-    },
-  ];
+  public reviews: any[] = [];
+  public reviewsLoaded = false;
+  public stars = [1, 2, 3, 4, 5];
+
+  private loadedForId?: string;
+
+  constructor(private genericService: GenericService) {}
+
+  // Load reviews as soon as the product is available so the rating summary
+  // (average stars + count) can be shown without opening the Reviews tab
+  ngOnChanges(changes: SimpleChanges): void {
+    const id = this.product?._id;
+    if (id && id !== this.loadedForId) {
+      this.loadedForId = id;
+      this.loadReviews();
+    }
+  }
+
+  // Number of reviews for the current product
+  get reviewCount(): number {
+    return this.reviews.length;
+  }
+
+  // Average rating across all reviews, rounded to the nearest star
+  get averageRating(): number {
+    if (!this.reviews.length) {
+      return 0;
+    }
+    const total = this.reviews.reduce(
+      (sum, r) => sum + (Number(r?.Rating) || 0),
+      0
+    );
+    return Math.round(total / this.reviews.length);
+  }
+
+  // Fetch reviews for the current product
+  loadReviews(): void {
+    const productId = this.product?._id;
+    if (!productId) {
+      return;
+    }
+
+    this.genericService
+      .getObservable(GET_PRODUCT_REVIEWS + productId)
+      .subscribe({
+        next: (res: any) => {
+          this.reviews = this.sortByNewest(this.extractReviews(res));
+          this.reviewsLoaded = true;
+        },
+        error: () => {
+          this.reviews = [];
+          this.reviewsLoaded = true;
+        },
+      });
+  }
+
+  // The API may wrap the list in different envelopes; always resolve to an array
+  private extractReviews(res: any): any[] {
+    if (Array.isArray(res)) {
+      return res;
+    }
+    const candidates = [
+      res?.data,
+      res?.reviews,
+      res?.data?.reviews,
+      res?.data?.docs,
+      res?.result,
+    ];
+    return candidates.find((c) => Array.isArray(c)) ?? [];
+  }
+
+  // Show the most recent reviews first, based on the created date/time
+  private sortByNewest(reviews: any[]): any[] {
+    return [...reviews].sort((a, b) => {
+      const dateA = new Date(a?.CreatedAt ?? a?.createdAt ?? 0).getTime();
+      const dateB = new Date(b?.CreatedAt ?? b?.createdAt ?? 0).getTime();
+      return dateB - dateA;
+    });
+  }
 }

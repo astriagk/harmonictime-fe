@@ -4,7 +4,6 @@
   <app-breadcrumb-two
     title="Contact Us"
     subtitle="Contact"
-    bg="/assets/img/page-title/page-title-2.jpg"
   ></app-breadcrumb-two>
 
   <section class="contact__area pb-100 pt-95">
@@ -48,20 +47,10 @@
 
             <div class="contact__social">
               <ul>
-                <li>
-                  <a href="#"><i class="fab fa-dribbble"></i></a>
-                </li>
-                <li>
-                  <a href="#"><i class="fab fa-facebook-f"></i></a>
-                </li>
-                <li>
-                  <a href="#"><i class="fab fa-twitter"></i></a>
-                </li>
-                <li>
-                  <a href="#"><i class="fab fa-behance"></i></a>
-                </li>
-                <li>
-                  <a href="#"><i class="fas fa-share-alt"></i></a>
+                <li *ngFor="let item of social_links">
+                  <a [href]="item.link" target="_blank"
+                    ><i [class]="item.icon"></i
+                  ></a>
                 </li>
               </ul>
             </div>
@@ -83,9 +72,7 @@
       <div class="row g-0">
         <div class="col-xl-12">
           <div class="contact__map-wrapper p-relative">
-            <iframe
-              src="https://maps.google.com/maps?hl=en&amp;q=Dhaka+()&amp;ie=UTF8&amp;t=&amp;z=10&amp;iwloc=B&amp;output=embed"
-            ></iframe>
+            <iframe [src]="mapUrl"></iframe>
           </div>
         </div>
       </div>

@@ -14,7 +14,10 @@ import { Store } from '@ngrx/store';
 export class OffcanvasComponent {
   public roles: number[] = [];
 
-  constructor(public utilsService: UtilsService, private store: Store) {}
+  constructor(
+    public utilsService: UtilsService,
+    private store: Store,
+  ) {}
 
   mobile_menus: IMobileMenu[] = mobile_menus;
 
@@ -35,7 +38,7 @@ export class OffcanvasComponent {
   }
 
   checkRole(value: boolean | undefined) {
-    if (value) return this.roles?.includes(2);
+    // if (value) return this.roles?.includes(2);
     return true;
   }
 }

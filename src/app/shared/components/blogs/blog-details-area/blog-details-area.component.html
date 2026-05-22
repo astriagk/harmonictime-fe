@@ -44,10 +44,7 @@
                           <div class="postbox__social">
                               <span>Share to friends:</span>
                               <ul>
-                                  <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                                  <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                                  <li><a href="#"><i class="fab fa-dribbble"></i></a></li>
-                                  <li><a href="#"><i class="fas fa-share-alt"></i></a></li>
+                                  <li *ngFor="let item of social_links"><a [href]="item.link" target="_blank"><i [class]="item.icon"></i></a></li>
                               </ul>
                           </div>
                       </div>

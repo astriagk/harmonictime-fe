@@ -1,3 +1,5 @@
+@import 'variables';
+
 .policy__content {
   .policy__intro {
     margin-bottom: 25px;
@@ -8,12 +10,12 @@
 
     h4 {
       font-size: 24px;
-      color: #201f1f;
+      color: $heading-color;
       margin-bottom: 15px;
     }
 
     p {
-      color: #848b8a;
+      color: $body-text-color;
       margin-bottom: 12px;
 
       &:last-child {

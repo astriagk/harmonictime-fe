@@ -43,7 +43,7 @@ export class ProductItemComponent {
   isItemInWishlist(item: any): boolean {
     return this.wishlistService
       .getWishlistProducts()
-      .some((prd: any) => prd._id === item._id);
+      .some((prd: any) => prd.ProductID === item._id || prd._id === item._id);
   }
 
   isItemInCompare(item: IProduct): boolean {
