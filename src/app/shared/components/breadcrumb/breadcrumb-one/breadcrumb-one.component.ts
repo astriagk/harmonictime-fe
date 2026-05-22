@@ -13,7 +13,7 @@ export class BreadcrumbOneComponent {
   @Input() subtitle!: string;
 
   // Static fallback until the CMS `breadcrumb` block loads.
-  public bg_img = '/assets/img/page-title/page-title-3.jpg';
+  public bg_img = '';
 
   constructor(private siteContentService: SiteContentService) {}
 

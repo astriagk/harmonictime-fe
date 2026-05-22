@@ -8,8 +8,13 @@
     <h2 class="order-info__title">My Orders</h2>
   </header>
 
+  <!-- Loading: shimmer table rows -->
+  <div *ngIf="loading" class="order-list white-bg pt-40">
+    <app-skeleton type="table-row" [count]="pageSize"></app-skeleton>
+  </div>
+
   <app-empty-state
-    *ngIf="orders.length === 0"
+    *ngIf="!loading && orders.length === 0"
     message="No Orders Found"
   ></app-empty-state>
 

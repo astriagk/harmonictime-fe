@@ -14,42 +14,42 @@ const routes: Routes = [
   {
     path: 'blog',
     component: BlogComponent,
-    title: 'Blog Page',
+    title: 'Blog',
   },
   {
     path: 'blog-left-sidebar',
     component: BlogLeftSideComponent,
-    title: 'Blog Left Sidebar Page',
+    title: 'Blog Left Sidebar',
   },
   {
     path: 'blog-no-sidebar',
     component: BlogNoSideComponent,
-    title: 'Blog No Sidebar Page',
+    title: 'Blog No Sidebar',
   },
   {
     path: 'blog-2-col',
     component: BlogTwoColComponent,
-    title: 'Blog Two Col Page',
+    title: 'Blog Two Col',
   },
   {
     path: 'blog-3-col',
     component: BlogThreeColComponent,
-    title: 'Blog Three Col Page',
+    title: 'Blog Three Col',
   },
   {
     path: 'blog-details',
     component: BlogDetailsComponent,
-    title: 'Blog Details Page',
+    title: 'Blog Details',
   },
   {
     path: 'blog-details/:id',
     component: BlogDynamicDetailsComponent,
-    title: 'Blog Details Page',
+    title: 'Blog Details',
   },
   {
     path: 'contact',
     component: ContactComponent,
-    title: 'Contact Page',
+    title: 'Contact',
   },
   {
     path: 'policy/:slug',

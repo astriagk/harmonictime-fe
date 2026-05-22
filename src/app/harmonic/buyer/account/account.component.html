@@ -157,7 +157,20 @@
                   <h3 class="order__info-title">My Orders</h3>
                 </div>
 
-                <div class="order__list white-bg table-responsive">
+                <!-- Loading: shimmer table rows -->
+                <div *ngIf="ordersLoading" class="order__list white-bg">
+                  <app-skeleton type="table-row" [count]="4"></app-skeleton>
+                </div>
+
+                <app-empty-state
+                  *ngIf="!ordersLoading && orders.length === 0"
+                  message="No Orders Found"
+                ></app-empty-state>
+
+                <div
+                  *ngIf="!ordersLoading && orders.length > 0"
+                  class="order__list white-bg table-responsive"
+                >
                   <table class="table">
                     <thead>
                       <tr>

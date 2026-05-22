@@ -27,7 +27,7 @@
           </h5>
           <div class="cart-price">
             <span class="ammount">1 <i class="fal fa-times"></i></span>
-            <span class="price"> {{ item.Price | currency : "INR" }}</span>
+            <span class="price"> {{ item.Price | platformPrice | currency : "INR" }}</span>
           </div>
         </div>
       </li>

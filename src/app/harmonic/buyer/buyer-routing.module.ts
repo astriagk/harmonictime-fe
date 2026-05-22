@@ -21,32 +21,32 @@ const routes: Routes = [
       {
         path: 'products',
         component: ListComponent,
-        title: 'Products Page',
+        title: 'Products',
       },
       {
         path: 'product-details/:id',
         component: DetailsComponent,
-        title: 'Product Details Page',
+        title: 'Product Details',
       },
       {
         path: 'cart',
         component: CartComponent,
-        title: 'Cart Page',
+        title: 'Cart',
       },
       {
         path: 'wishlist',
         component: WishlistComponent,
-        title: 'Wishlist Page',
+        title: 'Wishlist',
       },
       {
         path: 'checkout',
         component: CheckoutComponent,
-        title: 'Checkout Page',
+        title: 'Checkout',
       },
       {
         path: 'account',
         component: AccountComponent,
-        title: 'Account Page',
+        title: 'Account',
       },
     ],
   },

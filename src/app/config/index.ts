@@ -119,6 +119,14 @@ export const UPDATE_SHIPMENT = `${baseUrl}/shipments/`; // append the shipment i
 // order charges applied on top of the cart subtotal at checkout
 export const ORDER_CHARGES = {
   gstPercent: 18, // % of subtotal
-  platformPercent: 2, // % of subtotal
+  platformPercent: 2, // % baked into every displayed price (see withPlatformMarkup)
   extraFlat: 50, // flat amount in INR
 };
+
+// The platform fee is baked directly into the price shown to buyers (lists,
+// details, cart, checkout) rather than added as a separate line at checkout.
+// The marked-up price is rounded up so buyers never see fractional amounts.
+export const withPlatformMarkup = (price: number): number =>
+  price
+    ? Math.ceil(price + (price * ORDER_CHARGES.platformPercent) / 100)
+    : price;

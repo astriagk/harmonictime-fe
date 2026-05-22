@@ -6,7 +6,7 @@ const routes: Routes = [
   {
     path: 'home-style-7',
     component: HomeSevenComponent,
-    title: 'Home page seven',
+    title: 'Home',
   },
 ];
 

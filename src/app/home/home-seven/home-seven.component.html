@@ -2,6 +2,10 @@
 
 <main>
   <section class="slider__area slider__area-3 p-relative">
+    <!-- Shimmer overlay while the hero data resolves and Swiper initialises -->
+    <div *ngIf="!heroReady" class="hero__skeleton">
+      <app-skeleton type="hero"></app-skeleton>
+    </div>
     <div class="slider-active-3 swiper-container" #heroSliderContainer>
       <button
         (click)="swiperInstance?.slidePrev()"
@@ -100,7 +104,12 @@
     </div>
   </div>
 
+  <!-- Loading: shimmer block in place of the video area until the CMS block resolves -->
+  <div *ngIf="!videoReady" class="video__area-df video__area-df--loading">
+    <app-skeleton type="hero"></app-skeleton>
+  </div>
   <div
+    *ngIf="videoReady"
     class="video__area-df"
     [style.backgroundImage]="'url(' + video_area.bgImg + ')'"
   >

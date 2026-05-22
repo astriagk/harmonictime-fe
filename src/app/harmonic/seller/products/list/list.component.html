@@ -16,8 +16,13 @@
     </div>
   </header>
 
+  <!-- Loading: shimmer table rows -->
+  <div *ngIf="loading" class="order-list white-bg pt-40">
+    <app-skeleton type="table-row" [count]="pageSize"></app-skeleton>
+  </div>
+
   <app-empty-state
-    *ngIf="orders.length === 0"
+    *ngIf="!loading && orders.length === 0"
     message="No Products Found"
     actionLabel="Add Product"
     actionLink="/seller/add-product"

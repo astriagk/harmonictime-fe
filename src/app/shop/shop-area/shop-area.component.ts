@@ -8,6 +8,7 @@ import { IProduct } from 'src/app/shared/types/product-d-t';
 import { GenericService } from '@shared/services/generic.service';
 import { PRODUCT } from '@config/index';
 import { CartService } from '@shared/services/cart.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-shop-area',
@@ -40,6 +41,7 @@ export class ShopAreaComponent {
   public paginate: any = {}; // Pagination use only
   public sortBy: string = 'asc'; // Sorting Order
   public showFilters: boolean = false; // Toggle filter sidebar on mobile
+  public loading: boolean = true; // Show skeleton until the first product response
 
   constructor(
     public productService: ProductService,
@@ -187,7 +189,10 @@ export class ShopAreaComponent {
 
   ngOnInit() {
     const url = PRODUCT;
-    this.genericService.getObservable(url).subscribe({
+    this.genericService
+      .getObservable(url)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
       next: (response) => {
         this.products = response?.data;
         this.productsInitial = response?.data;

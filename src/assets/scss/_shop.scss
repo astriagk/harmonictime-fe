@@ -731,10 +731,6 @@
     }
 
     &-2 {
-      @media #{$xs} {
-        margin-top: 15px;
-      }
-
       & a {
         display: inline-block;
         width: 48px;

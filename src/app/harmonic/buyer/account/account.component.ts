@@ -7,7 +7,10 @@ import { UserService } from '@shared/services/user.service';
 import { loadOrders } from 'src/app/store/actions/orders.actions';
 import { Order } from 'src/app/store/models/orders.models';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
-import { selectOrders } from 'src/app/store/selectors/orders.selectors';
+import {
+  selectOrders,
+  selectOrdersLoading,
+} from 'src/app/store/selectors/orders.selectors';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
 @Component({
@@ -20,6 +23,7 @@ export class AccountComponent {
   public mail = `mailt:${companyDetails.email}`;
   public cartItems: any = [];
   public orders: Order[] = [];
+  public ordersLoading = false; // Drives the orders-tab skeleton
 
   constructor(public cartService: CartService, private store: Store) {}
 
@@ -45,5 +49,8 @@ export class AccountComponent {
         this.orders = [];
       }
     });
+    this.store
+      .select(selectOrdersLoading)
+      .subscribe((loading) => (this.ordersLoading = loading));
   }
 }

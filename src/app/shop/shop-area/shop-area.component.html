@@ -76,8 +76,18 @@
             </div>
           </div>
 
+          <!-- Loading: shimmer grid of product cards (matches the 3-col grid) -->
+          <div *ngIf="loading" class="row custom-row-10">
+            <div
+              *ngFor="let n of [].constructor(pageSize); let idx = index"
+              class="col-xl-4 col-lg-4 col-md-6 col-sm-6 custom-col-10"
+            >
+              <app-skeleton type="product-card" [count]="1"></app-skeleton>
+            </div>
+          </div>
+
           <div
-            *ngIf="products?.length === 0"
+            *ngIf="!loading && products?.length === 0"
             class="cartmini__empty text-center mt-80"
           >
             <img src="/assets/img/shop/empty-cart.png" alt="empty-cart-img" />
@@ -91,7 +101,7 @@
             >
           </div>
 
-          <div class="tab-content" id="pills-tabContent">
+          <div *ngIf="!loading" class="tab-content" id="pills-tabContent">
             <div
               class="tab-pane fade show active"
               id="pills-grid"
@@ -123,7 +133,7 @@
               </ng-container>
             </div>
           </div>
-          <div class="row mt-40">
+          <div *ngIf="!loading" class="row mt-40">
             <div class="col-xl-12">
               <div
                 class="shop-pagination-wrapper d-md-flex justify-content-end align-items-center"

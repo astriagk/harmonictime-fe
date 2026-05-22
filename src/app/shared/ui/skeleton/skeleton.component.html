@@ -1,0 +1,68 @@
+<ng-container [ngSwitch]="type">
+  <!-- Product grid card: image thumb + title line + price line -->
+  <ng-container *ngSwitchCase="'product-card'">
+    <div class="skeleton skeleton--product-card" *ngFor="let i of items">
+      <div class="sk sk--thumb"></div>
+      <div class="sk sk--line sk--line-lg mt-15"></div>
+      <div class="sk sk--line sk--line-sm mt-10"></div>
+    </div>
+  </ng-container>
+
+  <!-- Product detail: large gallery + stacked text lines/button -->
+  <div *ngSwitchCase="'product-detail'" class="skeleton skeleton--product-detail">
+    <div class="sk sk--gallery"></div>
+    <div class="skeleton__detail-info">
+      <div class="sk sk--line sk--line-lg"></div>
+      <div class="sk sk--line sk--line-sm mt-15"></div>
+      <div class="sk sk--line mt-20"></div>
+      <div class="sk sk--line mt-10"></div>
+      <div class="sk sk--line sk--line-md mt-10"></div>
+      <div class="sk sk--btn mt-30"></div>
+    </div>
+  </div>
+
+  <!-- Card-with-thumb list row (cart / wishlist / mini-cart) -->
+  <ng-container *ngSwitchCase="'list-row'">
+    <div class="skeleton skeleton--list-row" *ngFor="let i of items">
+      <div class="sk sk--avatar"></div>
+      <div class="skeleton__row-body">
+        <div class="sk sk--line sk--line-md"></div>
+        <div class="sk sk--line sk--line-sm mt-10"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Plain table row (seller products / orders) -->
+  <ng-container *ngSwitchCase="'table-row'">
+    <div class="skeleton skeleton--table-row" *ngFor="let i of items">
+      <div class="sk sk--line sk--line-sm"></div>
+      <div class="sk sk--line"></div>
+      <div class="sk sk--line sk--line-md"></div>
+      <div class="sk sk--line sk--line-sm"></div>
+    </div>
+  </ng-container>
+
+  <!-- Blog card: wide image + heading + two text lines -->
+  <ng-container *ngSwitchCase="'blog-card'">
+    <div class="skeleton skeleton--blog-card" *ngFor="let i of items">
+      <div class="sk sk--banner"></div>
+      <div class="sk sk--line sk--line-lg mt-20"></div>
+      <div class="sk sk--line mt-10"></div>
+      <div class="sk sk--line sk--line-md mt-10"></div>
+    </div>
+  </ng-container>
+
+  <!-- Full-bleed banner (hero slider) -->
+  <div *ngSwitchCase="'hero'" class="skeleton skeleton--hero">
+    <div class="sk sk--hero"></div>
+  </div>
+
+  <!-- Generic stacked text lines -->
+  <ng-container *ngSwitchDefault>
+    <div class="skeleton skeleton--text" *ngFor="let i of items">
+      <div class="sk sk--line"></div>
+      <div class="sk sk--line mt-10"></div>
+      <div class="sk sk--line sk--line-md mt-10"></div>
+    </div>
+  </ng-container>
+</ng-container>

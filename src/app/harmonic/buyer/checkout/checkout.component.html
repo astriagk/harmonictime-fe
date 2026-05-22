@@ -423,7 +423,7 @@
                       </td>
                       <td class="product-total">
                         <span class="amount">{{
-                          item.Price | currency: "INR"
+                          item.Price | platformPrice | currency: "INR"
                         }}</span>
                       </td>
                     </tr>
@@ -457,16 +457,10 @@
                         }}</span>
                       </td>
                     </tr>
-                    <tr *ngIf="showChargesDetails" class="cart-subtotal charges-detail">
-                      <th>Platform Charges (2%)</th>
-                      <td>
-                        <span class="amount">{{
-                          cartService.computeCheckoutSummary(cartItems).platform
-                            | currency: "INR"
-                        }}</span>
-                      </td>
-                    </tr>
-                    <tr *ngIf="showChargesDetails" class="cart-subtotal charges-detail">
+                    <tr
+                      *ngIf="showChargesDetails"
+                      class="cart-subtotal charges-detail"
+                    >
                       <th>Extra Charges</th>
                       <td>
                         <span class="amount">{{
@@ -493,7 +487,7 @@
               </div>
 
               <div class="payment-method">
-                <div class="accordion" id="accordionExample">
+                <!-- <div class="accordion" id="accordionExample">
                   <div class="card">
                     <div class="card-header" id="headingThree">
                       <h5 class="mb-0">
@@ -521,7 +515,7 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> -->
                 <div class="order-button-payment mt-20">
                   <button type="submit" class="os-btn os-btn-black">
                     Place order

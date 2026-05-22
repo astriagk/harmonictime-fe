@@ -60,7 +60,7 @@
         ></a>
       </h4>
       <div class="product__price transition-3">
-        <span>{{ product.Price | currency: "INR" }}</span>
+        <span>{{ product.Price | platformPrice | currency: "INR" }}</span>
         <!-- <span *ngIf="product.old_price" class="old-price"
           >${{ product.old_price.toFixed(2) }}</span
         > -->

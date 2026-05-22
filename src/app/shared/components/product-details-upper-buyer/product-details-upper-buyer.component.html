@@ -90,7 +90,7 @@
         }}</a>
       </h5>
       <div class="product__price-2 mb-25">
-        <span>{{ product.Price | currency: "INR" }}</span>
+        <span>{{ product.Price | platformPrice | currency: "INR" }}</span>
       </div>
       <div class="product__modal-des mb-25" *ngIf="product.Description.Content">
         <p>{{ product.Description.Content }}</p>

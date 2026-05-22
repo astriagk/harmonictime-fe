@@ -14,27 +14,27 @@ const routes: Routes = [
       {
         path: 'add-product',
         component: AddEditComponent,
-        title: 'Add Product Page',
+        title: 'Add Product',
       },
       {
         path: 'add-product/:id',
         component: AddEditComponent,
-        title: 'Edit Product Page',
+        title: 'Edit Product',
       },
       {
         path: 'product-list',
         component: ListComponent,
-        title: 'Product List Page',
+        title: 'Product List',
       },
       {
         path: 'product-details/:id',
         component: DetailsComponent,
-        title: 'Product Details Page',
+        title: 'Product Details',
       },
       {
         path: 'order-list',
         component: OrdersComponent,
-        title: 'Order List Page',
+        title: 'Order List',
       },
     ],
   },

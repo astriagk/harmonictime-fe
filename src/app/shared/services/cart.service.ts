@@ -7,6 +7,7 @@ import {
   DELETE_CART_ITEM,
   ORDER_CHARGES,
   USER_CART,
+  withPlatformMarkup,
 } from '@config/index';
 import { GenericService } from './generic.service';
 import {
@@ -135,7 +136,8 @@ export class CartService {
       (cartTotal: { total: number; quantity: number }, cartItem: any) => {
         const { Price } = cartItem;
         if (Price) {
-          cartTotal.total += Price;
+          // Platform fee is baked into the price the buyer pays.
+          cartTotal.total += withPlatformMarkup(Price);
         }
         return cartTotal;
       },
@@ -143,16 +145,15 @@ export class CartService {
     );
   }
 
-  // Subtotal + platform + extra charges, plus the grand total to pay.
-  // GST is computed but excluded from the total for now.
+  // Subtotal (platform fee already baked into prices) + extra charges, plus the
+  // grand total to pay. GST is computed but excluded from the total for now.
   computeCheckoutSummary(cartItems: any) {
     const subtotal = this.computeCartTotal(cartItems).total;
     const gst = (subtotal * ORDER_CHARGES.gstPercent) / 100;
-    const platform = (subtotal * ORDER_CHARGES.platformPercent) / 100;
     const extra = subtotal > 0 ? ORDER_CHARGES.extraFlat : 0;
-    const charges = platform + extra; // total additional charges (GST excluded for now)
+    const charges = extra; // additional charges (GST excluded for now)
     const grandTotal = subtotal + charges;
-    return { subtotal, gst, platform, extra, charges, grandTotal };
+    return { subtotal, gst, extra, charges, grandTotal };
   }
 
   // quantity increment
