@@ -27,6 +27,10 @@ export class HomeSevenComponent {
   public blogSliderInstance: Swiper | undefined;
   public brandSliderInstance: Swiper | undefined;
 
+  private viewInitialized = false;
+  private heroDataReady = false;
+  private heroInitDone = false;
+
   public hero_slider_data: IHeroSlider[] = HeroSliderData.hero_slider_seven;
   public blog_items: IBlogType[] = blog_data.filter((b) => b.blog === 'home-7');
 
@@ -82,11 +86,25 @@ export class HomeSevenComponent {
       .subscribe((slides) => {
         if (slides.length) {
           this.hero_slider_data = slides;
-          // Slides change after init, so rebuild the Swiper once Angular
-          // has rendered the new *ngFor items.
-          setTimeout(() => this.initHeroSwiper());
         }
+        // Data has resolved (CMS slides or empty -> keep fallback). Mark ready
+        // and try to init; the cache may deliver this sync (warm) or async
+        // (cold), so we don't know whether the view exists yet.
+        this.heroDataReady = true;
+        this.setupHeroSwiper();
       });
+  }
+
+  // Build the hero Swiper exactly once, only after BOTH the view is ready and
+  // the slider data has resolved. This avoids the init-with-fallback then
+  // destroy/recreate dance that raced differently on refresh vs. navigation.
+  private setupHeroSwiper() {
+    if (this.heroInitDone || !this.viewInitialized || !this.heroDataReady) {
+      return;
+    }
+    this.heroInitDone = true;
+    // Defer so Angular has rendered the *ngFor slides before Swiper measures.
+    setTimeout(() => this.initHeroSwiper());
   }
 
   private initHeroSwiper() {
@@ -96,6 +114,8 @@ export class HomeSevenComponent {
       spaceBetween: 0,
       loop: false,
       effect: 'fade',
+      observer: true,
+      observeParents: true,
       modules: [Pagination, EffectFade],
       pagination: {
         clickable: true,
@@ -116,8 +136,9 @@ export class HomeSevenComponent {
   ];
 
   ngAfterViewInit() {
+    this.viewInitialized = true;
     if (this.heroSliderContainer) {
-      this.initHeroSwiper();
+      this.setupHeroSwiper();
     }
 
     if (this.productSliderContainer) {

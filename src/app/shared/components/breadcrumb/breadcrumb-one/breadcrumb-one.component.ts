@@ -1,20 +1,34 @@
 import { Component, Input } from '@angular/core';
+import { SiteContentService } from 'src/app/shared/services/site-content.service';
+import { IBreadcrumb } from 'src/app/shared/types/breadcrumb-t';
 
 @Component({
   selector: 'app-breadcrumb-one',
   templateUrl: './breadcrumb-one.component.html',
-  styleUrls: ['./breadcrumb-one.component.scss']
+  styleUrls: ['./breadcrumb-one.component.scss'],
 })
 export class BreadcrumbOneComponent {
   @Input() bg?: string;
   @Input() title!: string;
   @Input() subtitle!: string;
 
-  public bg_img = '/assets/img/page-title/page-title-1.jpg';
+  // Static fallback until the CMS `breadcrumb` block loads.
+  public bg_img = '/assets/img/page-title/page-title-3.jpg';
 
-  ngOnInit () {
-    if(this.bg){
+  constructor(private siteContentService: SiteContentService) {}
+
+  ngOnInit() {
+    // An explicit [bg] input is a per-page override and always wins.
+    if (this.bg) {
       this.bg_img = this.bg;
+      return;
     }
+    this.siteContentService
+      .getBlock<IBreadcrumb>('breadcrumb')
+      .subscribe((items) => {
+        if (items[0]?.bgImg) {
+          this.bg_img = items[0].bgImg;
+        }
+      });
   }
 }
