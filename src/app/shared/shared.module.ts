@@ -24,6 +24,7 @@ import { VideoPopupComponent } from './components/modals/video-popup/video-popup
 import { BreadcrumbOneComponent } from './components/breadcrumb/breadcrumb-one/breadcrumb-one.component';
 import { PaginationComponent } from './ui/pagination/pagination.component';
 import { EmptyStateComponent } from './ui/empty-state/empty-state.component';
+import { SkeletonComponent } from './ui/skeleton/skeleton.component';
 import { ProductDetailsUpperComponent } from './components/product-details-upper/product-details-upper.component';
 import { ReviewFormComponent } from './components/forms/review-form/review-form.component';
 import { BlogSidebarComponent } from './components/blogs/blog-sidebar/blog-sidebar.component';
@@ -41,6 +42,7 @@ import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.compone
 import { BreadcrumbTwoComponent } from './components/breadcrumb/breadcrumb-two/breadcrumb-two.component';
 import { ProductDetailsUpperSellerComponent } from './components/product-details-upper-seller/product-details-upper-seller.component';
 import { ProductDetailsUpperBuyerComponent } from './components/product-details-upper-buyer/product-details-upper-buyer.component';
+import { PlatformPricePipe } from './pipes/platform-price.pipe';
 
 @NgModule({
   declarations: [
@@ -65,6 +67,7 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
     BreadcrumbOneComponent,
     PaginationComponent,
     EmptyStateComponent,
+    SkeletonComponent,
     ProductDetailsUpperComponent,
     ReviewFormComponent,
     BlogSidebarComponent,
@@ -82,6 +85,7 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
     BreadcrumbTwoComponent,
     ProductDetailsUpperSellerComponent,
     ProductDetailsUpperBuyerComponent,
+    PlatformPricePipe,
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -102,6 +106,7 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
     BreadcrumbOneComponent,
     PaginationComponent,
     EmptyStateComponent,
+    SkeletonComponent,
     ProductDetailsUpperComponent,
     ReviewFormComponent,
     BlogSidebarComponent,
@@ -116,6 +121,7 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
     BreadcrumbTwoComponent,
     ProductDetailsUpperSellerComponent,
     ProductDetailsUpperBuyerComponent,
+    PlatformPricePipe,
   ],
 })
 export class SharedModule {}

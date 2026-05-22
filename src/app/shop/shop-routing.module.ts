@@ -13,42 +13,42 @@ const routes: Routes = [
   {
     path: '',
     component: ShopComponent,
-    title: 'Shop Page',
+    title: 'Shop',
   },
   {
     path: 'shop-right',
     component: ShopRightSidebarComponent,
-    title: 'Shop Right Page',
+    title: 'Shop Right',
   },
   {
     path: 'shop-4-col',
     component: ShopFourColComponent,
-    title: 'Shop Four Col Page',
+    title: 'Shop Four Col',
   },
   {
     path: 'shop-3-col',
     component: ShopThreeColComponent,
-    title: 'Shop Three Col Page',
+    title: 'Shop Three Col',
   },
   {
     path: 'shop-details',
     component: ShopDetailsComponent,
-    title: 'Shop Details Page',
+    title: 'Shop Details',
   },
   {
     path: 'shop-details/:id',
     component: DynamicShopDetailsComponent,
-    title: 'Shop Details Page',
+    title: 'Shop Details',
   },
   {
     path: 'compare',
     component: CompareComponent,
-    title: 'Shop Compare Page',
+    title: 'Shop Compare',
   },
   {
     path: 'search',
     component: SearchComponent,
-    title: 'Shop Search Page',
+    title: 'Shop Search',
   },
 ];
 

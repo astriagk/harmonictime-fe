@@ -12,12 +12,12 @@ const routes: Routes = [
       {
         path: 'manage-users',
         component: UsersComponent,
-        title: 'Manage Users Page',
+        title: 'Manage Users',
       },
       {
         path: 'manage-roles',
         component: RolesComponent,
-        title: 'Manage Roles Page',
+        title: 'Manage Roles',
       },
     ],
   },

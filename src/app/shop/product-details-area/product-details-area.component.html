@@ -187,6 +187,12 @@
                         >
                       </h3>
                     </div>
+                    <!-- Loading: shimmer review rows -->
+                    <app-skeleton
+                      *ngIf="!reviewsLoaded"
+                      type="list-row"
+                      [count]="3"
+                    ></app-skeleton>
                     <div
                       *ngIf="reviewsLoaded && reviews.length === 0"
                       class="text-center pt-50"

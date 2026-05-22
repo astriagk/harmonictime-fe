@@ -9,6 +9,7 @@ import {
 import { Store } from '@ngrx/store';
 import { GenericService } from '@shared/services/generic.service';
 import { ToastrService } from 'ngx-toastr';
+import { finalize } from 'rxjs';
 import { ProductService } from 'src/app/shared/services/product.service';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
@@ -25,6 +26,7 @@ export class OrdersComponent {
   public pageSize = 10;
   public pageNo: number = 1;
   public userData: any = {};
+  public loading = true; // Show skeleton until the first orders response
 
   // Tracking-ID modal state
   public isTrackingModalOpen = false;
@@ -66,20 +68,26 @@ export class OrdersComponent {
         // Returns every order containing at least one product this seller
         // listed, with only this seller's line items per order, newest first.
         const url = `${GET_SELLER_ORDERS}${this.userData._id}`;
-        this.genericService.getObservable(url).subscribe((response) => {
-          this.orders = response?.data || [];
+        this.genericService
+          .getObservable(url)
+          .pipe(finalize(() => (this.loading = false)))
+          .subscribe((response) => {
+            this.orders = response?.data || [];
 
-          this.paginate = this.productService.getPager(
-            this.orders.length,
-            Number(+this.pageNo),
-            this.pageSize
-          );
+            this.paginate = this.productService.getPager(
+              this.orders.length,
+              Number(+this.pageNo),
+              this.pageSize
+            );
 
-          this.paginationOrders = this.orders.slice(
-            this.paginate.startIndex,
-            this.paginate.endIndex + 1
-          );
-        });
+            this.paginationOrders = this.orders.slice(
+              this.paginate.startIndex,
+              this.paginate.endIndex + 1
+            );
+          });
+      } else if (state) {
+        // Store has emitted but there's no logged-in seller — stop the skeleton.
+        this.loading = false;
       }
     });
 

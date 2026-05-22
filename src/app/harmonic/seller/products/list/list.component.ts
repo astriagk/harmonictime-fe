@@ -6,7 +6,7 @@ import { PRODUCT, UPDATE_PRODUCT_BY_ID } from '@config/index';
 import { GenericService } from '@shared/services/generic.service';
 import { UtilsService } from '@shared/services/utils.service';
 import { ToastrService } from 'ngx-toastr';
-import { filter, Subscription, switchMap } from 'rxjs';
+import { filter, finalize, Subscription, switchMap } from 'rxjs';
 import { ProductService } from 'src/app/shared/services/product.service';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
@@ -21,6 +21,7 @@ export class ListComponent implements OnInit, OnDestroy {
   public paginate: any = {}; // Pagination data
   public pageSize = 10;
   public pageNo: number = 1;
+  public loading = true; // Show skeleton until the first products response
   private subscriptions: Subscription = new Subscription();
   private userData: any;
 
@@ -45,7 +46,9 @@ export class ListComponent implements OnInit, OnDestroy {
           switchMap((state) => {
             this.userData = state.user.data;
             const url = `${PRODUCT}?UserID=${this.userData._id}&IsAvailable=all`;
-            return this.genericService.getObservable(url);
+            return this.genericService
+              .getObservable(url)
+              .pipe(finalize(() => (this.loading = false)));
           }),
         )
         .subscribe({

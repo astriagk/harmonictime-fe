@@ -40,7 +40,7 @@
                   }}</a>
                 </td>
                 <td class="product-price">
-                  <span class="amount">{{ item.Price | currency : "INR" }}</span>
+                  <span class="amount">{{ item.Price | platformPrice | currency : "INR" }}</span>
                 </td>
                 <td class="product-quantity">
                   <button

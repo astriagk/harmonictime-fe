@@ -10,6 +10,7 @@ import IBlogType from 'src/app/shared/types/blog-d-t';
 import blog_data from 'src/app/shared/data/blog-data';
 import { UtilsService } from 'src/app/shared/services/utils.service';
 import { SiteContentService } from 'src/app/shared/services/site-content.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-home-seven',
@@ -30,6 +31,12 @@ export class HomeSevenComponent {
   private viewInitialized = false;
   private heroDataReady = false;
   private heroInitDone = false;
+  // Drives the hero shimmer overlay: true once Swiper has built the slider, so
+  // we mask the stacked/unstyled slides during the cold CMS-load window.
+  public heroReady = false;
+  // Drives the video-area shimmer: true once the CMS `video_area` block has
+  // resolved, so the static fallback isn't shown then swapped.
+  public videoReady = false;
 
   public hero_slider_data: IHeroSlider[] = HeroSliderData.hero_slider_seven;
   public blog_items: IBlogType[] = blog_data.filter((b) => b.blog === 'home-7');
@@ -71,6 +78,7 @@ export class HomeSevenComponent {
   private loadVideoArea() {
     this.siteContentService
       .getBlock<IVideoArea>('video_area')
+      .pipe(finalize(() => (this.videoReady = true)))
       .subscribe((items) => {
         if (items.length) {
           this.video_area = items[0];
@@ -122,6 +130,8 @@ export class HomeSevenComponent {
         el: '.tp-slider-dot',
       },
     });
+    // Swiper has laid out the slides synchronously — drop the shimmer overlay.
+    this.heroReady = true;
   }
 
   // client logos

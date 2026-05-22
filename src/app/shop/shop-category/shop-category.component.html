@@ -19,8 +19,15 @@
       ]"
     >
       <div class="row">
+        <!-- Loading: shimmer category cards (hides the fallback during load) -->
+        <ng-container *ngIf="loading">
+          <div *ngFor="let n of [1, 2, 3]" class="col-xl-4 col-lg-4 col-md-6">
+            <app-skeleton type="product-card" [count]="1"></app-skeleton>
+          </div>
+        </ng-container>
         <div
           *ngFor="let item of category_data.slice(0, 3)"
+          [hidden]="loading"
           class="col-xl-4 col-lg-4 col-md-6"
         >
           <div class="banner__item mb-30 p-relative">
@@ -63,7 +70,17 @@
 
 <!-- banner__area-df start -->
 <div *ngIf="shop_category_2" class="banner__area-df mt-10">
-  <div *ngFor="let item of category_data" class="banner__item-3 mb-30">
+  <!-- Loading: shimmer category items (hides the fallback during load) -->
+  <app-skeleton
+    *ngIf="loading"
+    type="blog-card"
+    [count]="3"
+  ></app-skeleton>
+  <div
+    *ngFor="let item of category_data"
+    [hidden]="loading"
+    class="banner__item-3 mb-30"
+  >
     <div class="banner__item-3-image m-img">
       <img [src]="item.img" alt="category-img" />
     </div>

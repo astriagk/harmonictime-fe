@@ -19,6 +19,8 @@ import { UserService } from '@shared/services/user.service';
 import { CartEffects } from './store/effects/cart.effects';
 import { OrdersEffects } from './store/effects/orders.effects';
 import { WishlistEffects } from './store/effects/wishlist.effects';
+import { TitleStrategy } from '@angular/router';
+import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
 
 @NgModule({
   declarations: [AppComponent],
@@ -47,7 +49,11 @@ import { WishlistEffects } from './store/effects/wishlist.effects';
       logOnly: environment.production,
     }),
   ],
-  providers: [GenericService, UserService],
+  providers: [
+    GenericService,
+    UserService,
+    { provide: TitleStrategy, useClass: PageTitleStrategy },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
