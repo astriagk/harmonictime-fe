@@ -178,6 +178,7 @@
                         <th style="width: 220px">Name</th>
                         <th style="width: 120px">Price</th>
                         <th style="width: 220px">Shipping Details</th>
+                        <th style="width: 90px">Invoice</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -213,6 +214,31 @@
                             Tracking:
                             {{ order.Shipments?.[0]?.TrackingNumber || "-" }}
                           </span>
+                        </td>
+                        <td class="order__title pr-2 pl-2 text-center">
+                          <!-- Desktop: open invoice modal -->
+                          <a
+                            class="invoice-view-link cursor-pointer d-none d-md-inline-block"
+                            title="View invoice"
+                            (click)="viewInvoice(order)"
+                          >
+                            <i class="fa fa-eye"></i>
+                          </a>
+                          <!-- Mobile: download invoice directly -->
+                          <a
+                            class="invoice-view-link cursor-pointer d-inline-block d-md-none"
+                            title="Download invoice"
+                            (click)="downloadInvoiceDirect(order)"
+                          >
+                            <i
+                              class="fa"
+                              [ngClass]="
+                                isCapturing || isDownloading
+                                  ? 'fa-spinner fa-spin'
+                                  : 'fa-download'
+                              "
+                            ></i>
+                          </a>
                         </td>
                       </tr>
                     </tbody>
@@ -260,3 +286,169 @@
   </div>
 </section>
 <!-- profile menu area end -->
+
+<!-- Invoice modal -->
+<div
+  *ngIf="isInvoiceModalOpen || isCapturing"
+  class="modal fade show invoice-modal"
+  [class.is-capturing]="isCapturing"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeInvoice()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <!-- Captured for the PDF -->
+          <div #invoiceContent class="invoice" *ngIf="selectedOrder">
+          <!-- Header (kept in the body so it appears in the downloaded PDF) -->
+          <div
+            class="invoice__head d-flex justify-content-between align-items-center"
+          >
+            <h2 class="invoice__title">Invoice</h2>
+            <img
+              *ngIf="companyLogoUrl"
+              [src]="companyLogoUrl"
+              [alt]="company.name"
+              class="invoice__logo"
+            />
+            <span *ngIf="!companyLogoUrl" class="invoice__brand">
+              {{ company.name }}
+            </span>
+          </div>
+          <hr class="invoice__rule" />
+
+          <!-- Parties -->
+          <div class="invoice__parties d-flex justify-content-between">
+            <div class="invoice__col">
+              <h6 class="invoice__label">Billed By</h6>
+              <p class="invoice__text invoice__name">{{ company.name }}</p>
+              <p class="invoice__text">{{ company.address }}</p>
+              <p class="invoice__text">{{ company.email }}</p>
+              <p class="invoice__text">{{ company.phone }}</p>
+            </div>
+            <div class="invoice__col">
+              <h6 class="invoice__label">Billed To</h6>
+              <ng-container *ngIf="clientAddress as addr; else noClient">
+                <p class="invoice__text invoice__name">
+                  {{ addr.FirstName }} {{ addr.LastName }}
+                </p>
+                <p class="invoice__text" *ngIf="addr.AddressLine1">
+                  {{ addr.AddressLine1
+                  }}{{ addr.AddressLine2 ? ", " + addr.AddressLine2 : "" }}
+                </p>
+                <p class="invoice__text">
+                  {{ addr.City }}{{ addr.City && addr.State ? ", " : "" }}
+                  {{ addr.State }} {{ addr.PostalCode }}
+                </p>
+                <p class="invoice__text" *ngIf="addr.Country">
+                  {{ addr.Country }}
+                </p>
+                <p class="invoice__text" *ngIf="userData?.email">
+                  {{ userData.email }}
+                </p>
+                <p class="invoice__text" *ngIf="addr.Phone || userData?.phone">
+                  {{ addr.Phone || userData?.phone }}
+                </p>
+              </ng-container>
+              <ng-template #noClient>
+                <p class="invoice__text" *ngIf="userData?.email">
+                  {{ userData.email }}
+                </p>
+                <p class="invoice__text" *ngIf="!userData?.email">—</p>
+              </ng-template>
+            </div>
+          </div>
+
+          <!-- Meta -->
+          <div class="invoice__meta">
+            <div class="invoice__meta-row">
+              <h6 class="invoice__label">ISSUED ON</h6>
+              <span class="invoice__text">
+                {{ selectedOrder.CheckoutDate | date: "mediumDate" }}
+              </span>
+            </div>
+            <div class="invoice__meta-row">
+              <h6 class="invoice__label">PAYMENT STATUS</h6>
+              <span class="invoice__text">{{ selectedOrder.PaymentStatus }}</span>
+            </div>
+            <div class="invoice__meta-row">
+              <h6 class="invoice__label">INVOICE #</h6>
+              <span class="invoice__text invoice__number">
+                {{ selectedOrder._id | uppercase }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <table class="table invoice__items">
+            <thead>
+              <tr>
+                <th>ITEM DESCRIPTION</th>
+                <th class="text-end">UNIT PRICE</th>
+                <th class="text-end">TOTAL PRICE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of selectedOrder.Products">
+                <td>{{ product.ProductName }}</td>
+                <td class="text-end">
+                  {{ product.Price | platformPrice | currency: "INR" }}
+                </td>
+                <td class="text-end">
+                  {{ product.Price | platformPrice | currency: "INR" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Totals -->
+          <div class="invoice__totals">
+            <div class="invoice__totals-row">
+              <span>Subtotal</span>
+              <span>{{ invoiceSubtotal | currency: "INR" }}</span>
+            </div>
+            <div class="invoice__totals-row" *ngIf="platformCharges > 0">
+              <span>Platform Charges</span>
+              <span>{{ platformCharges | currency: "INR" }}</span>
+            </div>
+            <div class="invoice__totals-row invoice__totals-row--grand">
+              <span>Total Amount Paid</span>
+              <span>{{ invoiceTotal | currency: "INR" }}</span>
+            </div>
+          </div>
+
+          <p class="invoice__footer-note">
+            Thank you for shopping with {{ company.name }}. We appreciate your
+            purchase. If you have any questions regarding this invoice, feel free
+            to contact us at {{ company.email }}.
+          </p>
+          </div>
+
+          <div class="invoice__actions d-flex justify-content-end mt-30">
+            <button type="button" class="os-btn mr-5" (click)="closeInvoice()">
+              Close
+            </button>
+            <button
+              type="button"
+              class="os-btn"
+              (click)="downloadInvoice()"
+              [disabled]="isDownloading"
+            >
+              {{ isDownloading ? "Downloading…" : "Download PDF" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="isInvoiceModalOpen && !isCapturing"
+  class="modal-backdrop fade show"
+></div>
