@@ -14,6 +14,17 @@ export interface Shipment {
   TrackingNumber: string;
 }
 
+export interface ShippingAddress {
+  FirstName?: string;
+  LastName?: string;
+  AddressLine1?: string;
+  AddressLine2?: string;
+  City?: string;
+  State?: string;
+  PostalCode?: string;
+  Country?: string;
+}
+
 export interface Order {
   _id: string;
   TotalAmount: number;
@@ -22,4 +33,5 @@ export interface Order {
   DeliveryStatus: string;
   Products: Product[];
   Shipments?: Shipment[];
+  ShippingAddress?: ShippingAddress;
 }

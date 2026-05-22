@@ -45,7 +45,7 @@ export class CartService {
     private userService: UserService,
     private genericService: GenericService,
     private store: Store,
-    private router: Router
+    private router: Router,
   ) {}
 
   handleOpenCartSidebar() {
@@ -66,8 +66,8 @@ export class CartService {
             return this.genericService.getObservable(url).pipe(
               tap(() =>
                 this.toastrService.warning(
-                  `${payload.ProductName} exists in the cart`
-                )
+                  `${payload.ProductName} exists in the cart`,
+                ),
               ),
               catchError(() => {
                 // If item is not found in the cart, add it
@@ -80,19 +80,19 @@ export class CartService {
                   .pipe(
                     tap(() => {
                       this.toastrService.success(
-                        `${payload.ProductName} added to cart`
+                        `${payload.ProductName} added to cart`,
                       );
                       this.store.dispatch(loadCart()); // Dispatch action to reload cart
-                    })
+                    }),
                   );
-              })
+              }),
             );
           } else {
             // Guest user: keep the cart in session storage instead of forcing login
             this.addGuestCartProduct(payload);
             return EMPTY;
           }
-        })
+        }),
       )
       .subscribe({
         error: (err) => {
@@ -127,7 +127,7 @@ export class CartService {
       {
         total: 0,
         quantity: 0,
-      }
+      },
     );
   }
 
@@ -141,11 +141,11 @@ export class CartService {
         }
         return cartTotal;
       },
-      { total: 0, quantity: 0 }
+      { total: 0, quantity: 0 },
     );
   }
 
-  // Subtotal (platform fee already baked into prices) + extra charges, plus the
+  // Subtotal (platform fee already baked into prices) + Platform charges, plus the
   // grand total to pay. GST is computed but excluded from the total for now.
   computeCheckoutSummary(cartItems: any) {
     const subtotal = this.computeCartTotal(cartItems).total;
@@ -199,13 +199,13 @@ export class CartService {
             this.genericService.deleteObservable(url).subscribe({
               next: () => {
                 this.toastrService.success(
-                  `${payload.ProductName} removed from cart`
+                  `${payload.ProductName} removed from cart`,
                 );
                 this.store.dispatch(loadCart());
               },
               error: () => {
                 this.toastrService.error(
-                  `${payload.ProductName} error removing from cart`
+                  `${payload.ProductName} error removing from cart`,
                 );
               },
             });
@@ -249,7 +249,7 @@ export class CartService {
 
   private removeGuestCartProduct(payload: any) {
     const guestCart = this.getGuestCart().filter(
-      (p: any) => p.ProductID !== payload._id && p._id !== payload._id
+      (p: any) => p.ProductID !== payload._id && p._id !== payload._id,
     );
     this.saveGuestCart(guestCart);
     this.toastrService.success(`${payload.ProductName} removed from cart`);
@@ -268,7 +268,7 @@ export class CartService {
           UserID: userId,
           ProductID: item.ProductID || item._id,
         })
-        .pipe(catchError(() => of(null)))
+        .pipe(catchError(() => of(null))),
     );
     forkJoin(requests).subscribe(() => {
       sessionStorage.removeItem(this.GUEST_CART_KEY);
@@ -279,7 +279,7 @@ export class CartService {
   // clear cart
   clear_cart() {
     const confirmMsg = window.confirm(
-      'Are you sure deleted your all cart items ?'
+      'Are you sure deleted your all cart items ?',
     );
     if (confirmMsg) {
       state.cart_products = [];
