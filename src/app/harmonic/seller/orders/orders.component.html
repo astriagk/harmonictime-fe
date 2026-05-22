@@ -2,12 +2,21 @@
 
 <section class="order-info container">
   <header
+    *ngIf="orders.length > 0"
     class="order-info__header d-flex justify-content-between align-items-center pt-40"
   >
     <h2 class="order-info__title">My Orders</h2>
   </header>
 
-  <div class="order-list white-bg table-responsive pt-40">
+  <app-empty-state
+    *ngIf="orders.length === 0"
+    message="No Orders Found"
+  ></app-empty-state>
+
+  <div
+    *ngIf="orders.length > 0"
+    class="order-list white-bg table-responsive pt-40"
+  >
     <table class="table">
       <thead>
         <tr>
@@ -66,7 +75,10 @@
       </tbody>
     </table>
   </div>
-  <div class="order__info-btn d-flex justify-content-end mb-20">
+  <div
+    *ngIf="orders.length > 0"
+    class="order__info-btn d-flex justify-content-end mb-20"
+  >
     <app-pagination
       [data]="orders"
       [paginate]="paginate"

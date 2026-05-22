@@ -23,6 +23,7 @@ import { HomeSevenTestimonialComponent } from './components/testimonial/home-sev
 import { VideoPopupComponent } from './components/modals/video-popup/video-popup.component';
 import { BreadcrumbOneComponent } from './components/breadcrumb/breadcrumb-one/breadcrumb-one.component';
 import { PaginationComponent } from './ui/pagination/pagination.component';
+import { EmptyStateComponent } from './ui/empty-state/empty-state.component';
 import { ProductDetailsUpperComponent } from './components/product-details-upper/product-details-upper.component';
 import { ReviewFormComponent } from './components/forms/review-form/review-form.component';
 import { BlogSidebarComponent } from './components/blogs/blog-sidebar/blog-sidebar.component';
@@ -63,6 +64,7 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
     VideoPopupComponent,
     BreadcrumbOneComponent,
     PaginationComponent,
+    EmptyStateComponent,
     ProductDetailsUpperComponent,
     ReviewFormComponent,
     BlogSidebarComponent,
@@ -99,6 +101,7 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
     VideoPopupComponent,
     BreadcrumbOneComponent,
     PaginationComponent,
+    EmptyStateComponent,
     ProductDetailsUpperComponent,
     ReviewFormComponent,
     BlogSidebarComponent,
