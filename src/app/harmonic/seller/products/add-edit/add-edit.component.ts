@@ -25,8 +25,7 @@ import {
   UPDATE_PRODUCT_DETAILS,
   POST_UPLOAD_IMAGES,
   POST_PRODUCT_IMAGES,
-  DELETE_IMAGE_S3,
-  DELETE_IMAGE_DB,
+  UPDATE_PRODUCT_IMAGE,
   CREATE_BRAND,
   CREATE_CATEGORY,
   CREATE_COLLECTION,
@@ -63,8 +62,9 @@ interface SelectOption {
 }
 
 interface UploadedImage {
-  file: File;
+  file?: File;
   url: string;
+  isPrimary?: boolean;
 }
 
 interface LookupConfig {
@@ -105,8 +105,14 @@ export class AddEditComponent implements OnInit {
   // Component state
   isLinear = true;
   isEditing = false;
+  // True while an existing product is being fetched in edit mode, so the form
+  // shows skeletons instead of an empty stepper.
+  isLoadingProduct = false;
   productId?: string;
   uploadedImages: UploadedImage[] = [];
+  // IDs of already-saved images the seller removed; sent on update so the
+  // backend deletes them. New (unsaved) images just drop from the array.
+  removedImageIds: string[] = [];
   errorMessage = '';
 
   // Dropdown options
@@ -247,6 +253,7 @@ export class AddEditComponent implements OnInit {
     private genericService: GenericService,
     private toastrService: ToastrService,
     private store: Store,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -348,8 +355,10 @@ export class AddEditComponent implements OnInit {
   private async loadProductData(): Promise<void> {
     if (!this.productId) return;
     try {
+      this.isLoadingProduct = true;
       const url = GET_PRODUCT_BY_ID + `${this.productId}`;
-      this.genericService.getObservable(url).subscribe((response) => {
+      this.genericService.getObservable(url).subscribe({
+        next: (response) => {
         const data = response?.data[0];
         this.productData = response?.data[0];
         this.basicProductInformation.setValue({
@@ -386,13 +395,21 @@ export class AddEditComponent implements OnInit {
         });
 
         this.uploadedImages = data.Images.map((el: any) => {
-          return { url: el.ImageURL, ...el };
+          return { url: el.ImageURL, isPrimary: !!el.IsPrimary, ...el };
         });
+        this.ensurePrimaryImage();
+          this.isLoadingProduct = false;
+        },
+        error: (err) => {
+          console.error('Error loading product:', err);
+          this.isLoadingProduct = false;
+        },
       });
       // Example of loading product data
       // const product = await this.productService.getProduct(this.productId);
       // this.patchFormValues(product);
     } catch (error) {
+      this.isLoadingProduct = false;
       console.error('Error loading product:', error);
       // Handle error appropriately
     }
@@ -473,6 +490,8 @@ export class AddEditComponent implements OnInit {
             file,
             url: e.target.result as string,
           });
+          // Guarantee one image is always flagged primary (defaults to first).
+          this.ensurePrimaryImage();
         }
       };
       reader.readAsDataURL(file);
@@ -482,31 +501,46 @@ export class AddEditComponent implements OnInit {
   }
 
   removeImage(image: any, index: number): void {
-    if (image.key) {
-      const s3DeleteUrl = DELETE_IMAGE_S3;
-      const dbDeleteUrl = `${DELETE_IMAGE_DB}${image._id}`;
-
-      const deleteS3Payload = { imageUrl: image.key };
-
-      this.genericService
-        .deletePayloadObservable(s3DeleteUrl, deleteS3Payload)
-        .subscribe({
-          next: () => {
-            this.genericService.deleteObservable(dbDeleteUrl).subscribe({
-              next: () => {
-                this.uploadedImages.splice(index, 1);
-                this.toastrService.success('Image deleted successfully!');
-              },
-              error: () =>
-                this.toastrService.error('Failed to delete image from DB!'),
-            });
-          },
-          error: () =>
-            this.toastrService.error('Failed to delete image from S3!'),
-        });
-    } else {
-      this.uploadedImages.splice(index, 1);
+    // Already-saved images carry an _id: defer their deletion to the update
+    // call by collecting the id (sent as RemovedImageIDs). New images that were
+    // never persisted just drop from the local array.
+    if (image._id) {
+      this.removedImageIds.push(image._id);
     }
+    this.uploadedImages.splice(index, 1);
+    // Removing the primary promotes the next remaining image.
+    this.ensurePrimaryImage();
+  }
+
+  /** Mark a single image as the primary (the one shown first), clearing others. */
+  setPrimaryImage(index: number): void {
+    this.uploadedImages.forEach((img, i) => (img.isPrimary = i === index));
+  }
+
+  /**
+   * Ensure exactly one image is flagged primary. If the seller hasn't chosen
+   * one (e.g. after the first upload or after deleting the current primary),
+   * the first image becomes primary by default.
+   */
+  private ensurePrimaryImage(): void {
+    if (this.uploadedImages.length === 0) return;
+    if (!this.uploadedImages.some((img) => img.isPrimary)) {
+      this.uploadedImages[0].isPrimary = true;
+    }
+  }
+
+  /**
+   * Map freshly uploaded URLs (returned in the same order the files were
+   * appended) onto the IsPrimary flag the seller picked for each new image.
+   */
+  private buildImageUrlsPayload(
+    uploadedUrls: string[],
+  ): { url: string; isPrimary: boolean }[] {
+    const newImages = this.uploadedImages.filter((img) => img.file);
+    return uploadedUrls.map((url, idx) => ({
+      url,
+      isPrimary: !!newImages[idx]?.isPrimary,
+    }));
   }
 
   // Convenience accessor for the template.
@@ -698,11 +732,15 @@ export class AddEditComponent implements OnInit {
       RecipientID: productData.recipientId,
     };
 
+    // Captured from the first response so we can open the new product's details.
+    let newProductId: string | undefined;
+
     this.genericService
       .postObservable(this.CREATE_PRODUCT_URL, productPayload) // First API call
       .pipe(
         concatMap((response) => {
           const productId = response?.data?.insertedId;
+          newProductId = productId;
 
           // Prepare the payloads for the next calls
           const productDetailsPayload = {
@@ -743,8 +781,8 @@ export class AddEditComponent implements OnInit {
               concatMap((imageResponse) => {
                 const imagesPayload = {
                   ProductID: productId,
-                  ImageURLs: (imageResponse?.data?.urls ?? []).map(
-                    (url: string) => ({ url }),
+                  ImageURLs: this.buildImageUrlsPayload(
+                    imageResponse?.data?.urls ?? [],
                   ),
                 };
                 return this.genericService
@@ -780,12 +818,20 @@ export class AddEditComponent implements OnInit {
         next: (response) => {
           this.toastrService.success('Product created successfully !');
           this.resetForm();
+          if (newProductId) {
+            this.goToProductDetails(newProductId);
+          }
         },
         error: (err) => {
           console.error('Error creating product or related details:', err);
           this.toastrService.error('Error creating product or related details');
         },
       });
+  }
+
+  // Open the seller product-details page for the given product.
+  private goToProductDetails(productId: string): void {
+    this.router.navigate(['/seller/product-details', productId]);
   }
 
   resetForm() {
@@ -795,12 +841,13 @@ export class AddEditComponent implements OnInit {
     this.deliveryAndReturns.reset();
     this.media.reset();
     this.uploadedImages = [];
+    this.removedImageIds = [];
   }
 
   updateProduct(userId: string, productData: any, formData: any) {
     const productId = this.productData._id;
 
-    const productPayload = {
+    const productPayload: Record<string, any> = {
       // UserID: userId,
       ProductName: productData.productName,
       BrandID: productData.brandId,
@@ -809,6 +856,11 @@ export class AddEditComponent implements OnInit {
       Price: productData.price,
       RecipientID: productData.recipientId,
     };
+
+    // Tell the backend which already-saved images to delete.
+    if (this.removedImageIds.length) {
+      productPayload['RemovedImageIDs'] = this.removedImageIds;
+    }
 
     const productDetailsPayload = {
       DialColorID: productData.dialColorId,
@@ -838,7 +890,9 @@ export class AddEditComponent implements OnInit {
     // on user edits, not on the setValue() performed while loading the product.
     const updateRequests: Observable<any>[] = [];
 
-    if (this.basicProductInformation.dirty) {
+    // Fire the product PUT when basic info changed OR images were removed
+    // (RemovedImageIDs rides along on this same payload).
+    if (this.basicProductInformation.dirty || this.removedImageIds.length) {
       updateRequests.push(
         this.genericService.putObservable(`${PRODUCT}/${productId}`, productPayload),
       );
@@ -867,6 +921,20 @@ export class AddEditComponent implements OnInit {
         ),
       );
     }
+
+    // Changing the primary on an already-saved image isn't a form edit, so it
+    // needs an explicit PUT. Only send images whose flag actually changed
+    // (e.g. the new primary and the one it replaced).
+    this.uploadedImages.forEach((image: any) => {
+      if (image._id && !!image.isPrimary !== !!image.IsPrimary) {
+        updateRequests.push(
+          this.genericService.putObservable(
+            `${UPDATE_PRODUCT_IMAGE}${image._id}`,
+            { IsPrimary: !!image.isPrimary },
+          ),
+        );
+      }
+    });
 
     // Keep each request independent so one failure can't cancel the siblings
     // (forkJoin unsubscribes/aborts the rest the moment any source errors).
@@ -900,9 +968,7 @@ export class AddEditComponent implements OnInit {
           switchMap((response) => {
             const imagesPayload = {
               ProductID: productId,
-              ImageURLs: (response?.data?.urls ?? []).map((url: string) => ({
-                url,
-              })),
+              ImageURLs: this.buildImageUrlsPayload(response?.data?.urls ?? []),
             };
             return this.genericService.postObservable(
               POST_PRODUCT_IMAGES,
@@ -928,6 +994,7 @@ export class AddEditComponent implements OnInit {
       .subscribe(() => {
         this.toastrService.success('Product updated successfully!');
         this.resetForm();
+        this.goToProductDetails(productId);
       });
   }
 }

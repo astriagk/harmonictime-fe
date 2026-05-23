@@ -11,7 +11,7 @@
         <nav>
           <div class="nav nav-tabs" id="product-details" role="tablist">
             <a
-              *ngFor="let img of product.Images"
+              *ngFor="let img of orderedImages"
               class="nav-item nav-link mb-1 cursor-pointer"
               [class.active]="img.ImageURL === productService.activeImg"
             >
@@ -80,14 +80,14 @@
           <span>Manufacturer Product Number :</span>
           <span
             ><a class="cursor-pointer">{{
-              product.Details.ManufacturerProductNumber
+              product.Details.ManufacturerProductNumber | dash
             }}</a></span
           >
         </div>
         <div class="product__tag mb-25">
           <span>Color :</span>
           <span>
-            <a class="cursor-pointer">{{ product.Details.DialColorName }}</a>
+            <a class="cursor-pointer">{{ product.Details.DialColorName | dash }}</a>
           </span>
         </div>
       </div>

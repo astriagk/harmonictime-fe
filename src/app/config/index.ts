@@ -73,6 +73,8 @@ export const POST_PRODUCT_IMAGES = `${baseUrl}/product-images`;
 export const GET_PRODUCT_IMAGES = `${baseUrl}/product-images/product/`;
 // append the image id
 export const GET_PRODUCT_IMAGE_BY_ID = `${baseUrl}/product-images/`;
+// update a single image (e.g. its IsPrimary flag); append the image id
+export const UPDATE_PRODUCT_IMAGE = `${baseUrl}/product-images/`;
 export const DELETE_IMAGE_DB = `${baseUrl}/product-images/`;
 
 // reviews (append the product id to GET)

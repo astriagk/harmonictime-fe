@@ -5,7 +5,18 @@
 
 <section class="product-insert-area pt-100 pb-100">
   <div class="container">
-    <mat-vertical-stepper [linear]="isLinear" #stepper>
+    <!-- Edit mode: show skeleton rows while the product is being fetched -->
+    <div *ngIf="isLoadingProduct" class="row">
+      <div class="col-xl-8 col-lg-10">
+        <app-skeleton type="profile-row" [count]="8"></app-skeleton>
+      </div>
+    </div>
+
+    <mat-vertical-stepper
+      *ngIf="!isLoadingProduct"
+      [linear]="isLinear"
+      #stepper
+    >
       <mat-step [stepControl]="basicProductInformation">
         <form [formGroup]="basicProductInformation">
           <ng-template matStepLabel>Basic Product Information</ng-template>
@@ -579,7 +590,10 @@
                   class="col-auto m-2"
                   *ngFor="let img of uploadedImages; let i = index"
                 >
-                  <div class="position-relative image-container">
+                  <div
+                    class="position-relative image-container"
+                    [class.is-primary]="img.isPrimary"
+                  >
                     <img
                       [src]="img.url"
                       alt="product-img"
@@ -591,6 +605,20 @@
                     >
                       <i class="fa fa-times"></i>
                     </a>
+                    <span *ngIf="img.isPrimary" class="primary-badge"
+                      >Primary</span
+                    >
+                  </div>
+                  <div class="text-center mt-2">
+                    <span *ngIf="img.isPrimary" class="primary-current"
+                      >Primary image</span
+                    >
+                    <a
+                      *ngIf="!img.isPrimary"
+                      class="cursor-pointer set-primary-link"
+                      (click)="setPrimaryImage(i)"
+                      >Set as primary</a
+                    >
                   </div>
                 </div>
               </div>

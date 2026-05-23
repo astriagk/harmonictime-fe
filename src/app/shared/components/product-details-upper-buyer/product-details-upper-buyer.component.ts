@@ -15,6 +15,10 @@ import { CartService } from '../../services/cart.service';
 import { Store } from '@ngrx/store';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
 import { ReviewFormComponent } from '../forms/review-form/review-form.component';
+import {
+  getPrimaryImageUrl,
+  sortImagesPrimaryFirst,
+} from '../../utils/product-images';
 
 @Component({
   selector: 'app-product-details-upper-buyer',
@@ -72,8 +76,13 @@ export class ProductDetailsUpperBuyerComponent
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.product) {
-      this.productService.activeImg = this.product.Images[0].ImageURL;
+      this.productService.activeImg = getPrimaryImageUrl(this.product.Images);
     }
+  }
+
+  // Thumbnail strip with the primary image first.
+  get orderedImages(): any[] {
+    return sortImagesPrimaryFirst(this.product?.Images);
   }
 
   isItemInCart(item: any): boolean {

@@ -43,6 +43,8 @@ import { BreadcrumbTwoComponent } from './components/breadcrumb/breadcrumb-two/b
 import { ProductDetailsUpperSellerComponent } from './components/product-details-upper-seller/product-details-upper-seller.component';
 import { ProductDetailsUpperBuyerComponent } from './components/product-details-upper-buyer/product-details-upper-buyer.component';
 import { PlatformPricePipe } from './pipes/platform-price.pipe';
+import { PrimaryImagePipe, SecondaryImagePipe } from './pipes/primary-image.pipe';
+import { DashPipe } from './pipes/dash.pipe';
 
 @NgModule({
   declarations: [
@@ -86,6 +88,9 @@ import { PlatformPricePipe } from './pipes/platform-price.pipe';
     ProductDetailsUpperSellerComponent,
     ProductDetailsUpperBuyerComponent,
     PlatformPricePipe,
+    PrimaryImagePipe,
+    SecondaryImagePipe,
+    DashPipe,
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -122,6 +127,9 @@ import { PlatformPricePipe } from './pipes/platform-price.pipe';
     ProductDetailsUpperSellerComponent,
     ProductDetailsUpperBuyerComponent,
     PlatformPricePipe,
+    PrimaryImagePipe,
+    SecondaryImagePipe,
+    DashPipe,
   ],
 })
 export class SharedModule {}
