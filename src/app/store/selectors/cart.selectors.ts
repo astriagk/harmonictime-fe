@@ -16,6 +16,12 @@ export const selectCartError = createSelector(
   (state) => state.error
 );
 
+// Select Loading State
+export const selectCartLoading = createSelector(
+  selectCartState,
+  (state) => state.loading
+);
+
 export const isProductInCart = (productId: string) =>
   createSelector(selectCartItems, (cartItems) =>
     cartItems.some((prd) => prd.ProductID === productId)

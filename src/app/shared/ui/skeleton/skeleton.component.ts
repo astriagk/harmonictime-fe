@@ -5,6 +5,7 @@ export type SkeletonType =
   | 'product-detail'
   | 'list-row'
   | 'table-row'
+  | 'profile-row'
   | 'blog-card'
   | 'hero'
   | 'text';

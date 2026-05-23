@@ -89,6 +89,15 @@
     border-bottom: 1px solid $border;
   }
 
+  // Mirrors .profile__info-item (account profile fields): 30px padding + divider.
+  &--profile-row {
+    padding: 30px 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid $border;
+    }
+  }
+
   &--blog-card {
     margin-bottom: 40px;
   }

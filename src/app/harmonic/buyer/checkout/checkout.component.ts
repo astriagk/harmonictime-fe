@@ -26,7 +26,10 @@ import {
   selectUserError,
 } from 'src/app/store/selectors/user.selectors';
 import { Store } from '@ngrx/store';
-import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
+import {
+  selectCartItems,
+  selectCartLoading,
+} from 'src/app/store/selectors/cart.selectors';
 import { loadCart } from 'src/app/store/actions/cart.actions';
 import { Router } from '@angular/router';
 import { environment } from '@env/environment';
@@ -47,6 +50,7 @@ export class CheckoutComponent {
   public countries = countries;
   public userData: any = {};
   public cartItems: any = [];
+  public isLoading = true; // Drives the checkout loading skeleton
 
   // Returning customer login
   public loginForm!: FormGroup;
@@ -109,6 +113,9 @@ export class CheckoutComponent {
         this.cartItems = [];
       }
     });
+    this.store
+      .select(selectCartLoading)
+      .subscribe((loading) => (this.isLoading = loading));
     this.checkoutForm = new FormGroup({
       firstName: new FormControl(null, Validators.required),
       lastName: new FormControl(null, Validators.required),

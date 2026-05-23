@@ -2,7 +2,10 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { UserService } from '@shared/services/user.service';
 import { CartService } from 'src/app/shared/services/cart.service';
-import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
+import {
+  selectCartItems,
+  selectCartLoading,
+} from 'src/app/store/selectors/cart.selectors';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
 @Component({
@@ -15,6 +18,7 @@ export class CartComponent {
   shipCost: number = 0;
   userData: any = {};
   cartItems: any = [];
+  isLoading = true; // Drives the cart loading skeleton
 
   constructor(
     public cartService: CartService,
@@ -35,6 +39,9 @@ export class CartComponent {
         this.cartItems = [];
       }
     });
+    this.store
+      .select(selectCartLoading)
+      .subscribe((loading) => (this.isLoading = loading));
   }
 
   handleCouponSubmit() {

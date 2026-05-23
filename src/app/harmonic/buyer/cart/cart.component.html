@@ -1,14 +1,19 @@
 <app-breadcrumb-two title="Cart" subtitle="Cart"></app-breadcrumb-two>
 <section class="cart-area pt-100 pb-100">
   <div class="container">
+    <!-- Loading: shimmer placeholders for the cart rows -->
+    <div *ngIf="isLoading" class="table-content table-responsive">
+      <app-skeleton type="table-row" [count]="3"></app-skeleton>
+    </div>
+
     <app-empty-state
-      *ngIf="cartItems.length === 0"
+      *ngIf="!isLoading && cartItems.length === 0"
       message="No Cart Items Found"
       actionLabel="Continue Shopping"
       actionLink="/buyer/products"
     ></app-empty-state>
 
-    <div *ngIf="cartItems.length > 0" class="row">
+    <div *ngIf="!isLoading && cartItems.length > 0" class="row">
       <div class="col-12">
         <div class="table-content table-responsive">
           <table class="table">
