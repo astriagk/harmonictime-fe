@@ -1,5 +1,8 @@
 <app-breadcrumb-two title="Checkout" subtitle="Checkout"></app-breadcrumb-two>
-<section class="coupon-area pt-100 pb-30" *ngIf="cartItems.length > 0">
+<section
+  class="coupon-area pt-100 pb-30"
+  *ngIf="!isLoading && cartItems.length > 0"
+>
   <div class="container">
     <div class="row">
       <div class="col-md-6">
@@ -174,8 +177,22 @@
 </section>
 <section class="checkout-area pb-70">
   <div class="container">
+    <!-- Loading: shimmer placeholders for the billing form + order summary -->
+    <div *ngIf="isLoading" class="row">
+      <div class="col-lg-6">
+        <div class="checkbox-form">
+          <app-skeleton type="text" [count]="6"></app-skeleton>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="your-order mb-30">
+          <app-skeleton type="table-row" [count]="4"></app-skeleton>
+        </div>
+      </div>
+    </div>
+
     <div
-      *ngIf="cartItems.length === 0; else checkoutBlock"
+      *ngIf="!isLoading && cartItems.length === 0"
       class="text-center pt-80 pb-30"
     >
       <h3 class="py-2">No items found in cart to checkout</h3>
@@ -184,7 +201,7 @@
       </a>
     </div>
 
-    <ng-template #checkoutBlock>
+    <ng-container *ngIf="!isLoading && cartItems.length > 0">
       <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
         <div class="row">
           <div class="col-lg-6">
@@ -392,13 +409,12 @@
               <div class="different-address">
                 <div class="order-notes">
                   <div class="checkout-form-list">
-                    <label>Order Notes</label>
                     <textarea
                       formControlName="orderNote"
                       id="checkout-mess"
                       cols="30"
                       rows="10"
-                      placeholder="Notes about your order, e.g. special notes for delivery."
+                      placeholder="Notes about your order, e.g. special notes for delivery. (optional)"
                     ></textarea>
                   </div>
                 </div>
@@ -526,6 +542,6 @@
           </div>
         </div>
       </form>
-    </ng-template>
+    </ng-container>
   </div>
 </section>

@@ -32,6 +32,14 @@
     </div>
   </ng-container>
 
+  <!-- Profile field row (account: small label line + value line, divided) -->
+  <ng-container *ngSwitchCase="'profile-row'">
+    <div class="skeleton skeleton--profile-row" *ngFor="let i of items">
+      <div class="sk sk--line sk--line-sm"></div>
+      <div class="sk sk--line sk--line-md mt-10"></div>
+    </div>
+  </ng-container>
+
   <!-- Plain table row (seller products / orders) -->
   <ng-container *ngSwitchCase="'table-row'">
     <div class="skeleton skeleton--table-row" *ngFor="let i of items">

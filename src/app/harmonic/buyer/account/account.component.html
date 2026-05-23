@@ -122,25 +122,34 @@
                 </div>
 
                 <div class="profile__info-wrapper white-bg">
-                  <div class="profile__info-item" *ngIf="userData?.name">
-                    <p>Name</p>
-                    <h4>{{ userData?.name }}</h4>
-                  </div>
-                  <div class="profile__info-item">
-                    <p>Email</p>
-                    <h4>
-                      <a
-                        href="{{ mail }}"
-                        class="__cf_email__"
-                        data-cfemail="94fdfaf2fbd4f1f0e1fff1e6baf7fbf9"
-                        >{{ userData?.email }}</a
-                      >
-                    </h4>
-                  </div>
-                  <div class="profile__info-item" *ngIf="userData?.phone">
-                    <p>Phone</p>
-                    <h4>{{ userData?.phone }}</h4>
-                  </div>
+                  <!-- Loading: shimmer placeholders for the profile fields -->
+                  <app-skeleton
+                    *ngIf="profileLoading"
+                    type="profile-row"
+                    [count]="3"
+                  ></app-skeleton>
+
+                  <ng-container *ngIf="!profileLoading">
+                    <div class="profile__info-item" *ngIf="userData?.name">
+                      <p>Name</p>
+                      <h4>{{ userData?.name }}</h4>
+                    </div>
+                    <div class="profile__info-item">
+                      <p>Email</p>
+                      <h4>
+                        <a
+                          href="{{ mail }}"
+                          class="__cf_email__"
+                          data-cfemail="94fdfaf2fbd4f1f0e1fff1e6baf7fbf9"
+                          >{{ userData?.email }}</a
+                        >
+                      </h4>
+                    </div>
+                    <div class="profile__info-item" *ngIf="userData?.phone">
+                      <p>Phone</p>
+                      <h4>{{ userData?.phone }}</h4>
+                    </div>
+                  </ng-container>
                 </div>
               </div>
             </div>

@@ -14,7 +14,10 @@ import {
   selectOrders,
   selectOrdersLoading,
 } from 'src/app/store/selectors/orders.selectors';
-import { selectUserData } from 'src/app/store/selectors/user.selectors';
+import {
+  selectUserData,
+  selectUserLoading,
+} from 'src/app/store/selectors/user.selectors';
 
 @Component({
   selector: 'app-account',
@@ -27,6 +30,7 @@ export class AccountComponent {
   public cartItems: any = [];
   public orders: Order[] = [];
   public ordersLoading = false; // Drives the orders-tab skeleton
+  public profileLoading = false; // Drives the profile-info skeleton
 
   // Company info shown in the invoice header
   public readonly company = companyDetails;
@@ -176,5 +180,8 @@ export class AccountComponent {
     this.store
       .select(selectOrdersLoading)
       .subscribe((loading) => (this.ordersLoading = loading));
+    this.store
+      .select(selectUserLoading)
+      .subscribe((loading) => (this.profileLoading = loading));
   }
 }
