@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { VERIFY_EMAIL } from '@config/index';
 import { GenericService } from '@shared/services/generic.service';
 import { ToastrService } from 'ngx-toastr';
@@ -18,8 +17,7 @@ export class ForgotPasswordComponent {
 
   constructor(
     private toastrService: ToastrService,
-    public genericService: GenericService,
-    private router: Router
+    public genericService: GenericService
   ) {}
 
   ngOnInit() {
@@ -56,9 +54,5 @@ export class ForgotPasswordComponent {
         );
       },
     });
-  }
-
-  goToReset() {
-    this.router.navigate(['/auth/reset-password']);
   }
 }

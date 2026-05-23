@@ -57,8 +57,10 @@ export class WishlistService {
 
           if (data) {
             if (existing) {
-              // Already in wishlist -> remove it on the server (existing._id is the row id)
-              const url = DELETE_WISHLIST_ITEM + `${existing._id}`;
+              // Already in wishlist -> remove it on the server. The row id lives
+              // on WishlistID after normalization (existing._id is the product id).
+              const url =
+                DELETE_WISHLIST_ITEM + `${existing.WishlistID ?? existing._id}`;
               return this.genericService.deleteObservable(url).pipe(
                 tap(() => {
                   this.toastrService.error(
@@ -106,9 +108,12 @@ export class WishlistService {
       .subscribe((state: any) => {
         const user = state?.user?.data;
         if (user) {
-          // Logged-in user: delete the wishlist row on the server (payload._id is the row id)
-          if (payload._id) {
-            const url = DELETE_WISHLIST_ITEM + `${payload._id}`;
+          // Logged-in user: delete the wishlist row on the server. Items are
+          // normalized so the row id lives on WishlistID (payload._id is the
+          // product id); fall back to _id for older shapes.
+          const rowId = payload.WishlistID ?? payload._id;
+          if (rowId) {
+            const url = DELETE_WISHLIST_ITEM + `${rowId}`;
             this.genericService.deleteObservable(url).subscribe({
               next: () => {
                 this.toastrService.error(

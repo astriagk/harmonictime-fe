@@ -108,6 +108,9 @@ export class AddEditComponent implements OnInit {
   // True while an existing product is being fetched in edit mode, so the form
   // shows skeletons instead of an empty stepper.
   isLoadingProduct = false;
+  // True while a create/update request is in flight, so the submit button shows
+  // a loading state and can't be double-clicked.
+  isSubmitting = false;
   productId?: string;
   uploadedImages: UploadedImage[] = [];
   // IDs of already-saved images the seller removed; sent on update so the
@@ -125,6 +128,11 @@ export class AddEditComponent implements OnInit {
     { id: 'Yes', name: 'Yes' },
     { id: 'No', name: 'No' },
     { id: 'Both', name: 'Both' },
+  ];
+  // Guarantee is a simple Yes/No choice.
+  guaranteeOptions: any = [
+    { id: 'Yes', name: 'Yes' },
+    { id: 'No', name: 'No' },
   ];
   movements: Movement[] = [];
   strapMaterials: StrapMaterial[] = [];
@@ -268,6 +276,8 @@ export class AddEditComponent implements OnInit {
   private initializeForms(): void {
     this.basicProductInformation = this.fb.group({
       productName: ['', Validators.required],
+      // ng-select treats '' as a selected value (adds .ng-has-value and hides
+      // the placeholder); use null so "- Please select -" shows on a fresh form.
       brandId: ['', Validators.required],
       categoryId: ['', Validators.required],
       collectionId: ['', Validators.required],
@@ -276,6 +286,7 @@ export class AddEditComponent implements OnInit {
     });
 
     this.productInformation = this.fb.group({
+      // ng-select-bound controls use '' (not '') so the placeholder shows.
       dialColorId: ['', Validators.required],
       diameter: ['', Validators.required],
       waterResistant: [''],
@@ -283,7 +294,7 @@ export class AddEditComponent implements OnInit {
       strapMaterialId: ['', Validators.required],
       caseMaterialId: ['', Validators.required],
       watchMarkersId: ['', Validators.required],
-      manufacturerProductNumber: [''],
+      manufacturerProductNumber: ['', Validators.required],
       guarantee: [''],
       deliveryOptionId: [''],
     });
@@ -359,45 +370,45 @@ export class AddEditComponent implements OnInit {
       const url = GET_PRODUCT_BY_ID + `${this.productId}`;
       this.genericService.getObservable(url).subscribe({
         next: (response) => {
-        const data = response?.data[0];
-        this.productData = response?.data[0];
-        this.basicProductInformation.setValue({
-          productName: data.ProductName,
-          brandId: data.Details.BrandId,
-          categoryId: data.Details.CategoryId,
-          collectionId: data.Details.CollectionId,
-          price: data.Price,
-          recipientId: data.Details.RecipientId,
-        });
+          const data = response?.data[0];
+          this.productData = response?.data[0];
+          this.basicProductInformation.setValue({
+            productName: data.ProductName,
+            brandId: data.Details.BrandId,
+            categoryId: data.Details.CategoryId,
+            collectionId: data.Details.CollectionId,
+            price: data.Price,
+            recipientId: data.Details.RecipientId,
+          });
 
-        this.productInformation.setValue({
-          dialColorId: data.Details.DialColorId,
-          diameter: data.Details.Diameter,
-          waterResistant: data.Details.WaterResistant,
-          movementId: data.Details.MovementId,
-          strapMaterialId: data.Details.StrapMaterialId,
-          caseMaterialId: data.Details.CaseMaterialId,
-          watchMarkersId: data.Details.WatchMarkerId,
-          manufacturerProductNumber: data.Details.ManufacturerProductNumber,
-          guarantee: data.Details.Guarantee,
-          deliveryOptionId: data.Details.DeliveryOptionID,
-        });
+          this.productInformation.setValue({
+            dialColorId: data.Details.DialColorId,
+            diameter: data.Details.Diameter,
+            waterResistant: data.Details.WaterResistant,
+            movementId: data.Details.MovementId,
+            strapMaterialId: data.Details.StrapMaterialId,
+            caseMaterialId: data.Details.CaseMaterialId,
+            watchMarkersId: data.Details.WatchMarkerId,
+            manufacturerProductNumber: data.Details.ManufacturerProductNumber,
+            guarantee: data.Details.Guarantee,
+            deliveryOptionId: data.Details.DeliveryOptionID,
+          });
 
-        this.productDescription.setValue({
-          shortTitle: data.Description.Title,
-          detailedDescription: data.Description.Content,
-          additionalDescription: data.Description.AdditionalDetails,
-        });
+          this.productDescription.setValue({
+            shortTitle: data.Description.Title,
+            detailedDescription: data.Description.Content,
+            additionalDescription: data.Description.AdditionalDetails,
+          });
 
-        this.deliveryAndReturns.setValue({
-          deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
-          returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
-        });
+          this.deliveryAndReturns.setValue({
+            deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
+            returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
+          });
 
-        this.uploadedImages = data.Images.map((el: any) => {
-          return { url: el.ImageURL, isPrimary: !!el.IsPrimary, ...el };
-        });
-        this.ensurePrimaryImage();
+          this.uploadedImages = data.Images.map((el: any) => {
+            return { url: el.ImageURL, isPrimary: !!el.IsPrimary, ...el };
+          });
+          this.ensurePrimaryImage();
           this.isLoadingProduct = false;
         },
         error: (err) => {
@@ -464,6 +475,14 @@ export class AddEditComponent implements OnInit {
   }
   get watchMarkersId() {
     return this.productInformation.get('watchMarkersId');
+  }
+  get manufacturerProductNumber() {
+    return this.productInformation.get('manufacturerProductNumber');
+  }
+
+  // Leave the add/edit flow and return to the seller's product list.
+  cancel(): void {
+    this.router.navigate(['/seller/product-list']);
   }
 
   onImageUpload(event: Event): void {
@@ -535,11 +554,11 @@ export class AddEditComponent implements OnInit {
    */
   private buildImageUrlsPayload(
     uploadedUrls: string[],
-  ): { url: string; isPrimary: boolean }[] {
+  ): { url: string; IsPrimary: boolean }[] {
     const newImages = this.uploadedImages.filter((img) => img.file);
     return uploadedUrls.map((url, idx) => ({
       url,
-      isPrimary: !!newImages[idx]?.isPrimary,
+      IsPrimary: !!newImages[idx]?.isPrimary,
     }));
   }
 
@@ -556,7 +575,7 @@ export class AddEditComponent implements OnInit {
     this.newLookupName = '';
     // Pre-fill the modal's brand selector with the brand already chosen on the
     // form (only relevant for the Collection modal).
-    this.newLookupBrandId = this.basicProductInformation.value.brandId || '';
+    this.newLookupBrandId = this.basicProductInformation.value.brandId || null;
     this.lookupError = '';
     this.isAddLookupModalOpen = true;
   }
@@ -689,7 +708,11 @@ export class AddEditComponent implements OnInit {
         'Please fill in all required fields and upload at least 2 images';
       return;
     }
+    if (this.isSubmitting) {
+      return;
+    }
 
+    this.isSubmitting = true;
     const formData = new FormData();
 
     // Combine all form values
@@ -718,6 +741,7 @@ export class AddEditComponent implements OnInit {
       console.error('Error submitting form:', error);
       this.errorMessage =
         'An error occurred while saving the product. Please try again.';
+      this.isSubmitting = false;
     }
   }
 
@@ -816,6 +840,7 @@ export class AddEditComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
+          this.isSubmitting = false;
           this.toastrService.success('Product created successfully !');
           this.resetForm();
           if (newProductId) {
@@ -823,6 +848,7 @@ export class AddEditComponent implements OnInit {
           }
         },
         error: (err) => {
+          this.isSubmitting = false;
           console.error('Error creating product or related details:', err);
           this.toastrService.error('Error creating product or related details');
         },
@@ -894,7 +920,10 @@ export class AddEditComponent implements OnInit {
     // (RemovedImageIDs rides along on this same payload).
     if (this.basicProductInformation.dirty || this.removedImageIds.length) {
       updateRequests.push(
-        this.genericService.putObservable(`${PRODUCT}/${productId}`, productPayload),
+        this.genericService.putObservable(
+          `${PRODUCT}/${productId}`,
+          productPayload,
+        ),
       );
     }
     if (this.productInformation.dirty) {
@@ -951,6 +980,7 @@ export class AddEditComponent implements OnInit {
 
     // Nothing was edited and no new images were added — skip the API calls.
     if (safeRequests.length === 0 && !hasNewImages) {
+      this.isSubmitting = false;
       this.toastrService.info('No changes to update');
       return;
     }
@@ -986,12 +1016,14 @@ export class AddEditComponent implements OnInit {
       .pipe(
         switchMap(() => imageUpload$),
         catchError((err) => {
+          this.isSubmitting = false;
           console.error('Error updating product or related details:', err);
           this.toastrService.error('Error updating product or related details');
           throw err;
         }),
       )
       .subscribe(() => {
+        this.isSubmitting = false;
         this.toastrService.success('Product updated successfully!');
         this.resetForm();
         this.goToProductDetails(productId);

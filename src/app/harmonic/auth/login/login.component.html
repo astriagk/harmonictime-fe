@@ -27,12 +27,19 @@
 
             <div class="mb-20">
               <label for="pass">Password <span>**</span></label>
-              <input
-                id="pass"
-                type="password"
-                placeholder="Enter password..."
-                formControlName="password"
-              />
+              <div class="input-wrapper">
+                <input
+                  id="pass"
+                  [type]="isShowPass ? 'text' : 'password'"
+                  placeholder="Enter password..."
+                  formControlName="password"
+                />
+                <i
+                  class="fal"
+                  [ngClass]="isShowPass ? 'fa-eye-slash' : 'fa-eye'"
+                  (click)="handleShowPass()"
+                ></i>
+              </div>
               <span
                 *ngIf=" (password?.hasError('required') && password?.touched) || (password?.errors?.['minlength'] && password?.dirty) || (formSubmitted && !password?.value)"
                 class="text-danger"
@@ -50,7 +57,13 @@
                 <a routerLink="/auth/forgot-password">Lost your password?</a>
               </span>
             </div>
-            <button class="os-btn w-100">Login Now</button>
+            <button
+              type="submit"
+              class="os-btn w-100"
+              [disabled]="isSubmitting"
+            >
+              {{ isSubmitting ? "Logging in..." : "Login Now" }}
+            </button>
             <div class="or-divide"><span>or</span></div>
             <a routerLink="/auth/register" class="os-btn os-btn-black w-100"
               >Register Now</a

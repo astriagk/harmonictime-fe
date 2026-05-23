@@ -208,6 +208,59 @@
             <div class="checkbox-form">
               <h3>Billing Details</h3>
               <div class="row">
+                <!-- Saved addresses: pick one to prefill, or enter a new one -->
+                <div class="col-md-12" *ngIf="savedAddresses.length > 0">
+                  <div class="saved-address">
+                    <div
+                      class="saved-address__head d-flex justify-content-between align-items-center"
+                    >
+                      <label class="saved-address__heading"
+                        >Use a saved address</label
+                      >
+                      <a
+                        *ngIf="selectedAddressId"
+                        class="saved-address__clear cursor-pointer"
+                        (click)="onSelectSavedAddress(null)"
+                        >Clear & enter new</a
+                      >
+                    </div>
+                    <div class="saved-address__grid">
+                      <button
+                        type="button"
+                        class="saved-address__card"
+                        *ngFor="let addr of savedAddresses"
+                        [class.active]="selectedAddressId === addr._id"
+                        (click)="onSelectSavedAddress(addr._id)"
+                      >
+                        <span class="saved-address__top">
+                          <span class="saved-address__name">
+                            {{ addr.FirstName }} {{ addr.LastName }}
+                          </span>
+                          <span
+                            *ngIf="addr.IsDefault"
+                            class="saved-address__badge"
+                            >Default</span
+                          >
+                          <span class="saved-address__check"
+                            ><i class="fa fa-check"></i
+                          ></span>
+                        </span>
+                        <span class="saved-address__lines">
+                          {{ addr.AddressLine1
+                          }}{{
+                            addr.AddressLine2 ? ", " + addr.AddressLine2 : ""
+                          }}<br />
+                          {{ addr.City }}, {{ addr.State }}
+                          {{ addr.PostalCode }}<br />
+                          {{ addr.Country }}
+                          <ng-container *ngIf="addr.Phone"
+                            ><br />{{ addr.Phone }}</ng-container
+                          >
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 <div class="col-md-12">
                   <div class="country-select">
                     <label>Country <span class="required">*</span></label>
@@ -533,8 +586,12 @@
                   </div>
                 </div> -->
                 <div class="order-button-payment mt-20">
-                  <button type="submit" class="os-btn os-btn-black">
-                    Place order
+                  <button
+                    type="submit"
+                    class="os-btn os-btn-black"
+                    [disabled]="placingOrder"
+                  >
+                    {{ placingOrder ? "Processing..." : "Place order" }}
                   </button>
                 </div>
               </div>

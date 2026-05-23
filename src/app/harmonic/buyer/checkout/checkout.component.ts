@@ -13,6 +13,8 @@ import { GenericService } from '@shared/services/generic.service';
 import {
   CHECKOUT_ITEM_ORDER,
   CREATE_PAYMENT_ORDER,
+  GET_ADDRESSES_BY_USER,
+  GET_PRODUCT_BY_ID,
   LOGIN_USER,
   REGISTER_USER,
   UPDATE_PRODUCT,
@@ -51,6 +53,13 @@ export class CheckoutComponent {
   public userData: any = {};
   public cartItems: any = [];
   public isLoading = true; // Drives the checkout loading skeleton
+
+  // Saved addresses for logged-in users — pick one to prefill the billing form.
+  public savedAddresses: any[] = [];
+  public selectedAddressId: string | null = null;
+  private addressesLoadedFor: string | null = null; // guards repeat loads
+
+  public placingOrder = false; // disables Place order while we verify + pay
 
   // Returning customer login
   public loginForm!: FormGroup;
@@ -103,19 +112,8 @@ export class CheckoutComponent {
   public formSubmitted = false;
 
   ngOnInit() {
-    this.store.select(selectUserData).subscribe((state) => {
-      this.userData = state?.user?.data;
-    });
-    this.store.select(selectCartItems).subscribe((state) => {
-      if (state?.length) {
-        this.cartItems = state;
-      } else {
-        this.cartItems = [];
-      }
-    });
-    this.store
-      .select(selectCartLoading)
-      .subscribe((loading) => (this.isLoading = loading));
+    // Build the forms first so the store subscriptions below can safely prefill
+    // them on their initial (synchronous) emission.
     this.checkoutForm = new FormGroup({
       firstName: new FormControl(null, Validators.required),
       lastName: new FormControl(null, Validators.required),
@@ -129,6 +127,29 @@ export class CheckoutComponent {
       orderNote: new FormControl(null),
       email: new FormControl(null, [Validators.required, Validators.email]),
     });
+
+    this.store.select(selectUserData).subscribe((state) => {
+      this.userData = state?.user?.data;
+      const userId = this.userData?._id;
+      if (userId && userId !== this.addressesLoadedFor) {
+        this.addressesLoadedFor = userId;
+        this.loadSavedAddresses(userId);
+        // Default the billing email to the account email if not already set.
+        if (this.userData?.email && !this.checkoutForm?.get('email')?.value) {
+          this.checkoutForm?.patchValue({ email: this.userData.email });
+        }
+      }
+    });
+    this.store.select(selectCartItems).subscribe((state) => {
+      if (state?.length) {
+        this.cartItems = state;
+      } else {
+        this.cartItems = [];
+      }
+    });
+    this.store
+      .select(selectCartLoading)
+      .subscribe((loading) => (this.isLoading = loading));
 
     this.loginForm = new FormGroup({
       email: new FormControl(null, [Validators.required, Validators.email]),
@@ -150,6 +171,77 @@ export class CheckoutComponent {
     );
 
     this.loadRazorpayScript();
+  }
+
+  // Load the user's saved addresses so they can pick one to prefill billing.
+  private loadSavedAddresses(userId: string) {
+    this.genericService
+      .getObservable(`${GET_ADDRESSES_BY_USER}${userId}`)
+      .subscribe({
+        next: (res: any) => {
+          this.savedAddresses = res?.data ?? res ?? [];
+          // Nothing is preselected — the user picks an address (or enters a new
+          // one) themselves.
+        },
+        error: () => {
+          this.savedAddresses = [];
+        },
+      });
+  }
+
+  // Fired when the user picks a saved address from the dropdown. '' = enter a
+  // new address manually (clears the billing fields).
+  onSelectSavedAddress(addressId: string | null) {
+    this.selectedAddressId = addressId || null;
+    if (!addressId) {
+      this.checkoutForm.reset({ country: 'India', email: this.userData?.email ?? null });
+      return;
+    }
+    const addr = this.savedAddresses.find((a) => a._id === addressId);
+    if (addr) {
+      this.applyAddressToForm(addr);
+    }
+  }
+
+  // Map a saved address onto the billing form. Email isn't part of an address,
+  // so it's preserved (defaults to the account email).
+  private applyAddressToForm(addr: any) {
+    this.checkoutForm.patchValue({
+      firstName: addr.FirstName ?? '',
+      lastName: addr.LastName ?? '',
+      country: addr.Country ?? 'India',
+      address: addr.AddressLine1 ?? '',
+      apartment: addr.AddressLine2 ?? '',
+      city: addr.City ?? '',
+      state: addr.State ?? '',
+      zipCode: addr.PostalCode ?? '',
+      phone: addr.Phone ?? '',
+      email: this.checkoutForm.get('email')?.value || this.userData?.email || '',
+    });
+  }
+
+  // Verify every cart product is still purchasable before taking payment.
+  // Returns the names of any products that are no longer available. A product
+  // is treated as unavailable only when the API explicitly says IsAvailable is
+  // false; transient fetch errors are ignored so a network blip can't block an
+  // otherwise valid checkout.
+  private async getUnavailableProducts(): Promise<string[]> {
+    const checks = (this.cartItems as any[]).map(async (item) => {
+      const productId = item?.ProductID ?? item?._id;
+      try {
+        const res: any = await firstValueFrom(
+          this.genericService.getObservable(`${GET_PRODUCT_BY_ID}${productId}`),
+        );
+        const product = res?.data ?? res;
+        return product?.IsAvailable === false
+          ? item?.ProductName ?? 'A product'
+          : null;
+      } catch {
+        return null;
+      }
+    });
+    const results = await Promise.all(checks);
+    return results.filter((name): name is string => !!name);
   }
 
   passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
@@ -279,15 +371,29 @@ export class CheckoutComponent {
     });
   }
 
-  onSubmit() {
+  async onSubmit() {
     this.formSubmitted = true;
-    if (this.checkoutForm.valid) {
-      this.payNow();
-      // this.toastrService.success(`Order successfully`);
+    if (!this.checkoutForm.valid || this.placingOrder) {
+      return;
+    }
 
-      // Reset the form
-      // this.checkoutForm.reset();
-      // this.formSubmitted = false; // Reset formSubmitted to false
+    this.placingOrder = true;
+    try {
+      // Don't take payment for items that are no longer available.
+      const unavailable = await this.getUnavailableProducts();
+      if (unavailable.length) {
+        this.toastrService.error(
+          `${unavailable.join(', ')} ${
+            unavailable.length > 1 ? 'are' : 'is'
+          } no longer available. Please remove ${
+            unavailable.length > 1 ? 'them' : 'it'
+          } from your cart.`,
+        );
+        return;
+      }
+      await this.payNow();
+    } finally {
+      this.placingOrder = false;
     }
   }
 

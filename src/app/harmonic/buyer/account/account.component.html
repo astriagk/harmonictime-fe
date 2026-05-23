@@ -11,7 +11,12 @@
               <img src="assets/img/blog/comments/avater-3.png" alt="" />
             </div>
             <div class="profile__basic-content">
-              <h3 class="profile__basic-title">Welcome Back</h3>
+              <h3 class="profile__basic-title">
+                Welcome Back{{ displayName ? ", " + displayName : "" }}
+              </h3>
+              <p class="profile__basic-mail" *ngIf="userData?.email">
+                {{ userData.email }}
+              </p>
             </div>
           </div>
         </div>
@@ -166,24 +171,39 @@
                   ></app-skeleton>
 
                   <ng-container *ngIf="!profileLoading">
-                    <div class="profile__info-item" *ngIf="userData?.name">
+                    <div class="profile__info-item" *ngIf="displayName">
                       <p>Name</p>
-                      <h4>{{ userData?.name }}</h4>
+                      <h4>{{ displayName }}</h4>
                     </div>
                     <div class="profile__info-item">
                       <p>Email</p>
                       <h4>
                         <a
-                          href="{{ mail }}"
+                          href="mailto:{{ userData?.email }}"
                           class="__cf_email__"
-                          data-cfemail="94fdfaf2fbd4f1f0e1fff1e6baf7fbf9"
                           >{{ userData?.email }}</a
                         >
                       </h4>
                     </div>
-                    <div class="profile__info-item" *ngIf="userData?.phone">
+                    <div class="profile__info-item" *ngIf="displayPhone">
                       <p>Phone</p>
-                      <h4>{{ userData?.phone }}</h4>
+                      <h4>{{ displayPhone }}</h4>
+                    </div>
+                    <div class="profile__info-item" *ngIf="clientAddress as addr">
+                      <p>Default Address</p>
+                      <h4>
+                        <span class="d-block" *ngIf="addr.AddressLine1">
+                          {{ addr.AddressLine1
+                          }}{{ addr.AddressLine2 ? ", " + addr.AddressLine2 : "" }}
+                        </span>
+                        <span class="d-block">
+                          {{ addr.City }}{{ addr.City && addr.State ? ", " : "" }}
+                          {{ addr.State }} {{ addr.PostalCode }}
+                        </span>
+                        <span class="d-block" *ngIf="addr.Country">{{
+                          addr.Country
+                        }}</span>
+                      </h4>
                     </div>
                   </ng-container>
                 </div>
@@ -789,12 +809,12 @@
             >
               <h2 class="invoice__title">Invoice</h2>
               <img
-                *ngIf="companyLogoUrl"
-                [src]="companyLogoUrl"
+                *ngIf="companyLogoDataUrl"
+                [src]="companyLogoDataUrl"
                 [alt]="company.name"
                 class="invoice__logo"
               />
-              <span *ngIf="!companyLogoUrl" class="invoice__brand">
+              <span *ngIf="!companyLogoDataUrl" class="invoice__brand">
                 {{ company.name }}
               </span>
             </div>

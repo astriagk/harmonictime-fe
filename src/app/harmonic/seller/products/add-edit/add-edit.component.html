@@ -196,6 +196,14 @@
           </div>
           <div class="d-md-flex justify-content-end">
             <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
+            <button
               mat-button
               matStepperNext
               (click)="stepperNext(1, stepper)"
@@ -419,7 +427,8 @@
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="checkout-form-list">
                 <label for="manufacturerProductNumber"
-                  >Manufacturer Product Number</label
+                  >Manufacturer Product Number
+                  <span class="required">*</span></label
                 >
                 <input
                   id="manufacturerProductNumber"
@@ -427,18 +436,29 @@
                   placeholder="Enter Manufacturer Product Number"
                   formControlName="manufacturerProductNumber"
                 />
+                <span
+                  *ngIf="
+                    manufacturerProductNumber?.hasError('required') &&
+                    manufacturerProductNumber?.touched
+                  "
+                  class="text-danger"
+                  >Manufacturer Product Number is required</span
+                >
               </div>
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-              <div class="checkout-form-list">
+              <div class="country-select">
                 <label for="guarantee">Guarantee</label>
-                <input
-                  id="guarantee"
-                  type="text"
-                  placeholder="Enter Guarantee"
-                  formControlName="guarantee"
-                />
+                <select id="guarantee" formControlName="guarantee">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let guarantee of guaranteeOptions"
+                    [value]="guarantee.id"
+                  >
+                    {{ guarantee.name }}
+                  </option>
+                </select>
               </div>
             </div>
 
@@ -456,7 +476,10 @@
                     +
                   </button>
                 </div>
-                <select id="deliveryOptionId" formControlName="deliveryOptionId">
+                <select
+                  id="deliveryOptionId"
+                  formControlName="deliveryOptionId"
+                >
                   <option value="" disabled>- Please select -</option>
                   <option
                     *ngFor="let deliveryOptions of deliveryOptions"
@@ -469,6 +492,14 @@
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
@@ -516,6 +547,14 @@
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
@@ -550,6 +589,14 @@
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
@@ -625,11 +672,33 @@
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+              [disabled]="isSubmitting"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
-            <button mat-button matStepperNext class="os-btn">
-              {{ !productData ? "Create Product" : "Update Product" }}
+            <button
+              mat-button
+              type="submit"
+              class="os-btn"
+              [disabled]="isSubmitting"
+            >
+              {{
+                isSubmitting
+                  ? productData
+                    ? "Updating..."
+                    : "Creating..."
+                  : productData
+                    ? "Update Product"
+                    : "Create Product"
+              }}
             </button>
           </div>
         </form>

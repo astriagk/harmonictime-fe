@@ -101,6 +101,10 @@ export class AccountComponent {
   // Company info shown in the invoice header
   public readonly company = companyDetails;
   public readonly companyLogoUrl = environment.companyLogoUrl;
+  // Logo embedded as a base64 data URL for the invoice. The configured logo is
+  // a cross-origin S3 URL, which html2canvas drops from the captured PDF, so we
+  // preload a same-origin asset and inline it instead.
+  public companyLogoDataUrl: string | null = null;
 
   // Invoice modal state — manual modal pattern (see seller/orders).
   @ViewChild('invoiceContent') invoiceContent!: ElementRef<HTMLElement>;
@@ -464,6 +468,48 @@ export class AccountComponent {
     return addresses.find((a: any) => a?.IsDefault) ?? addresses[0] ?? null;
   }
 
+  // Display name for the profile/header. Buyers register with only an email, so
+  // the name often lives on their default address rather than the user record —
+  // fall back to it (and tolerate either casing the profile API might use).
+  get displayName(): string {
+    const u = this.userData;
+    const addr = this.clientAddress;
+    return (
+      u?.name ||
+      u?.Name ||
+      [u?.firstName ?? u?.FirstName, u?.lastName ?? u?.LastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim() ||
+      [addr?.FirstName, addr?.LastName].filter(Boolean).join(' ').trim() ||
+      ''
+    );
+  }
+
+  // Phone for the profile, with the same user-record-then-address fallback.
+  get displayPhone(): string {
+    const u = this.userData;
+    return u?.phone || u?.Phone || this.clientAddress?.Phone || '';
+  }
+
+  // Preload the same-origin brand logo as a base64 data URL so it survives the
+  // html2canvas capture used to build the invoice PDF (cross-origin images are
+  // dropped). Failure is non-fatal — the invoice falls back to the brand name.
+  private async preloadInvoiceLogo(): Promise<void> {
+    try {
+      const response = await fetch('assets/logo/logo.png');
+      const blob = await response.blob();
+      this.companyLogoDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      this.companyLogoDataUrl = null;
+    }
+  }
+
   // Sum of the all-in (price + 2%, rounded) item prices — the same figure the
   // buyer saw at checkout. See withPlatformMarkup in @config.
   get invoiceSubtotal(): number {
@@ -562,6 +608,7 @@ export class AccountComponent {
   }
 
   ngOnInit(): void {
+    this.preloadInvoiceLogo();
     this.store.select(selectUserData).subscribe((state) => {
       this.userData = state?.user?.data;
       const userId = this.userData?._id;

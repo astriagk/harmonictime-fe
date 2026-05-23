@@ -99,9 +99,9 @@
             <button
               type="submit"
               class="os-btn w-100"
-              [disabled]="!registerForm.valid"
+              [disabled]="!registerForm.valid || isSubmitting"
             >
-              Register Now
+              {{ isSubmitting ? "Registering..." : "Register Now" }}
             </button>
             <div class="or-divide"><span>or</span></div>
             <a routerLink="/auth/login" class="os-btn os-btn-black w-100"
