@@ -104,6 +104,8 @@ export const GET_SITE_CONTENT = `${baseUrl}/site-content`;
 // address
 export const CREATE_ADDRESS = `${baseUrl}/address`;
 export const GET_ADDRESSES_BY_USER = `${baseUrl}/address/user/`; // append the user id
+export const UPDATE_ADDRESS = `${baseUrl}/address/`; // append the address id
+export const DELETE_ADDRESS = `${baseUrl}/address/`; // append the address id
 
 // checkout
 export const CHECKOUT_ITEM = `${baseUrl}/checkout`;
@@ -117,6 +119,21 @@ export const CHECKOUT_ITEMS = `${baseUrl}/checkout-items/checkout/`; // append t
 // shipments
 export const CREATE_SHIPMENT = `${baseUrl}/shipments`;
 export const UPDATE_SHIPMENT = `${baseUrl}/shipments/`; // append the shipment id
+
+// seller wallet / settlement — seller identity comes from the JWT (no id in url).
+// All of these REQUIRE a Bearer token (use the *Token GenericService methods).
+export const GET_WALLET = `${baseUrl}/wallet`;
+// itemized sold products; optional ?status=available|pending|requested|settled
+export const GET_WALLET_ITEMS = `${baseUrl}/wallet/items`;
+
+// bank accounts (payout destinations)
+export const BANK_ACCOUNTS = `${baseUrl}/bank-accounts`; // GET list, POST add
+export const BANK_ACCOUNT_BY_ID = `${baseUrl}/bank-accounts/`; // append id (PUT/DELETE)
+
+// withdrawals (seller side)
+export const WITHDRAWALS = `${baseUrl}/withdrawals`; // GET history, POST request
+// cancel a pending withdrawal: `${WITHDRAWAL_BY_ID}${id}/cancel`
+export const WITHDRAWAL_BY_ID = `${baseUrl}/withdrawals/`;
 
 // order charges applied on top of the cart subtotal at checkout
 export const ORDER_CHARGES = {

@@ -22,17 +22,33 @@ export class GenericService {
     return this._httpClient.get(url, this.httpOptions);
   }
 
-  getObservableToken(_url: string | any): Observable<any> {
+  // Builds the auth header from the stored JWT. Used by every *Token method for
+  // endpoints that identify the user from the Bearer token (e.g. wallet).
+  private tokenOptions() {
     const token = localStorage.getItem('token');
-    const httpOptionsToken = {
+    return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         Accept: '*/*',
         Authorization: `Bearer ${token ? JSON.parse(token) : ''}`,
       }),
     };
-    const url = _url;
-    return this._httpClient.get(url, httpOptionsToken);
+  }
+
+  getObservableToken(_url: string | any): Observable<any> {
+    return this._httpClient.get(_url, this.tokenOptions());
+  }
+
+  postObservableToken(_url: string, data: any): Observable<any> {
+    return this._httpClient.post(_url, data, this.tokenOptions());
+  }
+
+  putObservableToken(_url: string, data: any): Observable<any> {
+    return this._httpClient.put(_url, data, this.tokenOptions());
+  }
+
+  deleteObservableToken(_url: string): Observable<any> {
+    return this._httpClient.delete(_url, this.tokenOptions());
   }
 
   getObservableJw(_url: string): Observable<any> {

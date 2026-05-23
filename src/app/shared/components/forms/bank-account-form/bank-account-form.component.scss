@@ -1,0 +1,15 @@
+@import 'variables';
+
+/* Tighten the shared checkout-form spacing for the compact 2-column modal
+   layout. Scoped to this component so the checkout page is unaffected. */
+:host ::ng-deep {
+  .checkout-form-list,
+  .country-select {
+    margin-bottom: 16px;
+  }
+
+  .checkout-form-list label,
+  .country-select label {
+    margin-bottom: 6px;
+  }
+}

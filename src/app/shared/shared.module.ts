@@ -34,6 +34,8 @@ import { BlogDetailsAreaComponent } from './components/blogs/blog-details-area/b
 import { BlogReplyFormComponent } from './components/forms/blog-reply-form/blog-reply-form.component';
 import { ProductModalComponent } from './components/modals/product-modal/product-modal.component';
 import { ContactFormComponent } from './components/forms/contact-form/contact-form.component';
+import { AddressFormComponent } from './components/forms/address-form/address-form.component';
+import { BankAccountFormComponent } from './components/forms/bank-account-form/bank-account-form.component';
 import { OffcanvasComponent } from './components/offcanvas/offcanvas.component';
 import { AuthLayoutComponent } from './layout/auth-layout/auth-layout.component';
 import { SellerLayoutComponent } from './layout/seller-layout/seller-layout.component';
@@ -79,6 +81,8 @@ import { DashPipe } from './pipes/dash.pipe';
     BlogReplyFormComponent,
     ProductModalComponent,
     ContactFormComponent,
+    AddressFormComponent,
+    BankAccountFormComponent,
     OffcanvasComponent,
     AuthLayoutComponent,
     SellerLayoutComponent,
@@ -120,6 +124,8 @@ import { DashPipe } from './pipes/dash.pipe';
     BlogDetailsAreaComponent,
     ProductModalComponent,
     ContactFormComponent,
+    AddressFormComponent,
+    BankAccountFormComponent,
     OffcanvasComponent,
     BuyerLayoutComponent,
     AdminLayoutComponent,
