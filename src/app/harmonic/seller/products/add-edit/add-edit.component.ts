@@ -278,25 +278,27 @@ export class AddEditComponent implements OnInit {
       productName: ['', Validators.required],
       // ng-select treats '' as a selected value (adds .ng-has-value and hides
       // the placeholder); use null so "- Please select -" shows on a fresh form.
-      brandId: ['', Validators.required],
-      categoryId: ['', Validators.required],
-      collectionId: ['', Validators.required],
+      brandId: [null, Validators.required],
+      categoryId: [null, Validators.required],
+      collectionId: [null, Validators.required],
       price: ['', Validators.required],
-      recipientId: ['', Validators.required],
+      recipientId: [null, Validators.required],
     });
 
     this.productInformation = this.fb.group({
-      // ng-select-bound controls use '' (not '') so the placeholder shows.
-      dialColorId: ['', Validators.required],
+      // ng-select-bound controls use null so the placeholder shows; the two
+      // native <select>s (waterResistant, guarantee) keep '' for their
+      // disabled value="" placeholder option.
+      dialColorId: [null, Validators.required],
       diameter: ['', Validators.required],
       waterResistant: [''],
-      movementId: ['', Validators.required],
-      strapMaterialId: ['', Validators.required],
-      caseMaterialId: ['', Validators.required],
-      watchMarkersId: ['', Validators.required],
+      movementId: [null, Validators.required],
+      strapMaterialId: [null, Validators.required],
+      caseMaterialId: [null, Validators.required],
+      watchMarkersId: [null, Validators.required],
       manufacturerProductNumber: ['', Validators.required],
       guarantee: [''],
-      deliveryOptionId: [''],
+      deliveryOptionId: [null],
     });
 
     this.productDescription = this.fb.group({

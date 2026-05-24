@@ -1,5 +1,14 @@
 @import "../../../../../assets/scss/variables";
 
+/* The Material vertical stepper clips its content with `overflow: hidden`,
+   which cuts off open ng-select dropdowns. Allow the active (expanded) step to
+   overflow so the dropdown can drop below its field. Inactive steps keep the
+   default clipping for their collapse animation. */
+:host ::ng-deep
+  .mat-vertical-stepper-content:not(.mat-vertical-stepper-content-inactive) {
+  overflow: visible;
+}
+
 .border-bottom-sub-heading {
     border-bottom: 1px solid #eaedff;
 }
