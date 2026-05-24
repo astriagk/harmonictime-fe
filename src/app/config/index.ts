@@ -135,6 +135,12 @@ export const WITHDRAWALS = `${baseUrl}/withdrawals`; // GET history, POST reques
 // cancel a pending withdrawal: `${WITHDRAWAL_BY_ID}${id}/cancel`
 export const WITHDRAWAL_BY_ID = `${baseUrl}/withdrawals/`;
 
+// offers (admin)
+export const OFFERS = `${baseUrl}/offers`; // GET active, POST create
+export const OFFERS_ALL = `${baseUrl}/offers/all`; // GET all incl. disabled
+export const OFFER_BY_ID = `${baseUrl}/offers/`; // append offerId (GET/PUT/DELETE)
+export const OFFER_STATUS = (id: string) => `${baseUrl}/offers/${id}/status`; // PATCH
+
 // order charges applied on top of the cart subtotal at checkout
 export const ORDER_CHARGES = {
   gstPercent: 18, // % of subtotal

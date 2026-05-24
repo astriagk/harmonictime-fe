@@ -104,3 +104,27 @@
       display: block;
     }
   }
+
+/* ── Auth password-reveal toggle (login / register / forgot / reset) ── */
+.auth-input {
+  position: relative;
+
+  input {
+    width: 100%;
+    padding-right: 40px;
+  }
+
+  i {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: $black-soft-2;
+    font-size: 18px;
+
+    &:hover {
+      color: $black;
+    }
+  }
+}

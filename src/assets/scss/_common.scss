@@ -964,3 +964,40 @@ p {
 	  -ms-transform: scale(1.05);
 	  -o-transform: scale(1.05);
 	  transform: scale(1.05); }
+
+/* ── Manual modal backdrop (used by invoice, lookup, offer modals) ── */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+}
+
+/* ── Static pages ── */
+.policy__content {
+  .policy__intro {
+    margin-bottom: 25px;
+  }
+
+  .policy__section {
+    margin-bottom: 30px;
+
+    h4 {
+      font-size: 24px;
+      color: $heading-color;
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: $body-text-color;
+      margin-bottom: 12px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

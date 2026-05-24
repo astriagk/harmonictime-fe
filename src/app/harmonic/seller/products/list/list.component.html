@@ -48,7 +48,7 @@
             [routerLink]="
               order.IsSold ? null : ['/seller/product-details', order._id]
             "
-            [class.clickable-row]="!order.IsSold"
+            [class.product-list__row]="!order.IsSold"
             [attr.aria-label]="'View order #' + order.id + ' details'"
           >
             <td>{{ i + 1 }}</td>

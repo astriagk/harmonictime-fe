@@ -2253,3 +2253,38 @@ html .ui-button.ui-state-disabled:active {
     border-radius: 2px;
   }
 }
+
+/* ── Review form — star rating ── */
+.review-rating {
+  .rating-stars {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      i {
+        font-size: 20px;
+        color: $theme-color;
+        transition: transform 0.15s ease;
+      }
+
+      &:hover i {
+        transform: scale(1.15);
+      }
+    }
+  }
+}
+
+/* ── Color swatch (color-filtering component) ── */
+.color-swatch {
+  background: var(--swatch-background, #d4d4d4);
+  border: var(--swatch-border, 1px solid transparent);
+  box-shadow: var(--swatch-shadow, none);
+
+  &:hover::after,
+  &.active::after {
+    border-color: var(--swatch-accent, #fbaf5d) !important;
+  }
+}

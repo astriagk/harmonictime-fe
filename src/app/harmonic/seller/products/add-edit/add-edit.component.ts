@@ -282,6 +282,7 @@ export class AddEditComponent implements OnInit {
       categoryId: [null, Validators.required],
       collectionId: [null, Validators.required],
       price: ['', Validators.required],
+      quantity: [null, [Validators.required, Validators.min(1)]],
       recipientId: [null, Validators.required],
     });
 
@@ -374,12 +375,20 @@ export class AddEditComponent implements OnInit {
         next: (response) => {
           const data = response?.data[0];
           this.productData = response?.data[0];
+          // In edit mode quantity can be 0 (no stock), so relax the min to 0.
+          this.basicProductInformation.get('quantity')?.setValidators([
+            Validators.required,
+            Validators.min(0),
+          ]);
+          this.basicProductInformation.get('quantity')?.updateValueAndValidity();
+
           this.basicProductInformation.setValue({
             productName: data.ProductName,
             brandId: data.Details.BrandId,
             categoryId: data.Details.CategoryId,
             collectionId: data.Details.CollectionId,
             price: data.Price,
+            quantity: data.Quantity,
             recipientId: data.Details.RecipientId,
           });
 
@@ -455,6 +464,9 @@ export class AddEditComponent implements OnInit {
   }
   get price() {
     return this.basicProductInformation.get('price');
+  }
+  get quantity() {
+    return this.basicProductInformation.get('quantity');
   }
   get recipientId() {
     return this.basicProductInformation.get('recipientId');
@@ -755,6 +767,7 @@ export class AddEditComponent implements OnInit {
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
 
@@ -882,6 +895,7 @@ export class AddEditComponent implements OnInit {
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
 

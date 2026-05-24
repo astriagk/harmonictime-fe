@@ -77,6 +77,10 @@ export class GenericService {
     return this._httpClient.put(url, data, this.httpOptions);
   }
 
+  patchObservable(_url: string, data: any): Observable<any> {
+    return this._httpClient.patch(_url, data, this.httpOptions);
+  }
+
   deleteObservable(_url: string): Observable<any> {
     const url = _url;
     return this._httpClient.delete(url);

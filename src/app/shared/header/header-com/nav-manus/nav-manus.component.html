@@ -4,7 +4,7 @@
       *ngFor="let item of menu_data; let index = index"
       [ngClass]="getMenuClasses(item)"
     >
-      <a *ngIf="checkRole(item.seller)" [routerLink]="item.link">{{
+      <a *ngIf="checkRole(item)" [routerLink]="item.link">{{
         item.title
       }}</a>
 

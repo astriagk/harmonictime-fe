@@ -10,7 +10,7 @@
             <button
               (click)="handleColor(c)"
               type="button"
-              class="color"
+              class="color-swatch"
               [ngStyle]="getColorStyles(c)"
               [class.active]="color === normalizeColor(c)"
               [attr.aria-label]="c"

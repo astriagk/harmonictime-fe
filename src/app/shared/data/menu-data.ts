@@ -19,6 +19,18 @@ const menuData: IMenuType[] = [
     ],
   },
   {
+    link: '/admin/manage-users',
+    title: 'Admin',
+    admin: true,
+    hasDropdown: true,
+    megamenu: false,
+    dropdownItems: [
+      { link: '/admin/approve-payments', title: 'Approve Payments' },
+      { link: '/admin/manage-users', title: 'Manage Users' },
+      { link: '/admin/offers', title: 'Offers' },
+    ],
+  },
+  {
     link: '/pages/contact',
     title: 'Contact',
   },
@@ -39,6 +51,15 @@ export const mobile_menus: IMobileMenu[] = [
       { link: '/seller/product-list', title: 'Product List' },
       { link: '/seller/order-list', title: 'Order List' },
       { link: '/seller/add-product', title: 'Add Product' },
+    ],
+  },
+  {
+    title: 'Admin',
+    admin: true,
+    dropdownMenu: [
+      { link: '/admin/approve-payments', title: 'Approve Payments' },
+      { link: '/admin/manage-users', title: 'Manage Users' },
+      { link: '/admin/offers', title: 'Offers' },
     ],
   },
   {

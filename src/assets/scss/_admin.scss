@@ -1,0 +1,54 @@
+/*----------------------------------------*/
+/*  Admin Dashboard CSS
+/*----------------------------------------*/
+
+/* ── Table action buttons (Edit / Delete) ── */
+.admin-table__action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: $black-soft-2;
+  transition: color 0.3s;
+
+  &:hover {
+    color: $theme-color;
+  }
+
+  &.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  &--delete:hover {
+    color: $heading-color;
+  }
+}
+
+/* ── Offer create / edit modal ── */
+.offer__modal {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1055;
+  overflow-y: auto;
+
+  .os-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Date input inside checkout-form-list (date type not covered globally) ── */
+.checkout-form-list input[type='date'] {
+  background: $white;
+  border: 1px solid #eaedff;
+  border-radius: 0;
+  height: 45px;
+  padding: 0 10px 0 10px;
+  width: 100%;
+  color: $black-soft-2;
+}
