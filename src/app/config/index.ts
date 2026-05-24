@@ -73,6 +73,8 @@ export const POST_PRODUCT_IMAGES = `${baseUrl}/product-images`;
 export const GET_PRODUCT_IMAGES = `${baseUrl}/product-images/product/`;
 // append the image id
 export const GET_PRODUCT_IMAGE_BY_ID = `${baseUrl}/product-images/`;
+// update a single image (e.g. its IsPrimary flag); append the image id
+export const UPDATE_PRODUCT_IMAGE = `${baseUrl}/product-images/`;
 export const DELETE_IMAGE_DB = `${baseUrl}/product-images/`;
 
 // reviews (append the product id to GET)
@@ -102,6 +104,8 @@ export const GET_SITE_CONTENT = `${baseUrl}/site-content`;
 // address
 export const CREATE_ADDRESS = `${baseUrl}/address`;
 export const GET_ADDRESSES_BY_USER = `${baseUrl}/address/user/`; // append the user id
+export const UPDATE_ADDRESS = `${baseUrl}/address/`; // append the address id
+export const DELETE_ADDRESS = `${baseUrl}/address/`; // append the address id
 
 // checkout
 export const CHECKOUT_ITEM = `${baseUrl}/checkout`;
@@ -115,6 +119,43 @@ export const CHECKOUT_ITEMS = `${baseUrl}/checkout-items/checkout/`; // append t
 // shipments
 export const CREATE_SHIPMENT = `${baseUrl}/shipments`;
 export const UPDATE_SHIPMENT = `${baseUrl}/shipments/`; // append the shipment id
+
+// seller wallet / settlement — seller identity comes from the JWT (no id in url).
+// All of these REQUIRE a Bearer token (use the *Token GenericService methods).
+export const GET_WALLET = `${baseUrl}/wallet`;
+// itemized sold products; optional ?status=available|pending|requested|settled
+export const GET_WALLET_ITEMS = `${baseUrl}/wallet/items`;
+
+// bank accounts (payout destinations)
+export const BANK_ACCOUNTS = `${baseUrl}/bank-accounts`; // GET list, POST add
+export const BANK_ACCOUNT_BY_ID = `${baseUrl}/bank-accounts/`; // append id (PUT/DELETE)
+// verify a bank account via Razorpay penny-drop: POST /bank-accounts/:id/verify
+export const bankAccountVerify = (id: string) => `${baseUrl}/bank-accounts/${id}/verify`;
+
+// withdrawals (seller side)
+export const WITHDRAWALS = `${baseUrl}/withdrawals`; // GET history, POST request
+// cancel a pending withdrawal: `${WITHDRAWAL_BY_ID}${id}/cancel`
+export const WITHDRAWAL_BY_ID = `${baseUrl}/withdrawals/`;
+
+// seller — bulk offer assignment / removal
+export const BULK_OFFER = `${baseUrl}/products/bulk-offer`;
+
+// admin — user management
+export const ADMIN_USERS = `${baseUrl}/admin/users`;
+export const ADMIN_USER_BY_ID = `${baseUrl}/admin/users/`; // append /:id
+export const adminUserAction = (id: string, action: 'block' | 'unblock' | 'suspend') =>
+  `${baseUrl}/admin/users/${id}/${action}`;
+
+// admin — withdrawal management
+export const ADMIN_WITHDRAWALS = `${baseUrl}/admin/withdrawals`;
+export const adminWithdrawalAction = (id: string, action: 'pay' | 'reject') =>
+  `${baseUrl}/admin/withdrawals/${id}/${action}`;
+
+// offers (admin)
+export const OFFERS = `${baseUrl}/offers`; // GET active, POST create
+export const OFFERS_ALL = `${baseUrl}/offers/all`; // GET all incl. disabled
+export const OFFER_BY_ID = `${baseUrl}/offers/`; // append offerId (GET/PUT/DELETE)
+export const OFFER_STATUS = (id: string) => `${baseUrl}/offers/${id}/status`; // PATCH
 
 // order charges applied on top of the cart subtotal at checkout
 export const ORDER_CHARGES = {

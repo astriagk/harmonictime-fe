@@ -22,13 +22,40 @@ export class WishlistEffects {
         const url = USER_WISHLIST + `${userData.user.data._id}`;
         return this.genericService.getObservable(url).pipe(
           map((response: any) =>
-            loadWishlistSuccess({ wishlist: response.data || [] })
+            loadWishlistSuccess({
+              wishlist: (response.data || []).map((row: any) =>
+                this.normalizeWishlistRow(row)
+              ),
+            })
           ),
           catchError((error) => of(loadWishlistFailure({ error })))
         );
       })
     )
   );
+
+  // The wishlist endpoint returns rows that nest the product (populated under
+  // ProductID) rather than flattening its fields like the cart does, so the
+  // table rendered blank. Flatten the product onto the row so the template can
+  // read ProductName/Price/Images and link to the product, while keeping the
+  // wishlist row id (WishlistID) for removal (DELETE /wishlist/:id).
+  private normalizeWishlistRow(row: any): any {
+    const product =
+      row?.ProductID && typeof row.ProductID === 'object'
+        ? row.ProductID
+        : row?.Product && typeof row.Product === 'object'
+        ? row.Product
+        : row?.product && typeof row.product === 'object'
+        ? row.product
+        : row;
+
+    return {
+      ...product, // ProductName, Price, Images, _id (product id), ...
+      _id: product?._id ?? row?._id, // product id — used for routerLink & add-to-cart
+      ProductID: product?._id ?? row?.ProductID, // for isProductInWishlist checks
+      WishlistID: row?._id, // wishlist row id — used to remove the item
+    };
+  }
 
   constructor(
     private actions$: Actions,

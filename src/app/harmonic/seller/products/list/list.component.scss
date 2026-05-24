@@ -1,66 +1,114 @@
-@import "../../../../../assets/scss/variables";
+@import 'variables';
 
-.clickable-row {
-    cursor: pointer;
+/* ── Offer selector cards ── */
+.offer-scroll-area {
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-.clickable-row:hover {
-    background-color: #f9f9f9;
+.offer-card {
+  border: 1px solid $border;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    border-color: $theme-color;
+  }
+
+  &.selected {
+    border-color: $theme-color;
+    background: rgba(188, 130, 70, 0.07);
+  }
 }
 
-/* Availability toggle switch */
-.availability-switch {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-    margin: 0;
-    cursor: pointer;
-
-    input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .slider {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        border-radius: 24px;
-        transition: 0.3s;
-
-        &::before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: #fff;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-    }
-
-    input:checked + .slider {
-        background-color: $theme-color;
-    }
-
-    input:checked + .slider::before {
-        transform: translateX(20px);
-    }
+.offer-discount-badge {
+  display: inline-block;
+  background: $theme-color;
+  color: $white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 20px;
 }
 
-.sold-badge {
-    display: inline-block;
-    padding: 2px 10px;
+/* ── Divider between panels ── */
+.offer-divider {
+  border: none;
+  border-top: 1px solid $border;
+  margin: 20px 0;
+}
+
+/* ── Products table in modal ── */
+.product-scroll-area {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid $border;
+
+  table {
+    margin-bottom: 0;
+  }
+}
+
+/* ── Modal footer ── */
+.offer-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &__count {
     font-size: 12px;
-    font-weight: 600;
-    color: #fff;
-    background-color: $theme-color;
-    border-radius: 12px;
+    white-space: nowrap;
+    margin-right: 12px;
+  }
+
+  &__actions {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 575px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    &__count {
+      margin-right: 0;
+      margin-bottom: 12px;
+    }
+
+    &__actions {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .os-btn {
+        flex: 1;
+        text-align: center;
+        margin-right: 0 !important;
+        min-width: 0;
+        padding: 0 12px;
+      }
+    }
+  }
+}
+
+/* ── Offer pill shown in the main product table ── */
+.offer-pill {
+  display: inline-block;
+  background: rgba(188, 130, 70, 0.1);
+  color: $theme-color;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+
+  &--current {
+    background: $theme-color;
+    color: $white;
+  }
 }

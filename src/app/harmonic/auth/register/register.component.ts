@@ -13,7 +13,10 @@ import { REGISTER_USER } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { registerUser } from 'src/app/store/actions/user.actions';
 import { AppState } from 'src/app/store/app.state';
-import { selectUserData } from 'src/app/store/selectors/user.selectors';
+import {
+  selectUserData,
+  selectUserError,
+} from 'src/app/store/selectors/user.selectors';
 import { Subscription } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 
@@ -27,8 +30,10 @@ export class RegisterComponent {
   public showConfirmPassword = false;
   public registerForm!: FormGroup;
   public formSubmitted = false;
+  public isSubmitting = false;
 
   private userDataSub?: Subscription;
+  private userErrorSub?: Subscription;
 
   constructor(
     private toastrService: ToastrService,
@@ -86,9 +91,25 @@ export class RegisterComponent {
         email: formValue.email,
         password: formValue.password,
       };
-      // Drop any subscription from a previous submit so toasts don't stack
+      // Drop any subscriptions from a previous submit so toasts don't stack
       this.userDataSub?.unsubscribe();
+      this.userErrorSub?.unsubscribe();
+
+      this.isSubmitting = true;
       this.store.dispatch(registerUser({ url, payload }));
+
+      // Surface the API message (e.g. "Email already registered") as a toast
+      this.userErrorSub = this.store
+        .select(selectUserError)
+        .pipe(
+          filter((error: any) => !!error),
+          take(1)
+        )
+        .subscribe((error: any) => {
+          this.isSubmitting = false;
+          this.toastrService.error(this.getErrorMessage(error));
+        });
+
       this.userDataSub = this.store
         .select(selectUserData)
         .pipe(
@@ -97,6 +118,7 @@ export class RegisterComponent {
         )
         .subscribe((state: any) => {
           localStorage.setItem('token', JSON.stringify(state?.data?.token));
+          this.isSubmitting = false;
           this.toastrService.success('Registration successful!');
           this.registerForm.reset();
           this.formSubmitted = false; // Reset the form submission state
@@ -105,5 +127,15 @@ export class RegisterComponent {
     } else if (this.registerForm.hasError('passwordsMismatch')) {
       this.toastrService.error('Passwords do not match.');
     }
+  }
+
+  // Pulls the human-readable message the API sends back, with a sensible
+  // fallback when the error payload doesn't carry one.
+  private getErrorMessage(error: any): string {
+    return (
+      error?.error?.message ||
+      error?.message ||
+      'Registration failed. Please try again.'
+    );
   }
 }

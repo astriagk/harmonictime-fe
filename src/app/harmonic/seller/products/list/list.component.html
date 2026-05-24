@@ -6,14 +6,9 @@
     class="order-info__header d-flex justify-content-between align-items-center pt-40"
   >
     <h2 class="order-info__title">My Products</h2>
-    <div class="order__info-btn">
-      <app-pagination
-        [data]="orders"
-        [paginate]="paginate"
-        (setPage)="setPage($event)"
-      >
-      </app-pagination>
-    </div>
+    <button type="button" class="os-btn" (click)="openOfferModal()">
+      Manage Offers
+    </button>
   </header>
 
   <!-- Loading: shimmer table rows -->
@@ -39,6 +34,7 @@
           <th scope="col">Brand Name</th>
           <th scope="col">Product Name</th>
           <th scope="col">Price</th>
+          <th scope="col">Offer</th>
           <th scope="col">Available</th>
         </tr>
       </thead>
@@ -48,13 +44,20 @@
             [routerLink]="
               order.IsSold ? null : ['/seller/product-details', order._id]
             "
-            [class.clickable-row]="!order.IsSold"
+            [class.product-list__row]="!order.IsSold"
             [attr.aria-label]="'View order #' + order.id + ' details'"
           >
             <td>{{ i + 1 }}</td>
-            <td>{{ order.Details.BrandName }}</td>
+            <td>{{ order.Details?.BrandName }}</td>
             <td>{{ order.ProductName }}</td>
             <td>{{ order.Price | currency: "INR" }}</td>
+            <td (click)="$event.stopPropagation()">
+              <span *ngIf="productOfferName(order)" class="offer-pill">
+                {{ productOfferName(order) }} ·
+                {{ productOfferDiscount(order) }}% off
+              </span>
+              <span *ngIf="!productOfferName(order)" class="text-muted">—</span>
+            </td>
             <td (click)="$event.stopPropagation()">
               <span *ngIf="order.IsSold" class="sold-badge">Sold</span>
               <label *ngIf="!order.IsSold" class="availability-switch">
@@ -71,4 +74,185 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination — bottom right -->
+  <div *ngIf="orders.length > 0" class="d-flex justify-content-end mt-20 pb-40">
+    <app-pagination
+      [data]="orders"
+      [paginate]="paginate"
+      (setPage)="setPage($event)"
+    ></app-pagination>
+  </div>
 </section>
+
+<!-- ── Manage Offers modal ───────────────────────────────────────── -->
+<div
+  *ngIf="isOfferModalOpen"
+  class="modal fade show offer__modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeOfferModal()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+
+        <div class="product__modal-inner">
+          <h4 class="mb-5">Manage Offers</h4>
+          <p class="text-muted mb-20" style="font-size: 13px">
+            Select an offer below, pick products, then click
+            <strong>Apply Offer</strong> — or just pick products and click
+            <strong>Remove Offer</strong>.
+          </p>
+
+          <!-- Panel 1: Offer list -->
+          <h6 class="mb-10">Available Offers</h6>
+
+          <div *ngIf="offersLoading" class="text-center py-20">
+            <i class="fal fa-spinner fa-spin mr-5"></i> Loading offers…
+          </div>
+
+          <div
+            *ngIf="!offersLoading && offers.length === 0"
+            class="text-muted mb-20"
+            style="font-size: 13px"
+          >
+            No active offers found. Ask an admin to create one.
+          </div>
+
+          <div
+            *ngIf="!offersLoading && offers.length > 0"
+            class="offer-scroll-area mb-0"
+          >
+            <div
+              *ngFor="let offer of offers"
+              class="offer-card"
+              [class.selected]="selectedOfferId === offer._id"
+              (click)="selectOffer(offer._id)"
+            >
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ offer.OfferName }}</strong>
+                  <span class="ml-10 offer-discount-badge"
+                    >{{ offer.DiscountPercentage }}% off</span
+                  >
+                  <small
+                    *ngIf="offer.Description"
+                    class="d-block text-muted mt-5"
+                    >{{ offer.Description }}</small
+                  >
+                </div>
+                <div class="text-right">
+                  <span
+                    class="admin-status-badge admin-status-badge--active d-block mb-5"
+                    >Active</span
+                  >
+                  <small class="text-muted d-block">
+                    {{ offer.StartDate | date: "mediumDate" }} →
+                    {{ offer.EndDate | date: "mediumDate" }}
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="offer-divider" />
+
+          <!-- Panel 2: Products table -->
+          <div class="d-flex justify-content-between align-items-center mb-10">
+            <h6 class="mb-0">Your Products</h6>
+            <a
+              *ngIf="availableProducts.length > 0"
+              class="cursor-pointer admin-table__action-link"
+              (click)="toggleSelectAll()"
+            >
+              {{ allSelectableSelected ? "Deselect All" : "Select All" }}
+            </a>
+          </div>
+
+          <div class="product-scroll-area">
+            <table class="table table-sm mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 40px"></th>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Current Offer</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of availableProducts">
+                  <td>
+                    <input
+                      type="checkbox"
+                      [checked]="selectedProductIds.has(p._id)"
+                      (change)="toggleProductSelect(p._id)"
+                    />
+                  </td>
+                  <td>{{ p.ProductName }}</td>
+                  <td>{{ p.Price | currency: "INR" }}</td>
+                  <td>
+                    <span
+                      *ngIf="productOfferName(p)"
+                      class="offer-pill"
+                      [class.offer-pill--current]="isCurrentOffer(p)"
+                    >
+                      {{ productOfferName(p) }} · {{ productOfferDiscount(p) }}%
+                      off
+                      <span *ngIf="isCurrentOffer(p)"> ✓</span>
+                    </span>
+                    <span *ngIf="!productOfferName(p)" class="text-muted"
+                      >—</span
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Footer -->
+          <div class="offer-modal-footer mt-20">
+            <span class="text-muted offer-modal-footer__count">
+              {{ selectedProductIds.size }} product(s) selected
+            </span>
+            <div class="d-flex offer-modal-footer__actions">
+              <button
+                type="button"
+                class="os-btn mr-10"
+                (click)="closeOfferModal()"
+                [disabled]="isSavingOffer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="os-btn mr-10"
+                [disabled]="selectedProductIds.size === 0 || isSavingOffer"
+                (click)="removeOffer()"
+              >
+                {{ isSavingOffer ? "Saving…" : "Remove" }}
+              </button>
+              <button
+                type="button"
+                class="os-btn os-btn-black"
+                [disabled]="
+                  !selectedOfferId ||
+                  selectedProductIds.size === 0 ||
+                  isSavingOffer
+                "
+                (click)="applyOffer()"
+              >
+                {{ isSavingOffer ? "Saving…" : "Apply" }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isOfferModalOpen" class="modal-backdrop fade show"></div>

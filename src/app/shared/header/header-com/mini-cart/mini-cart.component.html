@@ -16,7 +16,7 @@
       <li *ngFor="let item of cartItems">
         <div class="cart-img f-left">
           <a [routerLink]="['/shop/shop-details', item.id]">
-            <img [src]="item.Images[0]?.ImageURL" alt="cart-img" />
+            <img [src]="item.Images | primaryImage" alt="cart-img" />
           </a>
         </div>
         <div class="cart-content f-left text-left">

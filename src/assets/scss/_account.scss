@@ -1,0 +1,534 @@
+/*----------------------------------------*/
+/*  Account / Wallet / Invoice CSS
+/*----------------------------------------*/
+
+.address-modal__title {
+  margin-bottom: 20px;
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $border;
+  border-radius: 4px;
+  padding: 25px 30px;
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  }
+
+  &__head {
+    margin-bottom: 18px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid $border;
+
+    .mt-8 {
+      margin-top: 8px;
+    }
+  }
+
+  &__label {
+    font-size: 16px;
+    margin-bottom: 0;
+
+    i {
+      margin-right: 8px;
+      color: $theme-color;
+    }
+  }
+
+  &__badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: $theme-color;
+    border: 1px solid $theme-color;
+    padding: 2px 12px;
+    border-radius: 50px;
+  }
+
+  &__name {
+    font-size: 15px;
+    font-weight: 600;
+    color: $heading-color;
+    margin-bottom: 10px;
+  }
+
+  &__body {
+    p {
+      margin-bottom: 4px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: $body-text-color;
+    }
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid $border;
+    }
+
+    span {
+      color: $body-text-color;
+    }
+
+    strong {
+      color: $heading-color;
+      font-weight: 500;
+    }
+  }
+
+  &__actions {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid $border;
+    justify-content: flex-end;
+    gap: 10px;
+
+    .os-btn {
+      height: 38px;
+      line-height: 34px;
+      padding: 0 22px;
+      font-size: 11px;
+    }
+
+    .os-btn[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.wallet {
+  &__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 30px;
+    border: 1px solid $border;
+    border-left: 3px solid $theme-color;
+    border-radius: 4px;
+    padding: 18px 24px;
+  }
+
+  &__summary-main {
+    .wallet__summary-value {
+      font-size: 26px;
+      margin: 4px 0 0;
+      color: $theme-color;
+    }
+  }
+
+  &__summary-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 28px;
+  }
+
+  &__summary-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__summary-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $body-text-color;
+  }
+
+  &__summary-num {
+    font-size: 15px;
+    font-weight: 500;
+    color: $heading-color;
+    margin-top: 4px;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 24px;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid $border;
+  }
+
+  &__tab {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 0 0 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: $body-text-color;
+    transition: color 0.3s;
+
+    &:hover {
+      color: $theme-color;
+    }
+
+    &.active {
+      color: $heading-color;
+      border-bottom-color: $theme-color;
+    }
+  }
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__filter-btn {
+    background: transparent;
+    border: 1px solid $border;
+    border-radius: 50px;
+    padding: 5px 18px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $body-text-color;
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: $theme-color;
+      color: $theme-color;
+    }
+
+    &.active {
+      background: $theme-color;
+      border-color: $theme-color;
+      color: $white;
+    }
+  }
+
+  &__cancel-btn {
+    height: 34px;
+    line-height: 30px;
+    padding: 0 18px;
+    font-size: 11px;
+    white-space: nowrap;
+
+    i {
+      margin-right: 4px;
+    }
+
+    &[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.status-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 12px;
+  border-radius: 50px;
+  border: 1px solid $border;
+  color: $body-text-color;
+
+  &--available,
+  &--paid {
+    color: $theme-2-color;
+    border-color: $theme-2-color;
+  }
+
+  &--pending,
+  &--requested,
+  &--approved {
+    color: $theme-color;
+    border-color: $theme-color;
+  }
+
+  &--settled {
+    color: $heading-color;
+    border-color: $heading-color;
+  }
+
+  &--rejected {
+    color: #c0392b;
+    border-color: #c0392b;
+  }
+}
+
+.verify-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 50px;
+  border: 1px solid $border;
+  color: $body-text-color;
+
+  i {
+    font-size: 7px;
+  }
+
+  &--verified {
+    color: $theme-2-color;
+    border-color: $theme-2-color;
+  }
+
+  &--failed {
+    color: #c0392b;
+    border-color: #c0392b;
+  }
+
+  &--unverified {
+    color: $body-text-color;
+    border-color: $border;
+  }
+}
+
+.verify-notice {
+  font-size: 13px;
+  color: $body-text-color;
+  background: rgba(0, 0, 0, 0.03);
+  border-left: 3px solid $theme-color;
+  padding: 12px 16px;
+  border-radius: 0 4px 4px 0;
+  line-height: 1.5;
+}
+
+.withdraw__account {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid $border;
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+
+  &:hover,
+  &.active {
+    border-color: $theme-color;
+  }
+
+  &-body {
+    flex: 1 1 auto;
+    font-size: 14px;
+  }
+
+  &--disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.invoice-view-link {
+  font-size: 16px;
+  transition: color 0.3s;
+
+  &:hover {
+    color: $theme-color;
+  }
+}
+
+.invoice-modal {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1055;
+  overflow-y: auto;
+
+  .os-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.is-capturing {
+    left: -200vw;
+    overflow: hidden;
+
+    .modal-dialog {
+      width: 800px;
+      max-width: 800px;
+      margin: 0;
+    }
+  }
+}
+
+.invoice {
+  background: $white;
+  color: $body-text-color;
+  padding: 8px 16px 16px;
+
+  &__head {
+    margin-bottom: 16px;
+  }
+
+  &__title {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+    color: $heading-color;
+  }
+
+  &__brand {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: $theme-color;
+  }
+
+  &__logo {
+    max-height: 56px;
+    max-width: 180px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__rule {
+    border: 0;
+    border-top: 1px solid $border;
+    opacity: 1;
+    margin: 16px 0 28px;
+  }
+
+  &__parties {
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  &__col {
+    flex: 1 1 0;
+  }
+
+  &__meta {
+    margin-bottom: 28px;
+  }
+
+  &__meta-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 6px 0;
+
+    .invoice__label {
+      width: 130px;
+      flex-shrink: 0;
+      margin-bottom: 0;
+    }
+
+    .invoice__text {
+      margin-bottom: 0;
+      text-align: left;
+    }
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: $theme-color;
+  }
+
+  &__text {
+    margin-bottom: 3px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: $body-text-color;
+    overflow-wrap: anywhere;
+  }
+
+  &__name {
+    font-size: 15px;
+    font-weight: 600;
+    color: $heading-color;
+    margin-bottom: 6px;
+  }
+
+  &__number {
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: $heading-color;
+  }
+
+  &__items {
+    width: 100%;
+    margin-bottom: 24px;
+
+    thead th {
+      background: $theme-color;
+      color: $white;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 12px 14px;
+      border: none;
+    }
+
+    tbody td {
+      padding: 14px;
+      font-size: 14px;
+      color: $black-soft;
+      border-bottom: 1px solid $border;
+      vertical-align: middle;
+    }
+  }
+
+  &__totals {
+    margin-left: auto;
+    width: 280px;
+    max-width: 100%;
+  }
+
+  &__totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+    color: $black-soft;
+
+    &--grand {
+      margin-top: 6px;
+      padding-top: 14px;
+      border-top: 2px solid $theme-color;
+      font-size: 18px;
+      font-weight: 700;
+      color: $heading-color;
+    }
+  }
+
+  &__footer-note {
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid $border;
+    font-size: 13px;
+    font-style: italic;
+    text-align: center;
+    color: $body-text-color;
+  }
+}

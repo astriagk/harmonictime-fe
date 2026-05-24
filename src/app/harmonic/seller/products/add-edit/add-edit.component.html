@@ -5,7 +5,18 @@
 
 <section class="product-insert-area pt-100 pb-100">
   <div class="container">
-    <mat-vertical-stepper [linear]="isLinear" #stepper>
+    <!-- Edit mode: show skeleton rows while the product is being fetched -->
+    <div *ngIf="isLoadingProduct" class="row">
+      <div class="col-xl-8 col-lg-10">
+        <app-skeleton type="profile-row" [count]="8"></app-skeleton>
+      </div>
+    </div>
+
+    <mat-vertical-stepper
+      *ngIf="!isLoadingProduct"
+      [linear]="isLinear"
+      #stepper
+    >
       <mat-step [stepControl]="basicProductInformation">
         <form [formGroup]="basicProductInformation">
           <ng-template matStepLabel>Basic Product Information</ng-template>
@@ -47,12 +58,15 @@
                     +
                   </button>
                 </div>
-                <select id="brand" formControlName="brandId">
-                  <option value="" disabled>- Please select -</option>
-                  <option *ngFor="let brand of brands" [value]="brand._id">
-                    {{ brand.BrandName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="brand"
+                  formControlName="brandId"
+                  [items]="brands"
+                  bindLabel="BrandName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="brandId?.hasError('required') && brandId?.touched"
                   class="text-danger"
@@ -77,15 +91,15 @@
                     +
                   </button>
                 </div>
-                <select id="category" formControlName="categoryId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let category of categories"
-                    [value]="category._id"
-                  >
-                    {{ category.CategoryName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="category"
+                  formControlName="categoryId"
+                  [items]="categories"
+                  bindLabel="CategoryName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     categoryId?.hasError('required') && categoryId?.touched
@@ -112,15 +126,15 @@
                     +
                   </button>
                 </div>
-                <select id="collection" formControlName="collectionId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let collection of collections"
-                    [value]="collection._id"
-                  >
-                    {{ collection.CollectionName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="collection"
+                  formControlName="collectionId"
+                  [items]="collections"
+                  bindLabel="CollectionName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     collectionId?.hasError('required') && collectionId?.touched
@@ -149,6 +163,29 @@
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="quantity">Quantity <span class="required">*</span></label>
+                <input
+                  id="quantity"
+                  type="number"
+                  placeholder="Enter Quantity"
+                  formControlName="quantity"
+                  [min]="isEditing ? 0 : 1"
+                />
+                <span
+                  *ngIf="quantity?.hasError('required') && quantity?.touched"
+                  class="text-danger"
+                  >Quantity is required</span
+                >
+                <span
+                  *ngIf="quantity?.hasError('min') && quantity?.touched"
+                  class="text-danger"
+                  >Quantity must be at least {{ isEditing ? 0 : 1 }}</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="country-select">
                 <div class="lookup-label-row">
                   <label for="recipientId"
@@ -164,15 +201,15 @@
                     +
                   </button>
                 </div>
-                <select id="recipientId" formControlName="recipientId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let recipient of recipients"
-                    [value]="recipient._id"
-                  >
-                    {{ recipient.RecipientName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="recipientId"
+                  formControlName="recipientId"
+                  [items]="recipients"
+                  bindLabel="RecipientName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     recipientId?.hasError('required') && recipientId?.touched
@@ -184,6 +221,14 @@
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
             <button
               mat-button
               matStepperNext
@@ -215,12 +260,15 @@
                     +
                   </button>
                 </div>
-                <select id="dialColorId" formControlName="dialColorId">
-                  <option value="" disabled>- Please select -</option>
-                  <option *ngFor="let color of dialColors" [value]="color._id">
-                    {{ color.DialColorName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="dialColorId"
+                  formControlName="dialColorId"
+                  [items]="dialColors"
+                  bindLabel="DialColorName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     dialColorId?.hasError('required') && dialColorId?.touched
@@ -278,15 +326,15 @@
                     +
                   </button>
                 </div>
-                <select id="movementId" formControlName="movementId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let movement of movements"
-                    [value]="movement._id"
-                  >
-                    {{ movement.MovementName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="movementId"
+                  formControlName="movementId"
+                  [items]="movements"
+                  bindLabel="MovementName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     movementId?.hasError('required') && movementId?.touched
@@ -313,15 +361,15 @@
                     +
                   </button>
                 </div>
-                <select id="strapMaterialId" formControlName="strapMaterialId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let strapMaterial of strapMaterials"
-                    [value]="strapMaterial._id"
-                  >
-                    {{ strapMaterial.StrapMaterialName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="strapMaterialId"
+                  formControlName="strapMaterialId"
+                  [items]="strapMaterials"
+                  bindLabel="StrapMaterialName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     strapMaterialId?.hasError('required') &&
@@ -349,15 +397,15 @@
                     +
                   </button>
                 </div>
-                <select id="caseMaterialId" formControlName="caseMaterialId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let caseMaterial of caseMaterials"
-                    [value]="caseMaterial._id"
-                  >
-                    {{ caseMaterial.CaseMaterialName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="caseMaterialId"
+                  formControlName="caseMaterialId"
+                  [items]="caseMaterials"
+                  bindLabel="CaseMaterialName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     caseMaterialId?.hasError('required') &&
@@ -385,15 +433,15 @@
                     +
                   </button>
                 </div>
-                <select id="watchMarkersId" formControlName="watchMarkersId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let watchMarker of watchMarkers"
-                    [value]="watchMarker._id"
-                  >
-                    {{ watchMarker.WatchMarkerName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="watchMarkersId"
+                  formControlName="watchMarkersId"
+                  [items]="watchMarkers"
+                  bindLabel="WatchMarkerName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
                 <span
                   *ngIf="
                     watchMarkersId?.hasError('required') &&
@@ -408,7 +456,8 @@
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="checkout-form-list">
                 <label for="manufacturerProductNumber"
-                  >Manufacturer Product Number</label
+                  >Manufacturer Product Number
+                  <span class="required">*</span></label
                 >
                 <input
                   id="manufacturerProductNumber"
@@ -416,18 +465,29 @@
                   placeholder="Enter Manufacturer Product Number"
                   formControlName="manufacturerProductNumber"
                 />
+                <span
+                  *ngIf="
+                    manufacturerProductNumber?.hasError('required') &&
+                    manufacturerProductNumber?.touched
+                  "
+                  class="text-danger"
+                  >Manufacturer Product Number is required</span
+                >
               </div>
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-              <div class="checkout-form-list">
+              <div class="country-select">
                 <label for="guarantee">Guarantee</label>
-                <input
-                  id="guarantee"
-                  type="text"
-                  placeholder="Enter Guarantee"
-                  formControlName="guarantee"
-                />
+                <select id="guarantee" formControlName="guarantee">
+                  <option value="" disabled>- Please select -</option>
+                  <option
+                    *ngFor="let guarantee of guaranteeOptions"
+                    [value]="guarantee.id"
+                  >
+                    {{ guarantee.name }}
+                  </option>
+                </select>
               </div>
             </div>
 
@@ -445,19 +505,27 @@
                     +
                   </button>
                 </div>
-                <select id="deliveryOptionId" formControlName="deliveryOptionId">
-                  <option value="" disabled>- Please select -</option>
-                  <option
-                    *ngFor="let deliveryOptions of deliveryOptions"
-                    [value]="deliveryOptions._id"
-                  >
-                    {{ deliveryOptions.DeliveryOptionName }}
-                  </option>
-                </select>
+                <ng-select
+                  id="deliveryOptionId"
+                  formControlName="deliveryOptionId"
+                  [items]="deliveryOptions"
+                  bindLabel="DeliveryOptionName"
+                  bindValue="_id"
+                  placeholder="- Please select -"
+                  [clearable]="false"
+                ></ng-select>
               </div>
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
@@ -505,6 +573,14 @@
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
@@ -539,6 +615,14 @@
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
@@ -579,11 +663,14 @@
                   class="col-auto m-2"
                   *ngFor="let img of uploadedImages; let i = index"
                 >
-                  <div class="position-relative image-container">
+                  <div
+                    class="position-relative product-upload__frame"
+                    [class.product-upload__frame--primary]="img.isPrimary"
+                  >
                     <img
                       [src]="img.url"
                       alt="product-img"
-                      class="uploaded-img m-2"
+                      class="product-upload__img m-2"
                     />
                     <a
                       (click)="removeImage(img, i)"
@@ -591,17 +678,53 @@
                     >
                       <i class="fa fa-times"></i>
                     </a>
+                    <span *ngIf="img.isPrimary" class="product-upload__badge"
+                      >Primary</span
+                    >
+                  </div>
+                  <div class="text-center mt-2">
+                    <span *ngIf="img.isPrimary" class="product-upload__current"
+                      >Primary image</span
+                    >
+                    <a
+                      *ngIf="!img.isPrimary"
+                      class="cursor-pointer product-upload__set-primary"
+                      (click)="setPrimaryImage(i)"
+                      >Set as primary</a
+                    >
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="d-md-flex justify-content-end">
+            <button
+              type="button"
+              mat-button
+              class="os-btn mr-5"
+              (click)="cancel()"
+              [disabled]="isSubmitting"
+            >
+              Cancel
+            </button>
             <button mat-button matStepperPrevious class="os-btn mr-5">
               Back
             </button>
-            <button mat-button matStepperNext class="os-btn">
-              {{ !productData ? "Create Product" : "Update Product" }}
+            <button
+              mat-button
+              type="submit"
+              class="os-btn"
+              [disabled]="isSubmitting"
+            >
+              {{
+                isSubmitting
+                  ? productData
+                    ? "Updating..."
+                    : "Creating..."
+                  : productData
+                    ? "Update Product"
+                    : "Create Product"
+              }}
             </button>
           </div>
         </form>
@@ -639,16 +762,16 @@
           <label for="newLookupBrand"
             >Brand <span class="required">*</span></label
           >
-          <select
+          <ng-select
             id="newLookupBrand"
             [(ngModel)]="newLookupBrandId"
             [ngModelOptions]="{ standalone: true }"
-          >
-            <option value="" disabled>- Please select -</option>
-            <option *ngFor="let brand of brands" [value]="brand._id">
-              {{ brand.BrandName }}
-            </option>
-          </select>
+            [items]="brands"
+            bindLabel="BrandName"
+            bindValue="_id"
+            placeholder="- Please select -"
+            [clearable]="false"
+          ></ng-select>
         </div>
         <div class="checkout-form-list">
           <label for="newLookupName"

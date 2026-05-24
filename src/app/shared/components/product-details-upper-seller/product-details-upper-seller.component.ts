@@ -2,6 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IProduct, Product } from '../../types/product-d-t';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
+import {
+  getPrimaryImageUrl,
+  sortImagesPrimaryFirst,
+} from '../../utils/product-images';
 
 @Component({
   selector: 'app-product-details-upper-seller',
@@ -21,8 +25,13 @@ export class ProductDetailsUpperSellerComponent {
 
   ngOnInit() {
     if (this.product) {
-      this.productService.activeImg = this.product.Images[0].ImageURL;
+      this.productService.activeImg = getPrimaryImageUrl(this.product.Images);
     }
+  }
+
+  // Thumbnail strip with the primary image first.
+  get orderedImages(): any[] {
+    return sortImagesPrimaryFirst(this.product?.Images);
   }
 
   editProduct(item: any) {

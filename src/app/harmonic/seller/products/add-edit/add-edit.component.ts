@@ -25,8 +25,7 @@ import {
   UPDATE_PRODUCT_DETAILS,
   POST_UPLOAD_IMAGES,
   POST_PRODUCT_IMAGES,
-  DELETE_IMAGE_S3,
-  DELETE_IMAGE_DB,
+  UPDATE_PRODUCT_IMAGE,
   CREATE_BRAND,
   CREATE_CATEGORY,
   CREATE_COLLECTION,
@@ -63,8 +62,9 @@ interface SelectOption {
 }
 
 interface UploadedImage {
-  file: File;
+  file?: File;
   url: string;
+  isPrimary?: boolean;
 }
 
 interface LookupConfig {
@@ -105,8 +105,17 @@ export class AddEditComponent implements OnInit {
   // Component state
   isLinear = true;
   isEditing = false;
+  // True while an existing product is being fetched in edit mode, so the form
+  // shows skeletons instead of an empty stepper.
+  isLoadingProduct = false;
+  // True while a create/update request is in flight, so the submit button shows
+  // a loading state and can't be double-clicked.
+  isSubmitting = false;
   productId?: string;
   uploadedImages: UploadedImage[] = [];
+  // IDs of already-saved images the seller removed; sent on update so the
+  // backend deletes them. New (unsaved) images just drop from the array.
+  removedImageIds: string[] = [];
   errorMessage = '';
 
   // Dropdown options
@@ -119,6 +128,11 @@ export class AddEditComponent implements OnInit {
     { id: 'Yes', name: 'Yes' },
     { id: 'No', name: 'No' },
     { id: 'Both', name: 'Both' },
+  ];
+  // Guarantee is a simple Yes/No choice.
+  guaranteeOptions: any = [
+    { id: 'Yes', name: 'Yes' },
+    { id: 'No', name: 'No' },
   ];
   movements: Movement[] = [];
   strapMaterials: StrapMaterial[] = [];
@@ -247,6 +261,7 @@ export class AddEditComponent implements OnInit {
     private genericService: GenericService,
     private toastrService: ToastrService,
     private store: Store,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -261,24 +276,30 @@ export class AddEditComponent implements OnInit {
   private initializeForms(): void {
     this.basicProductInformation = this.fb.group({
       productName: ['', Validators.required],
-      brandId: ['', Validators.required],
-      categoryId: ['', Validators.required],
-      collectionId: ['', Validators.required],
+      // ng-select treats '' as a selected value (adds .ng-has-value and hides
+      // the placeholder); use null so "- Please select -" shows on a fresh form.
+      brandId: [null, Validators.required],
+      categoryId: [null, Validators.required],
+      collectionId: [null, Validators.required],
       price: ['', Validators.required],
-      recipientId: ['', Validators.required],
+      quantity: [null, [Validators.required, Validators.min(1)]],
+      recipientId: [null, Validators.required],
     });
 
     this.productInformation = this.fb.group({
-      dialColorId: ['', Validators.required],
+      // ng-select-bound controls use null so the placeholder shows; the two
+      // native <select>s (waterResistant, guarantee) keep '' for their
+      // disabled value="" placeholder option.
+      dialColorId: [null, Validators.required],
       diameter: ['', Validators.required],
       waterResistant: [''],
-      movementId: ['', Validators.required],
-      strapMaterialId: ['', Validators.required],
-      caseMaterialId: ['', Validators.required],
-      watchMarkersId: ['', Validators.required],
-      manufacturerProductNumber: [''],
+      movementId: [null, Validators.required],
+      strapMaterialId: [null, Validators.required],
+      caseMaterialId: [null, Validators.required],
+      watchMarkersId: [null, Validators.required],
+      manufacturerProductNumber: ['', Validators.required],
       guarantee: [''],
-      deliveryOptionId: [''],
+      deliveryOptionId: [null],
     });
 
     this.productDescription = this.fb.group({
@@ -348,51 +369,69 @@ export class AddEditComponent implements OnInit {
   private async loadProductData(): Promise<void> {
     if (!this.productId) return;
     try {
+      this.isLoadingProduct = true;
       const url = GET_PRODUCT_BY_ID + `${this.productId}`;
-      this.genericService.getObservable(url).subscribe((response) => {
-        const data = response?.data[0];
-        this.productData = response?.data[0];
-        this.basicProductInformation.setValue({
-          productName: data.ProductName,
-          brandId: data.Details.BrandId,
-          categoryId: data.Details.CategoryId,
-          collectionId: data.Details.CollectionId,
-          price: data.Price,
-          recipientId: data.Details.RecipientId,
-        });
+      this.genericService.getObservable(url).subscribe({
+        next: (response) => {
+          const data = response?.data[0];
+          this.productData = response?.data[0];
+          // In edit mode quantity can be 0 (no stock), so relax the min to 0.
+          this.basicProductInformation.get('quantity')?.setValidators([
+            Validators.required,
+            Validators.min(0),
+          ]);
+          this.basicProductInformation.get('quantity')?.updateValueAndValidity();
 
-        this.productInformation.setValue({
-          dialColorId: data.Details.DialColorId,
-          diameter: data.Details.Diameter,
-          waterResistant: data.Details.WaterResistant,
-          movementId: data.Details.MovementId,
-          strapMaterialId: data.Details.StrapMaterialId,
-          caseMaterialId: data.Details.CaseMaterialId,
-          watchMarkersId: data.Details.WatchMarkerId,
-          manufacturerProductNumber: data.Details.ManufacturerProductNumber,
-          guarantee: data.Details.Guarantee,
-          deliveryOptionId: data.Details.DeliveryOptionID,
-        });
+          this.basicProductInformation.setValue({
+            productName: data.ProductName,
+            brandId: data.Details.BrandId,
+            categoryId: data.Details.CategoryId,
+            collectionId: data.Details.CollectionId,
+            price: data.Price,
+            quantity: data.Quantity,
+            recipientId: data.Details.RecipientId,
+          });
 
-        this.productDescription.setValue({
-          shortTitle: data.Description.Title,
-          detailedDescription: data.Description.Content,
-          additionalDescription: data.Description.AdditionalDetails,
-        });
+          this.productInformation.setValue({
+            dialColorId: data.Details.DialColorId,
+            diameter: data.Details.Diameter,
+            waterResistant: data.Details.WaterResistant,
+            movementId: data.Details.MovementId,
+            strapMaterialId: data.Details.StrapMaterialId,
+            caseMaterialId: data.Details.CaseMaterialId,
+            watchMarkersId: data.Details.WatchMarkerId,
+            manufacturerProductNumber: data.Details.ManufacturerProductNumber,
+            guarantee: data.Details.Guarantee,
+            deliveryOptionId: data.Details.DeliveryOptionID,
+          });
 
-        this.deliveryAndReturns.setValue({
-          deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
-          returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
-        });
+          this.productDescription.setValue({
+            shortTitle: data.Description.Title,
+            detailedDescription: data.Description.Content,
+            additionalDescription: data.Description.AdditionalDetails,
+          });
 
-        this.uploadedImages = data.Images.map((el: any) => {
-          return { url: el.ImageURL, ...el };
-        });
+          this.deliveryAndReturns.setValue({
+            deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
+            returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
+          });
+
+          this.uploadedImages = data.Images.map((el: any) => {
+            return { url: el.ImageURL, isPrimary: !!el.IsPrimary, ...el };
+          });
+          this.ensurePrimaryImage();
+          this.isLoadingProduct = false;
+        },
+        error: (err) => {
+          console.error('Error loading product:', err);
+          this.isLoadingProduct = false;
+        },
       });
       // Example of loading product data
       // const product = await this.productService.getProduct(this.productId);
       // this.patchFormValues(product);
     } catch (error) {
+      this.isLoadingProduct = false;
       console.error('Error loading product:', error);
       // Handle error appropriately
     }
@@ -426,6 +465,9 @@ export class AddEditComponent implements OnInit {
   get price() {
     return this.basicProductInformation.get('price');
   }
+  get quantity() {
+    return this.basicProductInformation.get('quantity');
+  }
   get recipientId() {
     return this.basicProductInformation.get('recipientId');
   }
@@ -447,6 +489,14 @@ export class AddEditComponent implements OnInit {
   }
   get watchMarkersId() {
     return this.productInformation.get('watchMarkersId');
+  }
+  get manufacturerProductNumber() {
+    return this.productInformation.get('manufacturerProductNumber');
+  }
+
+  // Leave the add/edit flow and return to the seller's product list.
+  cancel(): void {
+    this.router.navigate(['/seller/product-list']);
   }
 
   onImageUpload(event: Event): void {
@@ -473,6 +523,8 @@ export class AddEditComponent implements OnInit {
             file,
             url: e.target.result as string,
           });
+          // Guarantee one image is always flagged primary (defaults to first).
+          this.ensurePrimaryImage();
         }
       };
       reader.readAsDataURL(file);
@@ -482,31 +534,46 @@ export class AddEditComponent implements OnInit {
   }
 
   removeImage(image: any, index: number): void {
-    if (image.key) {
-      const s3DeleteUrl = DELETE_IMAGE_S3;
-      const dbDeleteUrl = `${DELETE_IMAGE_DB}${image._id}`;
-
-      const deleteS3Payload = { imageUrl: image.key };
-
-      this.genericService
-        .deletePayloadObservable(s3DeleteUrl, deleteS3Payload)
-        .subscribe({
-          next: () => {
-            this.genericService.deleteObservable(dbDeleteUrl).subscribe({
-              next: () => {
-                this.uploadedImages.splice(index, 1);
-                this.toastrService.success('Image deleted successfully!');
-              },
-              error: () =>
-                this.toastrService.error('Failed to delete image from DB!'),
-            });
-          },
-          error: () =>
-            this.toastrService.error('Failed to delete image from S3!'),
-        });
-    } else {
-      this.uploadedImages.splice(index, 1);
+    // Already-saved images carry an _id: defer their deletion to the update
+    // call by collecting the id (sent as RemovedImageIDs). New images that were
+    // never persisted just drop from the local array.
+    if (image._id) {
+      this.removedImageIds.push(image._id);
     }
+    this.uploadedImages.splice(index, 1);
+    // Removing the primary promotes the next remaining image.
+    this.ensurePrimaryImage();
+  }
+
+  /** Mark a single image as the primary (the one shown first), clearing others. */
+  setPrimaryImage(index: number): void {
+    this.uploadedImages.forEach((img, i) => (img.isPrimary = i === index));
+  }
+
+  /**
+   * Ensure exactly one image is flagged primary. If the seller hasn't chosen
+   * one (e.g. after the first upload or after deleting the current primary),
+   * the first image becomes primary by default.
+   */
+  private ensurePrimaryImage(): void {
+    if (this.uploadedImages.length === 0) return;
+    if (!this.uploadedImages.some((img) => img.isPrimary)) {
+      this.uploadedImages[0].isPrimary = true;
+    }
+  }
+
+  /**
+   * Map freshly uploaded URLs (returned in the same order the files were
+   * appended) onto the IsPrimary flag the seller picked for each new image.
+   */
+  private buildImageUrlsPayload(
+    uploadedUrls: string[],
+  ): { url: string; IsPrimary: boolean }[] {
+    const newImages = this.uploadedImages.filter((img) => img.file);
+    return uploadedUrls.map((url, idx) => ({
+      url,
+      IsPrimary: !!newImages[idx]?.isPrimary,
+    }));
   }
 
   // Convenience accessor for the template.
@@ -522,7 +589,7 @@ export class AddEditComponent implements OnInit {
     this.newLookupName = '';
     // Pre-fill the modal's brand selector with the brand already chosen on the
     // form (only relevant for the Collection modal).
-    this.newLookupBrandId = this.basicProductInformation.value.brandId || '';
+    this.newLookupBrandId = this.basicProductInformation.value.brandId || null;
     this.lookupError = '';
     this.isAddLookupModalOpen = true;
   }
@@ -655,7 +722,11 @@ export class AddEditComponent implements OnInit {
         'Please fill in all required fields and upload at least 2 images';
       return;
     }
+    if (this.isSubmitting) {
+      return;
+    }
 
+    this.isSubmitting = true;
     const formData = new FormData();
 
     // Combine all form values
@@ -684,6 +755,7 @@ export class AddEditComponent implements OnInit {
       console.error('Error submitting form:', error);
       this.errorMessage =
         'An error occurred while saving the product. Please try again.';
+      this.isSubmitting = false;
     }
   }
 
@@ -695,14 +767,19 @@ export class AddEditComponent implements OnInit {
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
+
+    // Captured from the first response so we can open the new product's details.
+    let newProductId: string | undefined;
 
     this.genericService
       .postObservable(this.CREATE_PRODUCT_URL, productPayload) // First API call
       .pipe(
         concatMap((response) => {
           const productId = response?.data?.insertedId;
+          newProductId = productId;
 
           // Prepare the payloads for the next calls
           const productDetailsPayload = {
@@ -743,8 +820,8 @@ export class AddEditComponent implements OnInit {
               concatMap((imageResponse) => {
                 const imagesPayload = {
                   ProductID: productId,
-                  ImageURLs: (imageResponse?.data?.urls ?? []).map(
-                    (url: string) => ({ url }),
+                  ImageURLs: this.buildImageUrlsPayload(
+                    imageResponse?.data?.urls ?? [],
                   ),
                 };
                 return this.genericService
@@ -778,14 +855,24 @@ export class AddEditComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
+          this.isSubmitting = false;
           this.toastrService.success('Product created successfully !');
           this.resetForm();
+          if (newProductId) {
+            this.goToProductDetails(newProductId);
+          }
         },
         error: (err) => {
+          this.isSubmitting = false;
           console.error('Error creating product or related details:', err);
           this.toastrService.error('Error creating product or related details');
         },
       });
+  }
+
+  // Open the seller product-details page for the given product.
+  private goToProductDetails(productId: string): void {
+    this.router.navigate(['/seller/product-details', productId]);
   }
 
   resetForm() {
@@ -795,20 +882,27 @@ export class AddEditComponent implements OnInit {
     this.deliveryAndReturns.reset();
     this.media.reset();
     this.uploadedImages = [];
+    this.removedImageIds = [];
   }
 
   updateProduct(userId: string, productData: any, formData: any) {
     const productId = this.productData._id;
 
-    const productPayload = {
+    const productPayload: Record<string, any> = {
       // UserID: userId,
       ProductName: productData.productName,
       BrandID: productData.brandId,
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
+
+    // Tell the backend which already-saved images to delete.
+    if (this.removedImageIds.length) {
+      productPayload['RemovedImageIDs'] = this.removedImageIds;
+    }
 
     const productDetailsPayload = {
       DialColorID: productData.dialColorId,
@@ -838,9 +932,14 @@ export class AddEditComponent implements OnInit {
     // on user edits, not on the setValue() performed while loading the product.
     const updateRequests: Observable<any>[] = [];
 
-    if (this.basicProductInformation.dirty) {
+    // Fire the product PUT when basic info changed OR images were removed
+    // (RemovedImageIDs rides along on this same payload).
+    if (this.basicProductInformation.dirty || this.removedImageIds.length) {
       updateRequests.push(
-        this.genericService.putObservable(`${PRODUCT}/${productId}`, productPayload),
+        this.genericService.putObservable(
+          `${PRODUCT}/${productId}`,
+          productPayload,
+        ),
       );
     }
     if (this.productInformation.dirty) {
@@ -868,6 +967,20 @@ export class AddEditComponent implements OnInit {
       );
     }
 
+    // Changing the primary on an already-saved image isn't a form edit, so it
+    // needs an explicit PUT. Only send images whose flag actually changed
+    // (e.g. the new primary and the one it replaced).
+    this.uploadedImages.forEach((image: any) => {
+      if (image._id && !!image.isPrimary !== !!image.IsPrimary) {
+        updateRequests.push(
+          this.genericService.putObservable(
+            `${UPDATE_PRODUCT_IMAGE}${image._id}`,
+            { IsPrimary: !!image.isPrimary },
+          ),
+        );
+      }
+    });
+
     // Keep each request independent so one failure can't cancel the siblings
     // (forkJoin unsubscribes/aborts the rest the moment any source errors).
     const safeRequests = updateRequests.map((request$) =>
@@ -883,6 +996,7 @@ export class AddEditComponent implements OnInit {
 
     // Nothing was edited and no new images were added — skip the API calls.
     if (safeRequests.length === 0 && !hasNewImages) {
+      this.isSubmitting = false;
       this.toastrService.info('No changes to update');
       return;
     }
@@ -900,9 +1014,7 @@ export class AddEditComponent implements OnInit {
           switchMap((response) => {
             const imagesPayload = {
               ProductID: productId,
-              ImageURLs: (response?.data?.urls ?? []).map((url: string) => ({
-                url,
-              })),
+              ImageURLs: this.buildImageUrlsPayload(response?.data?.urls ?? []),
             };
             return this.genericService.postObservable(
               POST_PRODUCT_IMAGES,
@@ -920,14 +1032,17 @@ export class AddEditComponent implements OnInit {
       .pipe(
         switchMap(() => imageUpload$),
         catchError((err) => {
+          this.isSubmitting = false;
           console.error('Error updating product or related details:', err);
           this.toastrService.error('Error updating product or related details');
           throw err;
         }),
       )
       .subscribe(() => {
+        this.isSubmitting = false;
         this.toastrService.success('Product updated successfully!');
         this.resetForm();
+        this.goToProductDetails(productId);
       });
   }
 }

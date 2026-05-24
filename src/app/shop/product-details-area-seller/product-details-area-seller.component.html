@@ -60,22 +60,22 @@
                       <ul>
                         <li><span>Category</span></li>
                         <li class="value">
-                          <span>{{ product.Details.CategoryName }}</span>
+                          <span>{{ product.Details.CategoryName | dash }}</span>
                         </li>
 
                         <li><span>Watch Markers</span></li>
                         <li class="value">
-                          <span>{{ product.Details.WatchMarkerName }}</span>
+                          <span>{{ product.Details.WatchMarkerName | dash }}</span>
                         </li>
 
                         <li><span>Recipient</span></li>
                         <li class="value">
-                          <span>{{ product.Details.RecipientName }}</span>
+                          <span>{{ product.Details.RecipientName | dash }}</span>
                         </li>
 
                         <li><span>Case Material</span></li>
                         <li class="value">
-                          <span>{{ product.Details.CaseMaterialName }}</span>
+                          <span>{{ product.Details.CaseMaterialName | dash }}</span>
                         </li>
                       </ul>
                     </div>
@@ -84,23 +84,23 @@
                       <ul>
                         <li><span>Strap Material</span></li>
                         <li class="value">
-                          <span>{{ product.Details.StrapMaterialName }}</span>
+                          <span>{{ product.Details.StrapMaterialName | dash }}</span>
                         </li>
 
                         <li><span>Brand Collections</span></li>
                         <li class="value">
-                          <span>{{ product.Details.CollectionName }}</span>
+                          <span>{{ product.Details.CollectionName | dash }}</span>
                         </li>
 
                         <li><span>Water Resistant</span></li>
                         <li class="value">
-                          <span>{{ product.Details.WaterResistant }}</span>
+                          <span>{{ product.Details.WaterResistant | dash }}</span>
                         </li>
 
                         <li><span>Manufacturer Product Number</span></li>
                         <li class="value">
                           <span>{{
-                            product.Details.ManufacturerProductNumber
+                            product.Details.ManufacturerProductNumber | dash
                           }}</span>
                         </li>
                       </ul>
@@ -110,17 +110,17 @@
                       <ul>
                         <li><span>Movement</span></li>
                         <li class="value">
-                          <span>{{ product.Details.MovementName }}</span>
+                          <span>{{ product.Details.MovementName | dash }}</span>
                         </li>
 
                         <li><span>Dial Color</span></li>
                         <li class="value">
-                          <span>{{ product.Details.DialColorName }}</span>
+                          <span>{{ product.Details.DialColorName | dash }}</span>
                         </li>
 
                         <li><span>Diameter</span></li>
                         <li class="value">
-                          <span>{{ product.Details.Diameter }}</span>
+                          <span>{{ product.Details.Diameter | dash }}</span>
                         </li>
                       </ul>
                     </div>

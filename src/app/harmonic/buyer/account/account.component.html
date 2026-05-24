@@ -11,7 +11,12 @@
               <img src="assets/img/blog/comments/avater-3.png" alt="" />
             </div>
             <div class="profile__basic-content">
-              <h3 class="profile__basic-title">Welcome Back</h3>
+              <h3 class="profile__basic-title">
+                Welcome Back{{ displayName ? ", " + displayName : "" }}
+              </h3>
+              <p class="profile__basic-mail" *ngIf="userData?.email">
+                {{ userData.email }}
+              </p>
             </div>
           </div>
         </div>
@@ -76,6 +81,42 @@
               >
                 <i class="fa fa-file"></i> Orders
               </button>
+              <button
+                class="nav-link"
+                id="nav-wallet-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-wallet"
+                type="button"
+                role="tab"
+                aria-controls="nav-wallet"
+                aria-selected="false"
+              >
+                <i class="fa fa-wallet"></i> Wallet
+              </button>
+              <button
+                class="nav-link"
+                id="nav-address-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-address"
+                type="button"
+                role="tab"
+                aria-controls="nav-address"
+                aria-selected="false"
+              >
+                <i class="fa fa-location-arrow"></i> Address
+              </button>
+              <button
+                class="nav-link"
+                id="nav-bank-account-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-bank-account"
+                type="button"
+                role="tab"
+                aria-controls="nav-bank-account"
+                aria-selected="false"
+              >
+                <i class="fa fa-money-check"></i> Bank Account
+              </button>
 
               <!-- <button
                 class="nav-link"
@@ -130,24 +171,39 @@
                   ></app-skeleton>
 
                   <ng-container *ngIf="!profileLoading">
-                    <div class="profile__info-item" *ngIf="userData?.name">
+                    <div class="profile__info-item" *ngIf="displayName">
                       <p>Name</p>
-                      <h4>{{ userData?.name }}</h4>
+                      <h4>{{ displayName }}</h4>
                     </div>
                     <div class="profile__info-item">
                       <p>Email</p>
                       <h4>
                         <a
-                          href="{{ mail }}"
+                          href="mailto:{{ userData?.email }}"
                           class="__cf_email__"
-                          data-cfemail="94fdfaf2fbd4f1f0e1fff1e6baf7fbf9"
                           >{{ userData?.email }}</a
                         >
                       </h4>
                     </div>
-                    <div class="profile__info-item" *ngIf="userData?.phone">
+                    <div class="profile__info-item" *ngIf="displayPhone">
                       <p>Phone</p>
-                      <h4>{{ userData?.phone }}</h4>
+                      <h4>{{ displayPhone }}</h4>
+                    </div>
+                    <div class="profile__info-item" *ngIf="clientAddress as addr">
+                      <p>Default Address</p>
+                      <h4>
+                        <span class="d-block" *ngIf="addr.AddressLine1">
+                          {{ addr.AddressLine1
+                          }}{{ addr.AddressLine2 ? ", " + addr.AddressLine2 : "" }}
+                        </span>
+                        <span class="d-block">
+                          {{ addr.City }}{{ addr.City && addr.State ? ", " : "" }}
+                          {{ addr.State }} {{ addr.PostalCode }}
+                        </span>
+                        <span class="d-block" *ngIf="addr.Country">{{
+                          addr.Country
+                        }}</span>
+                      </h4>
                     </div>
                   </ng-container>
                 </div>
@@ -288,6 +344,475 @@
                 </div>
               </div>
             </div>
+            <div
+              class="tab-pane fade"
+              id="nav-wallet"
+              role="tabpanel"
+              aria-labelledby="nav-wallet-tab"
+            >
+              <div class="order__info">
+                <div
+                  class="order__info-top d-flex justify-content-between align-items-center"
+                >
+                  <h3 class="order__info-title">My Wallet</h3>
+                  <button
+                    type="button"
+                    class="os-btn os-btn-black"
+                    [disabled]="!canWithdraw"
+                    (click)="openWithdraw()"
+                  >
+                    <i class="fa fa-arrow-up"></i> Withdraw
+                  </button>
+                </div>
+
+                <!-- Loading: shimmer placeholder for the balance summary -->
+                <div *ngIf="walletLoading" class="white-bg mb-20">
+                  <app-skeleton type="profile-row" [count]="1"></app-skeleton>
+                </div>
+
+                <!-- Balance summary — compact strip: headline available balance
+                     on the left, secondary figures inline on the right. -->
+                <div *ngIf="!walletLoading && wallet" class="wallet__summary white-bg mb-20">
+                  <div class="wallet__summary-main">
+                    <span class="wallet__summary-label">Available Balance</span>
+                    <h3 class="wallet__summary-value">
+                      {{ wallet.availableBalance | currency: "INR" }}
+                    </h3>
+                  </div>
+                  <div class="wallet__summary-stats">
+                    <div class="wallet__summary-stat">
+                      <span class="wallet__summary-label">Pending</span>
+                      <span class="wallet__summary-num">{{
+                        wallet.pendingBalance | currency: "INR"
+                      }}</span>
+                    </div>
+                    <div class="wallet__summary-stat">
+                      <span class="wallet__summary-label">In Process</span>
+                      <span class="wallet__summary-num">{{
+                        wallet.inProcessBalance | currency: "INR"
+                      }}</span>
+                    </div>
+                    <div class="wallet__summary-stat">
+                      <span class="wallet__summary-label">Withdrawn</span>
+                      <span class="wallet__summary-num">{{
+                        wallet.totalWithdrawn | currency: "INR"
+                      }}</span>
+                    </div>
+                    <div class="wallet__summary-stat">
+                      <span class="wallet__summary-label">Total Earned</span>
+                      <span class="wallet__summary-num">{{
+                        wallet.totalEarned | currency: "INR"
+                      }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sub-tabs: Sold Items / Payout History -->
+                <ul class="nav wallet__tabs mb-20">
+                  <li>
+                    <button
+                      type="button"
+                      class="wallet__tab"
+                      [class.active]="walletTab === 'items'"
+                      (click)="walletTab = 'items'"
+                    >
+                      Sold Items
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      class="wallet__tab"
+                      [class.active]="walletTab === 'payouts'"
+                      (click)="walletTab = 'payouts'"
+                    >
+                      Payout History
+                    </button>
+                  </li>
+                </ul>
+
+                <!-- Sold items breakdown -->
+                <ng-container *ngIf="walletTab === 'items'">
+                  <ul class="nav wallet__filters mb-15">
+                    <li *ngFor="let f of walletItemFilters">
+                      <button
+                        type="button"
+                        class="wallet__filter-btn"
+                        [class.active]="walletItemStatus === f.value"
+                        (click)="loadWalletItems(f.value)"
+                      >
+                        {{ f.label }}
+                      </button>
+                    </li>
+                  </ul>
+
+                  <div *ngIf="walletItemsLoading" class="order__list white-bg">
+                    <app-skeleton type="table-row" [count]="3"></app-skeleton>
+                  </div>
+
+                  <app-empty-state
+                    *ngIf="!walletItemsLoading && walletItems.length === 0"
+                    message="No Sold Items Found"
+                  ></app-empty-state>
+
+                  <div
+                    *ngIf="!walletItemsLoading && walletItems.length > 0"
+                    class="order__list white-bg table-responsive"
+                  >
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th style="width: 240px">Product</th>
+                          <th style="width: 130px">Sale Date</th>
+                          <th style="width: 110px">Net</th>
+                          <th style="width: 110px">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of walletItems">
+                          <td class="order__title pr-2 pl-2">
+                            <div class="d-flex align-items-center">
+                              <img
+                                *ngIf="item.ImageURL"
+                                [src]="item.ImageURL"
+                                [alt]="item.ProductName"
+                                class="product-img mr-10"
+                                style="
+                                  width: 48px;
+                                  height: 48px;
+                                  object-fit: cover;
+                                "
+                              />
+                              <span>{{ item.ProductName }}</span>
+                            </div>
+                          </td>
+                          <td class="order__title pr-2 pl-2">
+                            {{ item.SaleDate | date: "mediumDate" }}
+                          </td>
+                          <td class="order__title pr-2 pl-2">
+                            {{ item.NetAmount | currency: "INR" }}
+                          </td>
+                          <td class="order__title pr-2 pl-2">
+                            <span
+                              class="status-chip"
+                              [ngClass]="
+                                'status-chip--' + (item.Status | lowercase)
+                              "
+                            >
+                              {{ item.Status }}
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </ng-container>
+
+                <!-- Payout history -->
+                <ng-container *ngIf="walletTab === 'payouts'">
+                  <div *ngIf="withdrawalsLoading" class="order__list white-bg">
+                    <app-skeleton type="table-row" [count]="2"></app-skeleton>
+                  </div>
+
+                  <app-empty-state
+                    *ngIf="!withdrawalsLoading && withdrawals.length === 0"
+                    message="No Payouts Yet"
+                  ></app-empty-state>
+
+                  <div
+                    *ngIf="!withdrawalsLoading && withdrawals.length > 0"
+                    class="order__list white-bg table-responsive"
+                  >
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th style="width: 130px">Requested</th>
+                          <th style="width: 110px" class="text-end">Amount</th>
+                          <th style="width: 200px">Bank</th>
+                          <th style="width: 150px">Status</th>
+                          <th style="width: 120px"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let w of withdrawals">
+                          <td class="order__title pr-2 pl-2">
+                            {{ w.RequestedAt | date: "mediumDate" }}
+                          </td>
+                          <td class="order__title pr-2 pl-2 text-end">
+                            {{ w.Amount | currency: "INR" }}
+                          </td>
+                          <td class="order__title pr-2 pl-2">
+                            <span class="d-block">{{
+                              w.BankSnapshot?.BankName
+                            }}</span>
+                            <span class="d-block text-muted">{{
+                              w.BankSnapshot?.AccountNumber
+                            }}</span>
+                          </td>
+                          <td class="order__title pr-2 pl-2">
+                            <span
+                              class="status-chip"
+                              [ngClass]="'status-chip--' + (w.Status | lowercase)"
+                            >
+                              {{ w.Status }}
+                            </span>
+                            <span
+                              *ngIf="w.Status === 'Paid' && w.Reference"
+                              class="d-block text-muted mt-1"
+                              >Ref: {{ w.Reference }}</span
+                            >
+                            <span
+                              *ngIf="w.Status === 'Rejected' && w.Notes"
+                              class="d-block text-danger mt-1"
+                              >{{ w.Notes }}</span
+                            >
+                          </td>
+                          <td class="order__title pr-2 pl-2 text-center">
+                            <button
+                              *ngIf="w.Status === 'Pending'"
+                              type="button"
+                              class="os-btn os-btn-black wallet__cancel-btn"
+                              [disabled]="cancellingId === w._id"
+                              (click)="cancelWithdrawal(w)"
+                            >
+                              <i
+                                class="fa"
+                                [ngClass]="
+                                  cancellingId === w._id
+                                    ? 'fa-spinner fa-spin'
+                                    : 'fa-times'
+                                "
+                              ></i>
+                              Cancel
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+            <div
+              class="tab-pane fade"
+              id="nav-address"
+              role="tabpanel"
+              aria-labelledby="nav-address-tab"
+            >
+              <div class="order__info">
+                <div
+                  class="order__info-top d-flex justify-content-between align-items-center"
+                >
+                  <h3 class="order__info-title">My Addresses</h3>
+                  <button
+                    type="button"
+                    class="os-btn os-btn-black"
+                    (click)="openAddAddress()"
+                  >
+                    <i class="fa fa-plus"></i> Add Address
+                  </button>
+                </div>
+
+                <!-- Loading: shimmer card placeholders -->
+                <div *ngIf="addressesLoading" class="white-bg">
+                  <app-skeleton type="profile-row" [count]="2"></app-skeleton>
+                </div>
+
+                <app-empty-state
+                  *ngIf="!addressesLoading && addresses.length === 0"
+                  message="No Addresses Found"
+                ></app-empty-state>
+
+                <div
+                  *ngIf="!addressesLoading && addresses.length > 0"
+                  class="row mt-20"
+                >
+                  <div
+                    class="col-xxl-6 col-md-6 mb-30"
+                    *ngFor="let addr of addresses"
+                  >
+                    <div class="account-card white-bg h-100">
+                      <div
+                        class="account-card__head d-flex justify-content-between align-items-center"
+                      >
+                        <h4 class="account-card__label">
+                          <i class="fa fa-location-arrow"></i>
+                          {{ addr.FirstName }} {{ addr.LastName }}
+                        </h4>
+                        <span *ngIf="addr.IsDefault" class="account-card__badge"
+                          >Default</span
+                        >
+                      </div>
+                      <div class="account-card__body">
+                        <p>{{ addr.AddressLine1 }}</p>
+                        <p *ngIf="addr.AddressLine2">{{ addr.AddressLine2 }}</p>
+                        <p>
+                          {{ addr.City }}, {{ addr.State }}
+                          {{ addr.PostalCode }}
+                        </p>
+                        <p>{{ addr.Country }}</p>
+                        <p>{{ addr.Phone }}</p>
+                      </div>
+                      <div class="account-card__actions d-flex">
+                        <button
+                          type="button"
+                          class="os-btn os-btn-black"
+                          (click)="openEditAddress(addr)"
+                        >
+                          <i class="fa-regular fa-pen-to-square"></i> Edit
+                        </button>
+                        <button
+                          type="button"
+                          class="os-btn os-btn-black"
+                          (click)="deleteAddress(addr)"
+                          [disabled]="deletingAddressId === addr._id"
+                        >
+                          <i
+                            class="fa"
+                            [ngClass]="
+                              deletingAddressId === addr._id
+                                ? 'fa-spinner fa-spin'
+                                : 'fa-trash'
+                            "
+                          ></i>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="tab-pane fade"
+              id="nav-bank-account"
+              role="tabpanel"
+              aria-labelledby="nav-bank-account-tab"
+            >
+              <div class="order__info">
+                <div
+                  class="order__info-top d-flex justify-content-between align-items-center"
+                >
+                  <h3 class="order__info-title">Bank Accounts</h3>
+                  <button
+                    type="button"
+                    class="os-btn os-btn-black"
+                    (click)="openAddBankAccount()"
+                  >
+                    <i class="fa fa-plus"></i> Add Account
+                  </button>
+                </div>
+
+                <!-- Loading: shimmer card placeholders -->
+                <div *ngIf="bankAccountsLoading" class="white-bg">
+                  <app-skeleton type="profile-row" [count]="2"></app-skeleton>
+                </div>
+
+                <app-empty-state
+                  *ngIf="!bankAccountsLoading && bankAccounts.length === 0"
+                  message="No Bank Accounts Found"
+                ></app-empty-state>
+
+                <div
+                  *ngIf="!bankAccountsLoading && bankAccounts.length > 0"
+                  class="row mt-20"
+                >
+                  <div
+                    class="col-xxl-6 col-md-6 mb-30"
+                    *ngFor="let bank of bankAccounts"
+                  >
+                    <div class="account-card white-bg h-100">
+                      <div class="account-card__head">
+                        <h4 class="account-card__label">
+                          <i class="fa fa-money-check"></i> {{ bank.BankName }}
+                        </h4>
+                        <div class="d-flex align-items-center gap-2 mt-8">
+                          <span
+                            class="verify-badge"
+                            [ngClass]="{
+                              'verify-badge--verified': bank.VerificationStatus === 'verified',
+                              'verify-badge--failed': bank.VerificationStatus === 'failed',
+                              'verify-badge--unverified': bank.VerificationStatus !== 'verified' && bank.VerificationStatus !== 'failed'
+                            }"
+                          >
+                            <i class="fa fa-circle"></i>
+                            {{ bank.VerificationStatus === 'verified' ? 'Verified' : bank.VerificationStatus === 'failed' ? 'Verification Failed' : 'Unverified' }}
+                          </span>
+                          <span *ngIf="bank.IsDefault" class="account-card__badge">Default</span>
+                        </div>
+                      </div>
+                      <div class="account-card__body">
+                        <div class="account-card__row">
+                          <span>Account Holder</span>
+                          <strong>{{ bank.AccountHolderName }}</strong>
+                        </div>
+                        <div class="account-card__row">
+                          <span>Account Number</span>
+                          <strong>{{ bank.AccountNumber }}</strong>
+                        </div>
+                        <div class="account-card__row">
+                          <span>IFSC Code</span>
+                          <strong>{{ bank.IFSC }}</strong>
+                        </div>
+                        <div
+                          class="account-card__row"
+                          *ngIf="bank.VerificationStatus === 'verified' && bank.VerifiedName"
+                        >
+                          <span>Verified Name</span>
+                          <strong>{{ bank.VerifiedName }}</strong>
+                        </div>
+                      </div>
+                      <div class="account-card__actions d-flex">
+                        <button
+                          *ngIf="bank.VerificationStatus !== 'verified'"
+                          type="button"
+                          class="os-btn os-btn-black"
+                          [disabled]="verifyingId === bank._id || verifyRetryCountdown[bank._id] > 0"
+                          (click)="openVerifyConfirm(bank)"
+                        >
+                          <i
+                            class="fa"
+                            [ngClass]="verifyingId === bank._id ? 'fa-spinner fa-spin' : 'fa-shield-check'"
+                          ></i>
+                          {{
+                            verifyingId === bank._id
+                              ? 'Verifying…'
+                              : verifyRetryCountdown[bank._id] > 0
+                              ? 'Retry in ' + verifyRetryCountdown[bank._id] + 's'
+                              : bank.VerificationStatus === 'failed'
+                              ? 'Retry Verification'
+                              : 'Verify Account'
+                          }}
+                        </button>
+                        <button
+                          type="button"
+                          class="os-btn os-btn-black"
+                          (click)="openEditBankAccount(bank)"
+                        >
+                          <i class="fa-regular fa-pen-to-square"></i> Edit
+                        </button>
+                        <button
+                          type="button"
+                          class="os-btn os-btn-black"
+                          (click)="deleteBankAccount(bank)"
+                          [disabled]="deletingBankId === bank._id"
+                        >
+                          <i
+                            class="fa"
+                            [ngClass]="
+                              deletingBankId === bank._id
+                                ? 'fa-spinner fa-spin'
+                                : 'fa-trash'
+                            "
+                          ></i>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -315,128 +840,133 @@
         <div class="product__modal-inner p-30">
           <!-- Captured for the PDF -->
           <div #invoiceContent class="invoice" *ngIf="selectedOrder">
-          <!-- Header (kept in the body so it appears in the downloaded PDF) -->
-          <div
-            class="invoice__head d-flex justify-content-between align-items-center"
-          >
-            <h2 class="invoice__title">Invoice</h2>
-            <img
-              *ngIf="companyLogoUrl"
-              [src]="companyLogoUrl"
-              [alt]="company.name"
-              class="invoice__logo"
-            />
-            <span *ngIf="!companyLogoUrl" class="invoice__brand">
-              {{ company.name }}
-            </span>
-          </div>
-          <hr class="invoice__rule" />
-
-          <!-- Parties -->
-          <div class="invoice__parties d-flex justify-content-between">
-            <div class="invoice__col">
-              <h6 class="invoice__label">Billed By</h6>
-              <p class="invoice__text invoice__name">{{ company.name }}</p>
-              <p class="invoice__text">{{ company.address }}</p>
-              <p class="invoice__text">{{ company.email }}</p>
-              <p class="invoice__text">{{ company.phone }}</p>
-            </div>
-            <div class="invoice__col">
-              <h6 class="invoice__label">Billed To</h6>
-              <ng-container *ngIf="clientAddress as addr; else noClient">
-                <p class="invoice__text invoice__name">
-                  {{ addr.FirstName }} {{ addr.LastName }}
-                </p>
-                <p class="invoice__text" *ngIf="addr.AddressLine1">
-                  {{ addr.AddressLine1
-                  }}{{ addr.AddressLine2 ? ", " + addr.AddressLine2 : "" }}
-                </p>
-                <p class="invoice__text">
-                  {{ addr.City }}{{ addr.City && addr.State ? ", " : "" }}
-                  {{ addr.State }} {{ addr.PostalCode }}
-                </p>
-                <p class="invoice__text" *ngIf="addr.Country">
-                  {{ addr.Country }}
-                </p>
-                <p class="invoice__text" *ngIf="userData?.email">
-                  {{ userData.email }}
-                </p>
-                <p class="invoice__text" *ngIf="addr.Phone || userData?.phone">
-                  {{ addr.Phone || userData?.phone }}
-                </p>
-              </ng-container>
-              <ng-template #noClient>
-                <p class="invoice__text" *ngIf="userData?.email">
-                  {{ userData.email }}
-                </p>
-                <p class="invoice__text" *ngIf="!userData?.email">—</p>
-              </ng-template>
-            </div>
-          </div>
-
-          <!-- Meta -->
-          <div class="invoice__meta">
-            <div class="invoice__meta-row">
-              <h6 class="invoice__label">ISSUED ON</h6>
-              <span class="invoice__text">
-                {{ selectedOrder.CheckoutDate | date: "mediumDate" }}
+            <!-- Header (kept in the body so it appears in the downloaded PDF) -->
+            <div
+              class="invoice__head d-flex justify-content-between align-items-center"
+            >
+              <h2 class="invoice__title">Invoice</h2>
+              <img
+                *ngIf="companyLogoDataUrl"
+                [src]="companyLogoDataUrl"
+                [alt]="company.name"
+                class="invoice__logo"
+              />
+              <span *ngIf="!companyLogoDataUrl" class="invoice__brand">
+                {{ company.name }}
               </span>
             </div>
-            <div class="invoice__meta-row">
-              <h6 class="invoice__label">PAYMENT STATUS</h6>
-              <span class="invoice__text">{{ selectedOrder.PaymentStatus }}</span>
-            </div>
-            <div class="invoice__meta-row">
-              <h6 class="invoice__label">INVOICE #</h6>
-              <span class="invoice__text invoice__number">
-                {{ selectedOrder._id | uppercase }}
-              </span>
-            </div>
-          </div>
+            <hr class="invoice__rule" />
 
-          <!-- Items -->
-          <table class="table invoice__items">
-            <thead>
-              <tr>
-                <th>ITEM DESCRIPTION</th>
-                <th class="text-end">UNIT PRICE</th>
-                <th class="text-end">TOTAL PRICE</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let product of selectedOrder.Products">
-                <td>{{ product.ProductName }}</td>
-                <td class="text-end">
-                  {{ product.Price | platformPrice | currency: "INR" }}
-                </td>
-                <td class="text-end">
-                  {{ product.Price | platformPrice | currency: "INR" }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <!-- Parties -->
+            <div class="invoice__parties d-flex justify-content-between">
+              <div class="invoice__col">
+                <h6 class="invoice__label">Billed By</h6>
+                <p class="invoice__text invoice__name">{{ company.name }}</p>
+                <p class="invoice__text">{{ company.address }}</p>
+                <p class="invoice__text">{{ company.email }}</p>
+                <p class="invoice__text">{{ company.phone }}</p>
+              </div>
+              <div class="invoice__col">
+                <h6 class="invoice__label">Billed To</h6>
+                <ng-container *ngIf="clientAddress as addr; else noClient">
+                  <p class="invoice__text invoice__name">
+                    {{ addr.FirstName }} {{ addr.LastName }}
+                  </p>
+                  <p class="invoice__text" *ngIf="addr.AddressLine1">
+                    {{ addr.AddressLine1
+                    }}{{ addr.AddressLine2 ? ", " + addr.AddressLine2 : "" }}
+                  </p>
+                  <p class="invoice__text">
+                    {{ addr.City }}{{ addr.City && addr.State ? ", " : "" }}
+                    {{ addr.State }} {{ addr.PostalCode }}
+                  </p>
+                  <p class="invoice__text" *ngIf="addr.Country">
+                    {{ addr.Country }}
+                  </p>
+                  <p class="invoice__text" *ngIf="userData?.email">
+                    {{ userData.email }}
+                  </p>
+                  <p
+                    class="invoice__text"
+                    *ngIf="addr.Phone || userData?.phone"
+                  >
+                    {{ addr.Phone || userData?.phone }}
+                  </p>
+                </ng-container>
+                <ng-template #noClient>
+                  <p class="invoice__text" *ngIf="userData?.email">
+                    {{ userData.email }}
+                  </p>
+                  <p class="invoice__text" *ngIf="!userData?.email">—</p>
+                </ng-template>
+              </div>
+            </div>
 
-          <!-- Totals -->
-          <div class="invoice__totals">
-            <div class="invoice__totals-row">
-              <span>Subtotal</span>
-              <span>{{ invoiceSubtotal | currency: "INR" }}</span>
+            <!-- Meta -->
+            <div class="invoice__meta">
+              <div class="invoice__meta-row">
+                <h6 class="invoice__label">ISSUED ON</h6>
+                <span class="invoice__text">
+                  {{ selectedOrder.CheckoutDate | date: "mediumDate" }}
+                </span>
+              </div>
+              <div class="invoice__meta-row">
+                <h6 class="invoice__label">PAYMENT STATUS</h6>
+                <span class="invoice__text">{{
+                  selectedOrder.PaymentStatus
+                }}</span>
+              </div>
+              <div class="invoice__meta-row">
+                <h6 class="invoice__label">INVOICE #</h6>
+                <span class="invoice__text invoice__number">
+                  {{ selectedOrder._id | uppercase }}
+                </span>
+              </div>
             </div>
-            <div class="invoice__totals-row" *ngIf="platformCharges > 0">
-              <span>Platform Charges</span>
-              <span>{{ platformCharges | currency: "INR" }}</span>
-            </div>
-            <div class="invoice__totals-row invoice__totals-row--grand">
-              <span>Total Amount Paid</span>
-              <span>{{ invoiceTotal | currency: "INR" }}</span>
-            </div>
-          </div>
 
-          <p class="invoice__footer-note">
-            Thank you for shopping with {{ company.name }}. We appreciate your
-            purchase. If you have any questions regarding this invoice, feel free
-            to contact us at {{ company.email }}.
-          </p>
+            <!-- Items -->
+            <table class="table invoice__items">
+              <thead>
+                <tr>
+                  <th>ITEM DESCRIPTION</th>
+                  <th class="text-end">UNIT PRICE</th>
+                  <th class="text-end">TOTAL PRICE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let product of selectedOrder.Products">
+                  <td>{{ product.ProductName }}</td>
+                  <td class="text-end">
+                    {{ product.Price | platformPrice | currency: "INR" }}
+                  </td>
+                  <td class="text-end">
+                    {{ product.Price | platformPrice | currency: "INR" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Totals -->
+            <div class="invoice__totals">
+              <div class="invoice__totals-row">
+                <span>Subtotal</span>
+                <span>{{ invoiceSubtotal | currency: "INR" }}</span>
+              </div>
+              <div class="invoice__totals-row" *ngIf="platformCharges > 0">
+                <span>Platform Charges</span>
+                <span>{{ platformCharges | currency: "INR" }}</span>
+              </div>
+              <div class="invoice__totals-row invoice__totals-row--grand">
+                <span>Total Amount Paid</span>
+                <span>{{ invoiceTotal | currency: "INR" }}</span>
+              </div>
+            </div>
+
+            <p class="invoice__footer-note">
+              Thank you for shopping with {{ company.name }}. We appreciate your
+              purchase. If you have any questions regarding this invoice, feel
+              free to contact us at {{ company.email }}.
+            </p>
           </div>
 
           <div class="invoice__actions d-flex justify-content-end mt-30">
@@ -461,3 +991,214 @@
   *ngIf="isInvoiceModalOpen && !isCapturing"
   class="modal-backdrop fade show"
 ></div>
+
+<!-- Address add/edit modal — reuses the shared address form -->
+<div
+  *ngIf="isAddressModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button
+            type="button"
+            aria-label="Close"
+            (click)="closeAddressModal()"
+          >
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">
+            {{ editingAddress ? "Edit Address" : "Add Address" }}
+          </h3>
+          <app-address-form
+            [address]="editingAddress"
+            [saving]="savingAddress"
+            (save)="onAddressSave($event)"
+            (cancel)="closeAddressModal()"
+          ></app-address-form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isAddressModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Bank account add/edit modal — reuses the shared bank-account form -->
+<div
+  *ngIf="isBankModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeBankModal()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">
+            {{ editingBankAccount ? "Edit Bank Account" : "Add Bank Account" }}
+          </h3>
+          <app-bank-account-form
+            [account]="editingBankAccount"
+            [saving]="savingBankAccount"
+            (save)="onBankAccountSave($event)"
+            (cancel)="closeBankModal()"
+          ></app-bank-account-form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isBankModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Withdraw modal — choose a payout destination for all available funds -->
+<div
+  *ngIf="isWithdrawModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeWithdraw()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">Withdraw Funds</h3>
+
+          <p class="mb-20">
+            You are about to withdraw your full available balance of
+            <strong>{{ wallet?.availableBalance | currency: "INR" }}</strong>.
+            Choose the bank account to receive the payout.
+          </p>
+
+          <!-- No payout destinations yet -->
+          <div *ngIf="bankAccounts.length === 0" class="text-center pt-20 pb-20">
+            <p>You don't have a bank account yet.</p>
+            <p class="text-muted">
+              Add a bank account from the Bank Account tab before withdrawing.
+            </p>
+          </div>
+
+          <!-- Bank account picker -->
+          <div
+            *ngIf="bankAccounts.length > 0"
+            class="withdraw__accounts mb-20"
+          >
+            <label
+              *ngFor="let bank of bankAccounts"
+              class="withdraw__account"
+              [class.active]="selectedBankAccountId === bank._id"
+              [class.withdraw__account--disabled]="!bank.IsVerified"
+              [title]="!bank.IsVerified ? 'Verify this account first to use it for withdrawals' : ''"
+            >
+              <input
+                type="radio"
+                name="withdrawBank"
+                [value]="bank._id"
+                [(ngModel)]="selectedBankAccountId"
+                [disabled]="!bank.IsVerified"
+                class="mr-10"
+              />
+              <span class="withdraw__account-body">
+                <strong>{{ bank.BankName }}</strong>
+                <span class="d-block text-muted">
+                  {{ bank.AccountHolderName }} • {{ bank.AccountNumber }}
+                </span>
+                <span *ngIf="!bank.IsVerified" class="d-block mt-1" style="font-size:12px;color:#c0392b;">
+                  Not verified — cannot use for withdrawals
+                </span>
+              </span>
+              <span *ngIf="bank.IsDefault" class="account-card__badge"
+                >Default</span
+              >
+            </label>
+          </div>
+
+          <div class="d-flex justify-content-end mt-10">
+            <button type="button" class="os-btn mr-5" (click)="closeWithdraw()">
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="os-btn os-btn-black"
+              [disabled]="
+                !selectedBankAccountId || requestingWithdrawal
+              "
+              (click)="requestWithdrawal()"
+            >
+              {{ requestingWithdrawal ? "Requesting…" : "Confirm Withdrawal" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isWithdrawModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Verify bank account confirmation dialog -->
+<div
+  *ngIf="verifyConfirmAccount"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeVerifyConfirm()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">Verify Bank Account</h3>
+
+          <p class="mb-20">
+            We will send <strong>₹1</strong> to your account ending in
+            <strong>{{ verifyConfirmAccount.AccountNumber | slice:-4 }}</strong>
+            to verify it. This amount will be refunded. Proceed?
+          </p>
+
+          <div class="verify-notice mb-20">
+            <i class="fa fa-info-circle mr-5"></i>
+            Once your bank account is verified, HarmonicTime will send payouts to it as-is.
+            Please make sure the details are correct. Any payout issues after verification are your responsibility.
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button type="button" class="os-btn mr-5" (click)="closeVerifyConfirm()">
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="os-btn os-btn-black"
+              [disabled]="verifyingId === verifyConfirmAccount._id"
+              (click)="verifyBankAccount(verifyConfirmAccount)"
+            >
+              <i
+                class="fa"
+                [ngClass]="verifyingId === verifyConfirmAccount._id ? 'fa-spinner fa-spin' : 'fa-check'"
+              ></i>
+              Proceed
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="verifyConfirmAccount" class="modal-backdrop fade show"></div>

@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { AdminLayoutComponent } from 'src/app/shared/layout/admin-layout/admin-layout.component';
 import { UsersComponent } from './users/users.component';
 import { RolesComponent } from './roles/roles.component';
+import { ApprovePaymentsComponent } from './approve-payments/approve-payments.component';
+import { AdminOffersComponent } from './offers/offers.component';
 
 const routes: Routes = [
   {
@@ -18,6 +20,16 @@ const routes: Routes = [
         path: 'manage-roles',
         component: RolesComponent,
         title: 'Manage Roles',
+      },
+      {
+        path: 'approve-payments',
+        component: ApprovePaymentsComponent,
+        title: 'Approve Payments',
+      },
+      {
+        path: 'offers',
+        component: AdminOffersComponent,
+        title: 'Offers',
       },
     ],
   },

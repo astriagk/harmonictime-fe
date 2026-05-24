@@ -30,7 +30,7 @@
               <tr *ngFor="let item of cartItems">
                 <td class="product-thumbnail">
                   <a [routerLink]="['/shop/shop-details', item._id]">
-                    <img [src]="item.Images[0]?.ImageURL" alt="product-img" />
+                    <img [src]="item.Images | primaryImage" alt="product-img" />
                   </a>
                 </td>
                 <td class="product-name">

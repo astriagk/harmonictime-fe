@@ -37,8 +37,8 @@ export class OffcanvasComponent {
     }
   }
 
-  checkRole(value: boolean | undefined) {
-    // if (value) return this.roles?.includes(2);
+  checkRole(menu: IMobileMenu) {
+    if (menu.admin) return this.roles?.includes(1);
     return true;
   }
 }

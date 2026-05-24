@@ -23,7 +23,7 @@
               'menu-item-has-children has-droupdown ' +
               (activeMenu === menu.title ? 'active' : '')
             "
-            *ngIf="menu.dropdownMenu?.length && checkRole(menu.seller)"
+            *ngIf="menu.dropdownMenu?.length && checkRole(menu)"
           >
             <a (click)="handleOpenMenu(menu.title)">{{ menu.title }}</a>
             <ul
@@ -36,7 +36,7 @@
               </li>
             </ul>
           </li>
-          <li *ngIf="!menu.dropdownMenu && checkRole(menu.seller)">
+          <li *ngIf="!menu.dropdownMenu && checkRole(menu)">
             <a [routerLink]="menu.link">{{ menu.title }}</a>
           </li>
         </ng-container>

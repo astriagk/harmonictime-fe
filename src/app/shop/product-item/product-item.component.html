@@ -1,10 +1,10 @@
 <div class="product__wrapper mb-60">
   <div class="product__thumb">
     <a [routerLink]="['/buyer/product-details', product._id]" class="w-img">
-      <img [src]="product?.Images[0]?.ImageURL" alt="product-img" />
+      <img [src]="product?.Images | primaryImage" alt="product-img" />
       <img
         class="product__thumb-2"
-        [src]="product?.Images[1]?.ImageURL || product?.Images[0]?.ImageURL"
+        [src]="product?.Images | secondaryImage"
         alt="product-img"
       />
     </a>

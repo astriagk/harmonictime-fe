@@ -1,0 +1,150 @@
+/* ng-select overrides — make <ng-select> match the native
+   `.country-select select` (see _shop.scss:1812): 1px #eaedff border, 45px
+   tall, #6f7172 text, 10px left padding, white bg, FA chevron, #222 focus border.
+   Panels render inline and use a high z-index to sit above sibling fields and
+   the add-lookup modal (z-index 1055). The Material vertical stepper's
+   overflow clipping is relaxed in add-edit.component.scss so panels aren't cut. */
+@import 'variables';
+
+// Colours use existing theme tokens: $border (≈ the #eaedff field border),
+// $black-soft-3 (≈ the #6f7172 field text), $black-3 (#222 focus border).
+$ns-height: 45px;
+
+// ---- Closed control: mirror `.country-select select` ----
+.country-select .ng-select {
+  font-family: $pop;
+
+  .ng-select-container {
+    display: flex;
+    align-items: center;
+    min-height: $ns-height;
+    border: 1px solid $border;
+    border-radius: 0; // square when closed
+    color: $black-soft-3;
+    background-color: $white;
+
+    .ng-value-container {
+      flex: 1;
+      align-items: center;
+      padding-left: 10px;
+      padding-right: 30px; // room for the chevron
+
+      .ng-value,
+      .ng-placeholder {
+        color: $black-soft-3;
+        font-size: 14px;
+      }
+
+      .ng-input > input {
+        color: $black-soft-3;
+        font-family: $pop;
+        // _common.scss applies `transition: .3s` to every <input>; ng-select
+        // resizes the search input's width as you type, so that transition
+        // animates the width and makes typing feel laggy. Disable it here.
+        transition: none;
+      }
+    }
+
+    // Match the native inputs: no hover shadow.
+    &:hover {
+      box-shadow: none;
+    }
+  }
+
+  &.ng-select-single .ng-select-container {
+    height: $ns-height;
+
+    .ng-value-container .ng-input {
+      top: 10px; // centre the search input within 45px
+      left: 0;
+      padding-left: 10px;
+      padding-right: 30px;
+    }
+  }
+
+  // Hide placeholder once a value is selected.
+  &.ng-has-value .ng-placeholder,
+  .ng-has-value .ng-placeholder {
+    display: none;
+  }
+
+  // Chevron — same FA glyph the native select uses.
+  .ng-arrow-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    padding: 0;
+
+    .ng-arrow {
+      border: none;
+      width: auto;
+      height: auto;
+
+      &::before {
+        content: "\f107"; // fa-angle-down
+        font-family: "Font Awesome 5 Pro";
+        font-weight: 700;
+        font-size: 16px;
+        color: $black-soft-3;
+        line-height: 1;
+      }
+    }
+  }
+
+  // On focus/open: 2px dark #222 border, matching `.select-one select`.
+  &.ng-select-focused:not(.ng-select-opened) > .ng-select-container,
+  &.ng-select-opened > .ng-select-container {
+    border: 2px solid $black-3; // #222
+    box-shadow: none;
+  }
+
+  // Square when closed; rounded only when the dropdown is open.
+  &.ng-select-opened > .ng-select-container {
+    border-radius: 4px;
+  }
+}
+
+// ---- Dropdown panel (rendered inline, drops directly under the control) ----
+.ng-dropdown-panel {
+  left: 0;
+  width: 100%;
+  z-index: 1100; // stack above sibling fields / the add-lookup modal (1055)
+  background-color: $white;
+  border: 1px solid $border;
+  // border-radius left to the default theme so the panel corners match the control.
+  box-shadow: 0 4px 12px rgba($black-2, 0.12);
+
+  &.ng-select-bottom {
+    top: 100%;
+    margin-top: -1px;
+  }
+
+  &.ng-select-top {
+    bottom: 100%;
+    margin-bottom: -1px;
+  }
+
+  .ng-dropdown-panel-items .ng-option {
+    padding: 8px 10px;
+    font-size: 14px;
+    color: $black-soft-3;
+    background-color: $white;
+
+    &.ng-option-marked {
+      background-color: rgba($theme-color, 0.12);
+      color: $heading-color;
+    }
+
+    &.ng-option-selected,
+    &.ng-option-selected.ng-option-marked {
+      background-color: $theme-color;
+      color: $white;
+      font-weight: 500;
+    }
+
+    &.ng-option-disabled {
+      color: $grey-3;
+    }
+  }
+}

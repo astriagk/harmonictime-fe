@@ -34,9 +34,8 @@ export class NavManusComponent {
     return classes.join(' ');
   }
 
-  checkRole(value: boolean | undefined) {
-    // TODO: all the users are sellers / buyers
-    // if (value) return this.roles?.includes(2);
+  checkRole(item: IMenuType) {
+    if (item.admin) return this.roles?.includes(1);
     return true;
   }
 }

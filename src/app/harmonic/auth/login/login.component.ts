@@ -28,6 +28,7 @@ export class LoginComponent {
 
   public loginForm!: FormGroup;
   public formSubmitted = false;
+  public isSubmitting = false;
 
   private userDataSub?: Subscription;
   private userErrorSub?: Subscription;
@@ -66,6 +67,7 @@ export class LoginComponent {
       this.userDataSub?.unsubscribe();
       this.userErrorSub?.unsubscribe();
 
+      this.isSubmitting = true;
       this.store.dispatch(loginUser({ url, payload }));
 
       this.userErrorSub = this.store
@@ -75,6 +77,7 @@ export class LoginComponent {
           take(1)
         )
         .subscribe(() => {
+          this.isSubmitting = false;
           this.toastrService.error('Please check email and password !');
         });
 
@@ -86,6 +89,7 @@ export class LoginComponent {
         )
         .subscribe((state: any) => {
           localStorage.setItem('token', JSON.stringify(state?.data?.token));
+          this.isSubmitting = false;
           this.toastrService.success('Login successful !');
           this.loginForm.reset();
           this.formSubmitted = false; // Reset the form submission state
