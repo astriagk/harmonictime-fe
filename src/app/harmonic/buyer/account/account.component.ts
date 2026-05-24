@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import {
   BANK_ACCOUNTS,
   BANK_ACCOUNT_BY_ID,
+  bankAccountVerify,
   CREATE_ADDRESS,
   DELETE_ADDRESS,
   GET_ADDRESSES_BY_USER,
@@ -97,6 +98,12 @@ export class AccountComponent {
   public editingBankAccount: any = null; // null = add, populated = edit
   public savingBankAccount = false;
   public deletingBankId: string | null = null;
+
+  // Bank account verification (Razorpay penny-drop).
+  public verifyConfirmAccount: any = null; // non-null = confirm dialog is open
+  public verifyingId: string | null = null;
+  // Per-account cooldown counters (seconds remaining after a failed attempt).
+  public verifyRetryCountdown: Record<string, number> = {};
 
   // Company info shown in the invoice header
   public readonly company = companyDetails;
@@ -262,10 +269,10 @@ export class AccountComponent {
     if (!this.canWithdraw) {
       return;
     }
-    // Preselect the default bank account, else the first one.
-    const def = this.bankAccounts.find((b) => b.IsDefault);
-    this.selectedBankAccountId =
-      def?._id ?? this.bankAccounts[0]?._id ?? null;
+    // Only verified accounts can receive payouts. Prefer the verified default.
+    const verified = this.bankAccounts.filter((b) => b.IsVerified);
+    const def = verified.find((b) => b.IsDefault) ?? verified[0];
+    this.selectedBankAccountId = def?._id ?? null;
     this.isWithdrawModalOpen = true;
   }
 
@@ -336,6 +343,7 @@ export class AccountComponent {
       next: (res) => {
         this.bankAccounts = res?.data ?? [];
         this.bankAccountsLoading = false;
+        this.restoreVerifyCountdowns();
       },
       error: () => {
         this.bankAccounts = [];
@@ -408,6 +416,108 @@ export class AccountComponent {
       this.toastrService.error(message);
     } finally {
       this.deletingBankId = null;
+    }
+  }
+
+  // --- Bank account verification ---------------------------------------------
+
+  openVerifyConfirm(bank: any): void {
+    this.verifyConfirmAccount = bank;
+  }
+
+  closeVerifyConfirm(): void {
+    this.verifyConfirmAccount = null;
+  }
+
+  async verifyBankAccount(bank: any): Promise<void> {
+    const id = bank?._id;
+    if (!id || this.verifyingId) {
+      return;
+    }
+    this.verifyConfirmAccount = null;
+    this.verifyingId = id;
+    try {
+      const res = await firstValueFrom(
+        this.genericService.postObservableToken(bankAccountVerify(id), {})
+      );
+      const data = res?.data;
+      const verifiedName: string = data?.VerifiedName ?? '';
+      const successMsg = verifiedName
+        ? `Account verified! Bank confirmed name: ${verifiedName}`
+        : 'Bank account verified successfully';
+      this.toastrService.success(successMsg);
+
+      if (
+        verifiedName &&
+        bank.AccountHolderName &&
+        verifiedName.trim().toUpperCase() !==
+          bank.AccountHolderName.trim().toUpperCase()
+      ) {
+        this.toastrService.warning(
+          `The bank-registered name (${verifiedName}) is different from what you entered. Please ensure this is correct.`,
+          '',
+          { timeOut: 8000 }
+        );
+      }
+
+      const idx = this.bankAccounts.findIndex((b) => b._id === id);
+      if (idx !== -1) {
+        this.bankAccounts[idx] = {
+          ...this.bankAccounts[idx],
+          IsVerified: true,
+          VerificationStatus: 'verified',
+          VerifiedName: verifiedName,
+        };
+      }
+    } catch (error: any) {
+      const message =
+        error?.error?.message ??
+        'Bank account verification failed. Please check your account number and IFSC code.';
+      this.toastrService.error(message);
+
+      const idx = this.bankAccounts.findIndex((b) => b._id === id);
+      if (idx !== -1) {
+        this.bankAccounts[idx] = {
+          ...this.bankAccounts[idx],
+          VerificationStatus: 'failed',
+        };
+      }
+      this.startVerifyCountdown(id);
+    } finally {
+      this.verifyingId = null;
+    }
+  }
+
+  private startVerifyCountdown(id: string): void {
+    const endsAt = Date.now() + 60_000;
+    localStorage.setItem(`verify_cooldown_${id}`, String(endsAt));
+    this.resumeVerifyCountdown(id, endsAt);
+  }
+
+  private resumeVerifyCountdown(id: string, endsAt: number): void {
+    const remaining = Math.ceil((endsAt - Date.now()) / 1000);
+    if (remaining <= 0) {
+      localStorage.removeItem(`verify_cooldown_${id}`);
+      return;
+    }
+    this.verifyRetryCountdown[id] = remaining;
+    const timer = setInterval(() => {
+      this.verifyRetryCountdown[id]--;
+      if (this.verifyRetryCountdown[id] <= 0) {
+        delete this.verifyRetryCountdown[id];
+        localStorage.removeItem(`verify_cooldown_${id}`);
+        clearInterval(timer);
+      }
+    }, 1000);
+  }
+
+  private restoreVerifyCountdowns(): void {
+    for (const bank of this.bankAccounts) {
+      const key = `verify_cooldown_${bank._id}`;
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        this.resumeVerifyCountdown(bank._id, Number(stored));
+      }
     }
   }
 

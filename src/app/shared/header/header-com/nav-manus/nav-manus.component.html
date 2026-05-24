@@ -1,10 +1,11 @@
 <nav>
   <ul>
+    <ng-container *ngFor="let item of menu_data; let index = index">
     <li
-      *ngFor="let item of menu_data; let index = index"
+      *ngIf="checkRole(item)"
       [ngClass]="getMenuClasses(item)"
     >
-      <a *ngIf="checkRole(item)" [routerLink]="item.link">{{
+      <a [routerLink]="item.link">{{
         item.title
       }}</a>
 
@@ -35,5 +36,6 @@
         </li>
       </ul>
     </li>
+    </ng-container>
   </ul>
 </nav>

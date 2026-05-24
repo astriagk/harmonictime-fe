@@ -129,11 +129,27 @@ export const GET_WALLET_ITEMS = `${baseUrl}/wallet/items`;
 // bank accounts (payout destinations)
 export const BANK_ACCOUNTS = `${baseUrl}/bank-accounts`; // GET list, POST add
 export const BANK_ACCOUNT_BY_ID = `${baseUrl}/bank-accounts/`; // append id (PUT/DELETE)
+// verify a bank account via Razorpay penny-drop: POST /bank-accounts/:id/verify
+export const bankAccountVerify = (id: string) => `${baseUrl}/bank-accounts/${id}/verify`;
 
 // withdrawals (seller side)
 export const WITHDRAWALS = `${baseUrl}/withdrawals`; // GET history, POST request
 // cancel a pending withdrawal: `${WITHDRAWAL_BY_ID}${id}/cancel`
 export const WITHDRAWAL_BY_ID = `${baseUrl}/withdrawals/`;
+
+// seller — bulk offer assignment / removal
+export const BULK_OFFER = `${baseUrl}/products/bulk-offer`;
+
+// admin — user management
+export const ADMIN_USERS = `${baseUrl}/admin/users`;
+export const ADMIN_USER_BY_ID = `${baseUrl}/admin/users/`; // append /:id
+export const adminUserAction = (id: string, action: 'block' | 'unblock' | 'suspend') =>
+  `${baseUrl}/admin/users/${id}/${action}`;
+
+// admin — withdrawal management
+export const ADMIN_WITHDRAWALS = `${baseUrl}/admin/withdrawals`;
+export const adminWithdrawalAction = (id: string, action: 'pay' | 'reject') =>
+  `${baseUrl}/admin/withdrawals/${id}/${action}`;
 
 // offers (admin)
 export const OFFERS = `${baseUrl}/offers`; // GET active, POST create

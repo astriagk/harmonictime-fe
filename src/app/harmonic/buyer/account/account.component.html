@@ -722,15 +722,24 @@
                     *ngFor="let bank of bankAccounts"
                   >
                     <div class="account-card white-bg h-100">
-                      <div
-                        class="account-card__head d-flex justify-content-between align-items-center"
-                      >
+                      <div class="account-card__head">
                         <h4 class="account-card__label">
                           <i class="fa fa-money-check"></i> {{ bank.BankName }}
                         </h4>
-                        <span *ngIf="bank.IsDefault" class="account-card__badge"
-                          >Default</span
-                        >
+                        <div class="d-flex align-items-center gap-2 mt-8">
+                          <span
+                            class="verify-badge"
+                            [ngClass]="{
+                              'verify-badge--verified': bank.VerificationStatus === 'verified',
+                              'verify-badge--failed': bank.VerificationStatus === 'failed',
+                              'verify-badge--unverified': bank.VerificationStatus !== 'verified' && bank.VerificationStatus !== 'failed'
+                            }"
+                          >
+                            <i class="fa fa-circle"></i>
+                            {{ bank.VerificationStatus === 'verified' ? 'Verified' : bank.VerificationStatus === 'failed' ? 'Verification Failed' : 'Unverified' }}
+                          </span>
+                          <span *ngIf="bank.IsDefault" class="account-card__badge">Default</span>
+                        </div>
                       </div>
                       <div class="account-card__body">
                         <div class="account-card__row">
@@ -745,8 +754,36 @@
                           <span>IFSC Code</span>
                           <strong>{{ bank.IFSC }}</strong>
                         </div>
+                        <div
+                          class="account-card__row"
+                          *ngIf="bank.VerificationStatus === 'verified' && bank.VerifiedName"
+                        >
+                          <span>Verified Name</span>
+                          <strong>{{ bank.VerifiedName }}</strong>
+                        </div>
                       </div>
                       <div class="account-card__actions d-flex">
+                        <button
+                          *ngIf="bank.VerificationStatus !== 'verified'"
+                          type="button"
+                          class="os-btn os-btn-black"
+                          [disabled]="verifyingId === bank._id || verifyRetryCountdown[bank._id] > 0"
+                          (click)="openVerifyConfirm(bank)"
+                        >
+                          <i
+                            class="fa"
+                            [ngClass]="verifyingId === bank._id ? 'fa-spinner fa-spin' : 'fa-shield-check'"
+                          ></i>
+                          {{
+                            verifyingId === bank._id
+                              ? 'Verifying…'
+                              : verifyRetryCountdown[bank._id] > 0
+                              ? 'Retry in ' + verifyRetryCountdown[bank._id] + 's'
+                              : bank.VerificationStatus === 'failed'
+                              ? 'Retry Verification'
+                              : 'Verify Account'
+                          }}
+                        </button>
                         <button
                           type="button"
                           class="os-btn os-btn-black"
@@ -1064,18 +1101,24 @@
               *ngFor="let bank of bankAccounts"
               class="withdraw__account"
               [class.active]="selectedBankAccountId === bank._id"
+              [class.withdraw__account--disabled]="!bank.IsVerified"
+              [title]="!bank.IsVerified ? 'Verify this account first to use it for withdrawals' : ''"
             >
               <input
                 type="radio"
                 name="withdrawBank"
                 [value]="bank._id"
                 [(ngModel)]="selectedBankAccountId"
+                [disabled]="!bank.IsVerified"
                 class="mr-10"
               />
               <span class="withdraw__account-body">
                 <strong>{{ bank.BankName }}</strong>
                 <span class="d-block text-muted">
                   {{ bank.AccountHolderName }} • {{ bank.AccountNumber }}
+                </span>
+                <span *ngIf="!bank.IsVerified" class="d-block mt-1" style="font-size:12px;color:#c0392b;">
+                  Not verified — cannot use for withdrawals
                 </span>
               </span>
               <span *ngIf="bank.IsDefault" class="account-card__badge"
@@ -1105,3 +1148,57 @@
   </div>
 </div>
 <div *ngIf="isWithdrawModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Verify bank account confirmation dialog -->
+<div
+  *ngIf="verifyConfirmAccount"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeVerifyConfirm()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">Verify Bank Account</h3>
+
+          <p class="mb-20">
+            We will send <strong>₹1</strong> to your account ending in
+            <strong>{{ verifyConfirmAccount.AccountNumber | slice:-4 }}</strong>
+            to verify it. This amount will be refunded. Proceed?
+          </p>
+
+          <div class="verify-notice mb-20">
+            <i class="fa fa-info-circle mr-5"></i>
+            Once your bank account is verified, HarmonicTime will send payouts to it as-is.
+            Please make sure the details are correct. Any payout issues after verification are your responsibility.
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button type="button" class="os-btn mr-5" (click)="closeVerifyConfirm()">
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="os-btn os-btn-black"
+              [disabled]="verifyingId === verifyConfirmAccount._id"
+              (click)="verifyBankAccount(verifyConfirmAccount)"
+            >
+              <i
+                class="fa"
+                [ngClass]="verifyingId === verifyConfirmAccount._id ? 'fa-spinner fa-spin' : 'fa-check'"
+              ></i>
+              Proceed
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="verifyConfirmAccount" class="modal-backdrop fade show"></div>

@@ -5,21 +5,13 @@
     class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20"
   >
     <h2 class="order-info__title">Offers</h2>
-    <div class="d-flex align-items-center">
-      <app-pagination
-        *ngIf="offers.length > 0"
-        [data]="offers"
-        [paginate]="paginate"
-        (setPage)="setPage($event)"
-      ></app-pagination>
-      <button
-        type="button"
-        class="os-btn os-btn-black ml-20"
-        (click)="openCreate()"
-      >
-        New Offer
-      </button>
-    </div>
+    <button
+      type="button"
+      class="os-btn os-btn-black"
+      (click)="openCreate()"
+    >
+      New Offer
+    </button>
   </header>
 
   <!-- Loading skeleton -->
@@ -97,6 +89,15 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Pagination — bottom right -->
+  <div *ngIf="offers.length > 0" class="d-flex justify-content-end mt-20 pb-40">
+    <app-pagination
+      [data]="offers"
+      [paginate]="paginate"
+      (setPage)="setPage($event)"
+    ></app-pagination>
   </div>
 </section>
 
@@ -252,27 +253,20 @@
   tabindex="-1"
   role="dialog"
 >
-  <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+  <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
-      <div class="product__modal-wrapper p-relative">
-        <div class="product__modal-close p-absolute">
-          <button type="button" aria-label="Close" (click)="cancelDelete()">
-            <i class="fal fa-times"></i>
+      <div class="product__modal-inner text-center">
+        <h5 class="mb-15">Delete Offer?</h5>
+        <p class="mb-25">
+          <strong>{{ confirmDeleteName }}</strong> will be permanently removed.
+        </p>
+        <div class="d-flex justify-content-center">
+          <button type="button" class="os-btn mr-10" (click)="cancelDelete()">
+            No, Keep It
           </button>
-        </div>
-        <div class="product__modal-inner text-center">
-          <h5 class="mb-15">Delete Offer?</h5>
-          <p class="mb-25">
-            <strong>{{ confirmDeleteName }}</strong> will be permanently removed.
-          </p>
-          <div class="d-flex justify-content-center">
-            <button type="button" class="os-btn mr-10" (click)="cancelDelete()">
-              No, Keep It
-            </button>
-            <button type="button" class="os-btn os-btn-black" (click)="confirmDelete()">
-              Yes, Delete
-            </button>
-          </div>
+          <button type="button" class="os-btn os-btn-black" (click)="confirmDelete()">
+            Yes, Delete
+          </button>
         </div>
       </div>
     </div>
