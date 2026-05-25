@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { GenericService } from 'src/app/shared/services/generic.service';
@@ -19,7 +19,7 @@ import { filter, take } from 'rxjs/operators';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   isShowPass = false;
 
   handleShowPass() {
@@ -96,5 +96,10 @@ export class LoginComponent {
           this.router.navigate(['/buyer/products']);
         });
     }
+  }
+
+  ngOnDestroy() {
+    this.userDataSub?.unsubscribe();
+    this.userErrorSub?.unsubscribe();
   }
 }

@@ -43,9 +43,9 @@
         <ng-container *ngFor="let order of paginationOrders; let i = index">
           <tr
             [routerLink]="
-              order.IsSold ? null : ['/seller/product-details', order._id]
+              order.RemainingQuantity === 0 ? null : ['/seller/product-details', order._id]
             "
-            [class.product-list__row]="!order.IsSold"
+            [class.product-list__row]="order.RemainingQuantity !== 0"
             [attr.aria-label]="'View order #' + order.id + ' details'"
           >
             <td>{{ i + 1 }}</td>
@@ -61,8 +61,8 @@
             </td>
             <td>{{ (order.Quantity ?? '—') }} / {{ (order.RemainingQuantity ?? '—') }}</td>
             <td (click)="$event.stopPropagation()">
-              <span *ngIf="order.IsSold" class="sold-badge">Sold</span>
-              <label *ngIf="!order.IsSold" class="availability-switch">
+              <span *ngIf="order.RemainingQuantity === 0" class="sold-badge">Sold</span>
+              <label *ngIf="order.RemainingQuantity !== 0" class="availability-switch">
                 <input
                   type="checkbox"
                   [checked]="order.IsAvailable"

@@ -43,11 +43,11 @@ export class HomeSevenComponent {
 
   // Static fallback until the CMS `video_area` block loads.
   public video_area: IVideoArea = {
-    bgImg: '/assets/img/bg/01.jpg',
+    bgImg: 'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/video_area/dadacacb-09fc-40a7-bde1-8f0c38f0e1bb-1779435991494',
     videoTitle: 'Art of Restoring',
     videoId: '8nsL3Uryv0U',
     description:
-      '"Art of Restoring" is dedicated to reviving the beauty and precision of vintage and pre-owned watches.',
+      '"Art of Restoring" celebrates the craftsmanship behind bringing vintage and pre-owned watches back to life with precision, care, and timeless passion.',
   };
 
   public big_item_1: IProduct | undefined;

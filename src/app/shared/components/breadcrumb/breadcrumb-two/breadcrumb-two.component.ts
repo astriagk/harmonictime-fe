@@ -13,7 +13,7 @@ export class BreadcrumbTwoComponent {
   @Input() subtitle!: string;
 
   // Static fallback until the CMS `breadcrumb` block loads.
-  public bg_img = '';
+  public bg_img = 'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/breadcrumb/c8fc84e8-2316-4bee-9e64-73b517f5318f-1779435215818';
 
   constructor(private siteContentService: SiteContentService) {}
 

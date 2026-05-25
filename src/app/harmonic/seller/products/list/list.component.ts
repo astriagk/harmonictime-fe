@@ -201,7 +201,7 @@ export class ListComponent implements OnInit, OnDestroy {
   }
 
   get availableProducts(): any[] {
-    return this.orders.filter((p) => !p.IsSold);
+    return this.orders.filter((p) => p.RemainingQuantity !== 0);
   }
 
   get allSelectableSelected(): boolean {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -25,7 +25,7 @@ import { filter, take } from 'rxjs/operators';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnDestroy {
   public showPassword = false;
   public showConfirmPassword = false;
   public registerForm!: FormGroup;
@@ -129,8 +129,11 @@ export class RegisterComponent {
     }
   }
 
-  // Pulls the human-readable message the API sends back, with a sensible
-  // fallback when the error payload doesn't carry one.
+  ngOnDestroy() {
+    this.userDataSub?.unsubscribe();
+    this.userErrorSub?.unsubscribe();
+  }
+
   private getErrorMessage(error: any): string {
     return (
       error?.error?.message ||
