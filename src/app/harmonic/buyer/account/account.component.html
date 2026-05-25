@@ -189,15 +189,21 @@
                       <p>Phone</p>
                       <h4>{{ displayPhone }}</h4>
                     </div>
-                    <div class="profile__info-item" *ngIf="clientAddress as addr">
+                    <div
+                      class="profile__info-item"
+                      *ngIf="clientAddress as addr"
+                    >
                       <p>Default Address</p>
                       <h4>
                         <span class="d-block" *ngIf="addr.AddressLine1">
                           {{ addr.AddressLine1
-                          }}{{ addr.AddressLine2 ? ", " + addr.AddressLine2 : "" }}
+                          }}{{
+                            addr.AddressLine2 ? ", " + addr.AddressLine2 : ""
+                          }}
                         </span>
                         <span class="d-block">
-                          {{ addr.City }}{{ addr.City && addr.State ? ", " : "" }}
+                          {{ addr.City
+                          }}{{ addr.City && addr.State ? ", " : "" }}
                           {{ addr.State }} {{ addr.PostalCode }}
                         </span>
                         <span class="d-block" *ngIf="addr.Country">{{
@@ -241,7 +247,7 @@
                       <tr>
                         <th style="width: 100px">Image</th>
                         <th style="width: 220px">Name</th>
-                        <th style="width: 120px">Price</th>
+                        <th style="width: 120px">Total</th>
                         <th style="width: 220px">Shipping Details</th>
                         <th style="width: 90px">Invoice</th>
                       </tr>
@@ -266,7 +272,8 @@
                           </span>
                         </td>
                         <td class="order__title pr-2 pl-2">
-                          {{ order.TotalAmount | currency: "INR" }}
+                          <strong>{{ order.TotalAmount | currency: "INR" }}</strong>
+                          <small class="d-block text-muted">incl. GST</small>
                         </td>
                         <td class="order__title pr-2 pl-2">
                           <span class="d-block">
@@ -298,7 +305,7 @@
                             <i
                               class="fa"
                               [ngClass]="
-                                isCapturing || isDownloading
+                                downloadingOrderId === order._id
                                   ? 'fa-spinner fa-spin'
                                   : 'fa-download'
                               "
@@ -372,7 +379,10 @@
 
                 <!-- Balance summary — compact strip: headline available balance
                      on the left, secondary figures inline on the right. -->
-                <div *ngIf="!walletLoading && wallet" class="wallet__summary white-bg mb-20">
+                <div
+                  *ngIf="!walletLoading && wallet"
+                  class="wallet__summary white-bg mb-20"
+                >
                   <div class="wallet__summary-main">
                     <span class="wallet__summary-label">Available Balance</span>
                     <h3 class="wallet__summary-value">
@@ -462,10 +472,11 @@
                     <table class="table">
                       <thead>
                         <tr>
-                          <th style="width: 240px">Product</th>
-                          <th style="width: 130px">Sale Date</th>
-                          <th style="width: 110px">Net</th>
-                          <th style="width: 110px">Status</th>
+                          <th style="width: 200px">Product</th>
+                          <th style="width: 120px">Sale Date</th>
+                          <th style="width: 140px">Earnings Breakdown</th>
+                          <th style="width: 100px">You Receive</th>
+                          <th style="width: 100px">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -490,7 +501,60 @@
                             {{ item.SaleDate | date: "mediumDate" }}
                           </td>
                           <td class="order__title pr-2 pl-2">
-                            {{ item.NetAmount | currency: "INR" }}
+                            <div class="wallet__breakdown">
+                              <div class="wallet__breakdown-row">
+                                <span>Listed price</span>
+                                <span>{{
+                                  item.GrossAmount +
+                                    (item.OfferDiscountAmount || 0)
+                                    | currency: "INR"
+                                }}</span>
+                              </div>
+                              <div
+                                class="wallet__breakdown-row wallet__breakdown-row--deduct"
+                                *ngIf="item.OfferDiscountPercentage > 0"
+                              >
+                                <span
+                                  >Offer ({{
+                                    item.OfferDiscountPercentage
+                                  }}%)</span
+                                >
+                                <span
+                                  >−
+                                  {{
+                                    item.OfferDiscountAmount | currency: "INR"
+                                  }}</span
+                                >
+                              </div>
+                              <div
+                                class="wallet__breakdown-row wallet__breakdown-row--sub"
+                              >
+                                <span>Effective price</span>
+                                <span>{{
+                                  item.GrossAmount | currency: "INR"
+                                }}</span>
+                              </div>
+                              <div
+                                class="wallet__breakdown-row wallet__breakdown-row--deduct"
+                              >
+                                <span
+                                  >Platform fee ({{
+                                    item.CommissionRate * 100 | number: "1.0-0"
+                                  }}%)</span
+                                >
+                                <span
+                                  >−
+                                  {{
+                                    item.CommissionAmount | currency: "INR"
+                                  }}</span
+                                >
+                              </div>
+                            </div>
+                          </td>
+                          <td class="order__title pr-2 pl-2">
+                            <strong>{{
+                              item.NetAmount | currency: "INR"
+                            }}</strong>
                           </td>
                           <td class="order__title pr-2 pl-2">
                             <span
@@ -552,7 +616,9 @@
                           <td class="order__title pr-2 pl-2">
                             <span
                               class="status-chip"
-                              [ngClass]="'status-chip--' + (w.Status | lowercase)"
+                              [ngClass]="
+                                'status-chip--' + (w.Status | lowercase)
+                              "
                             >
                               {{ w.Status }}
                             </span>
@@ -730,15 +796,29 @@
                           <span
                             class="verify-badge"
                             [ngClass]="{
-                              'verify-badge--verified': bank.VerificationStatus === 'verified',
-                              'verify-badge--failed': bank.VerificationStatus === 'failed',
-                              'verify-badge--unverified': bank.VerificationStatus !== 'verified' && bank.VerificationStatus !== 'failed'
+                              'verify-badge--verified':
+                                bank.VerificationStatus === 'verified',
+                              'verify-badge--failed':
+                                bank.VerificationStatus === 'failed',
+                              'verify-badge--unverified':
+                                bank.VerificationStatus !== 'verified' &&
+                                bank.VerificationStatus !== 'failed',
                             }"
                           >
                             <i class="fa fa-circle"></i>
-                            {{ bank.VerificationStatus === 'verified' ? 'Verified' : bank.VerificationStatus === 'failed' ? 'Verification Failed' : 'Unverified' }}
+                            {{
+                              bank.VerificationStatus === "verified"
+                                ? "Verified"
+                                : bank.VerificationStatus === "failed"
+                                  ? "Verification Failed"
+                                  : "Unverified"
+                            }}
                           </span>
-                          <span *ngIf="bank.IsDefault" class="account-card__badge">Default</span>
+                          <span
+                            *ngIf="bank.IsDefault"
+                            class="account-card__badge"
+                            >Default</span
+                          >
                         </div>
                       </div>
                       <div class="account-card__body">
@@ -756,7 +836,10 @@
                         </div>
                         <div
                           class="account-card__row"
-                          *ngIf="bank.VerificationStatus === 'verified' && bank.VerifiedName"
+                          *ngIf="
+                            bank.VerificationStatus === 'verified' &&
+                            bank.VerifiedName
+                          "
                         >
                           <span>Verified Name</span>
                           <strong>{{ bank.VerifiedName }}</strong>
@@ -767,21 +850,30 @@
                           *ngIf="bank.VerificationStatus !== 'verified'"
                           type="button"
                           class="os-btn os-btn-black"
-                          [disabled]="verifyingId === bank._id || verifyRetryCountdown[bank._id] > 0"
+                          [disabled]="
+                            verifyingId === bank._id ||
+                            verifyRetryCountdown[bank._id] > 0
+                          "
                           (click)="openVerifyConfirm(bank)"
                         >
                           <i
                             class="fa"
-                            [ngClass]="verifyingId === bank._id ? 'fa-spinner fa-spin' : 'fa-shield-check'"
+                            [ngClass]="
+                              verifyingId === bank._id
+                                ? 'fa-spinner fa-spin'
+                                : 'fa-shield-check'
+                            "
                           ></i>
                           {{
                             verifyingId === bank._id
-                              ? 'Verifying…'
+                              ? "Verifying…"
                               : verifyRetryCountdown[bank._id] > 0
-                              ? 'Retry in ' + verifyRetryCountdown[bank._id] + 's'
-                              : bank.VerificationStatus === 'failed'
-                              ? 'Retry Verification'
-                              : 'Verify Account'
+                                ? "Retry in " +
+                                  verifyRetryCountdown[bank._id] +
+                                  "s"
+                                : bank.VerificationStatus === "failed"
+                                  ? "Retry Verification"
+                                  : "Verify Account"
                           }}
                         </button>
                         <button
@@ -929,18 +1021,40 @@
               <thead>
                 <tr>
                   <th>ITEM DESCRIPTION</th>
-                  <th class="text-end">UNIT PRICE</th>
-                  <th class="text-end">TOTAL PRICE</th>
+                  <th class="text-end">MRP</th>
+                  <th class="text-end">OFFER</th>
+                  <th class="text-end">AMOUNT</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let product of selectedOrder.Products">
                   <td>{{ product.ProductName }}</td>
                   <td class="text-end">
-                    {{ product.Price | platformPrice | currency: "INR" }}
+                    {{
+                      (product.OfferApplied
+                        ? (product.DisplayPrice ?? 0) +
+                          product.OfferApplied.DiscountAmount
+                        : product.DisplayPrice
+                      ) | currency: "INR"
+                    }}
+                  </td>
+                  <td class="text-end invoice__breakdown-deduct">
+                    <ng-container *ngIf="product.OfferApplied; else noOffer">
+                      −
+                      {{
+                        product.OfferApplied.DiscountAmount | currency: "INR"
+                      }}
+                      <small class="d-block" style="font-size: 10px"
+                        >{{ product.OfferApplied.DiscountPercentage }}%
+                        off</small
+                      >
+                    </ng-container>
+                    <ng-template #noOffer>—</ng-template>
                   </td>
                   <td class="text-end">
-                    {{ product.Price | platformPrice | currency: "INR" }}
+                    <strong>{{
+                      product.DisplayPrice | currency: "INR"
+                    }}</strong>
                   </td>
                 </tr>
               </tbody>
@@ -955,6 +1069,10 @@
               <div class="invoice__totals-row" *ngIf="platformCharges > 0">
                 <span>Platform Charges</span>
                 <span>{{ platformCharges | currency: "INR" }}</span>
+              </div>
+              <div class="invoice__totals-row" *ngIf="gstAmount > 0">
+                <span>GST ({{ gstPercent }}%)</span>
+                <span>{{ gstAmount | currency: "INR" }}</span>
               </div>
               <div class="invoice__totals-row invoice__totals-row--grand">
                 <span>Total Amount Paid</span>
@@ -1080,12 +1198,15 @@
 
           <p class="mb-20">
             You are about to withdraw your full available balance of
-            <strong>{{ wallet?.availableBalance | currency: "INR" }}</strong>.
-            Choose the bank account to receive the payout.
+            <strong>{{ wallet?.availableBalance | currency: "INR" }}</strong
+            >. Choose the bank account to receive the payout.
           </p>
 
           <!-- No payout destinations yet -->
-          <div *ngIf="bankAccounts.length === 0" class="text-center pt-20 pb-20">
+          <div
+            *ngIf="bankAccounts.length === 0"
+            class="text-center pt-20 pb-20"
+          >
             <p>You don't have a bank account yet.</p>
             <p class="text-muted">
               Add a bank account from the Bank Account tab before withdrawing.
@@ -1093,16 +1214,17 @@
           </div>
 
           <!-- Bank account picker -->
-          <div
-            *ngIf="bankAccounts.length > 0"
-            class="withdraw__accounts mb-20"
-          >
+          <div *ngIf="bankAccounts.length > 0" class="withdraw__accounts mb-20">
             <label
               *ngFor="let bank of bankAccounts"
               class="withdraw__account"
               [class.active]="selectedBankAccountId === bank._id"
               [class.withdraw__account--disabled]="!bank.IsVerified"
-              [title]="!bank.IsVerified ? 'Verify this account first to use it for withdrawals' : ''"
+              [title]="
+                !bank.IsVerified
+                  ? 'Verify this account first to use it for withdrawals'
+                  : ''
+              "
             >
               <input
                 type="radio"
@@ -1117,7 +1239,11 @@
                 <span class="d-block text-muted">
                   {{ bank.AccountHolderName }} • {{ bank.AccountNumber }}
                 </span>
-                <span *ngIf="!bank.IsVerified" class="d-block mt-1" style="font-size:12px;color:#c0392b;">
+                <span
+                  *ngIf="!bank.IsVerified"
+                  class="d-block mt-1"
+                  style="font-size: 12px; color: #c0392b"
+                >
                   Not verified — cannot use for withdrawals
                 </span>
               </span>
@@ -1134,9 +1260,7 @@
             <button
               type="button"
               class="os-btn os-btn-black"
-              [disabled]="
-                !selectedBankAccountId || requestingWithdrawal
-              "
+              [disabled]="!selectedBankAccountId || requestingWithdrawal"
               (click)="requestWithdrawal()"
             >
               {{ requestingWithdrawal ? "Requesting…" : "Confirm Withdrawal" }}
@@ -1160,27 +1284,40 @@
     <div class="modal-content">
       <div class="product__modal-wrapper p-relative">
         <div class="product__modal-close p-absolute">
-          <button type="button" aria-label="Close" (click)="closeVerifyConfirm()">
+          <button
+            type="button"
+            aria-label="Close"
+            (click)="closeVerifyConfirm()"
+          >
             <i class="fal fa-times"></i>
           </button>
         </div>
         <div class="product__modal-inner p-30">
-          <h3 class="order__info-title address-modal__title">Verify Bank Account</h3>
+          <h3 class="order__info-title address-modal__title">
+            Verify Bank Account
+          </h3>
 
           <p class="mb-20">
             We will send <strong>₹1</strong> to your account ending in
-            <strong>{{ verifyConfirmAccount.AccountNumber | slice:-4 }}</strong>
+            <strong>{{
+              verifyConfirmAccount.AccountNumber | slice: -4
+            }}</strong>
             to verify it. This amount will be refunded. Proceed?
           </p>
 
           <div class="verify-notice mb-20">
             <i class="fa fa-info-circle mr-5"></i>
-            Once your bank account is verified, HarmonicTime will send payouts to it as-is.
-            Please make sure the details are correct. Any payout issues after verification are your responsibility.
+            Once your bank account is verified, HarmonicTime will send payouts
+            to it as-is. Please make sure the details are correct. Any payout
+            issues after verification are your responsibility.
           </div>
 
           <div class="d-flex justify-content-end">
-            <button type="button" class="os-btn mr-5" (click)="closeVerifyConfirm()">
+            <button
+              type="button"
+              class="os-btn mr-5"
+              (click)="closeVerifyConfirm()"
+            >
               Cancel
             </button>
             <button
@@ -1191,7 +1328,11 @@
             >
               <i
                 class="fa"
-                [ngClass]="verifyingId === verifyConfirmAccount._id ? 'fa-spinner fa-spin' : 'fa-check'"
+                [ngClass]="
+                  verifyingId === verifyConfirmAccount._id
+                    ? 'fa-spinner fa-spin'
+                    : 'fa-check'
+                "
               ></i>
               Proceed
             </button>

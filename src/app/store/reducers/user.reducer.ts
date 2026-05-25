@@ -41,6 +41,7 @@ export const userReducer = createReducer(
   })),
   on(loginUserFailure, (state, { error }) => ({
     ...state,
+    data: [],
     loading: false,
     error,
   })),

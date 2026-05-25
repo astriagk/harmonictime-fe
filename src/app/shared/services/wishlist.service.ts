@@ -4,6 +4,7 @@ import {
   ADD_TO_WISHLIST,
   DELETE_WISHLIST_ITEM,
   USER_WISHLIST,
+  WISHLIST_MOVE_TO_CART,
 } from '@config/index';
 import { GenericService } from './generic.service';
 import {
@@ -22,6 +23,7 @@ import {
   loadWishlist,
   updateWishlist,
 } from 'src/app/store/actions/wishlist.actions';
+import { loadCart } from 'src/app/store/actions/cart.actions';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
 @Injectable({
@@ -132,6 +134,24 @@ export class WishlistService {
           // Guest user: remove from the session-storage wishlist
           this.removeGuestWishlistProduct(payload);
         }
+      });
+  }
+
+  moveToCart(item: any): void {
+    const wishlistId = item.WishlistID ?? item._id;
+    if (!wishlistId) return;
+    this.genericService
+      .postObservable(WISHLIST_MOVE_TO_CART(wishlistId), {})
+      .subscribe({
+        next: () => {
+          this.toastrService.success(`${item.ProductName} moved to cart`);
+          this.store.dispatch(loadWishlist());
+          this.store.dispatch(loadCart());
+        },
+        error: (err) => {
+          const message = err?.error?.message || 'Failed to move item to cart';
+          this.toastrService.error(message);
+        },
       });
   }
 

@@ -39,9 +39,14 @@
                   }}</a>
                 </td>
                 <td class="product-price">
-                  <span class="amount">{{
-                    item.Price | platformPrice | currency : "INR"
-                  }}</span>
+                  <ng-container *ngIf="item.Offer?.IsActive && item.DisplayPrice; else regularPrice">
+                    <div class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR":'symbol':'1.0-0' }}</div>
+                    <small class="offer-badge">{{ item.Offer.DiscountPercentage }}% off</small>
+                    <div class="old-price">{{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</div>
+                  </ng-container>
+                  <ng-template #regularPrice>
+                    <span class="amount">{{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</span>
+                  </ng-template>
                 </td>
                 <td class="product-quantity">
                   <div class="cart-plus-minus">
@@ -90,19 +95,19 @@
             <div class="cart-page-total">
               <h2>Cart totals</h2>
               <ul class="mb-20">
+                <li *ngIf="cartService.computeOfferDiscount(cartItems) > 0">
+                  Offer Savings
+                  <span style="color: green;">
+                    - {{ cartService.computeOfferDiscount(cartItems) | currency: "INR" }}
+                  </span>
+                </li>
                 <li>
                   Subtotal
-                  <span>{{
-                    cartService.computeCartTotal(cartItems).total
-                      | currency : "INR"
-                  }}</span>
+                  <span>{{ cartService.computeCartTotal(cartItems).total | currency: "INR" }}</span>
                 </li>
                 <li>
                   Total
-                  <span>{{
-                    cartService.computeCartTotal(cartItems).total
-                      | currency : "INR"
-                  }}</span>
+                  <span>{{ cartService.computeCartTotal(cartItems).total | currency: "INR" }}</span>
                 </li>
               </ul>
               <a class="os-btn" routerLink="/buyer/checkout"

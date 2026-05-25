@@ -1,8 +1,16 @@
+export interface OfferApplied {
+  DiscountPercentage: number;
+  DiscountAmount: number;
+}
+
 export interface Product {
   ProductName: string;
   Price: number;
+  OfferApplied?: OfferApplied | null;
+  EffectivePrice?: number;
+  BuyerCommissionAmount?: number;
+  DisplayPrice?: number;
   ImageURL: string;
-  Tracking?: string;
 }
 
 export interface Shipment {

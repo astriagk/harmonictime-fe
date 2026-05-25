@@ -491,13 +491,26 @@
                         {{ item.ProductName }}
                       </td>
                       <td class="product-total">
-                        <span class="amount">{{
-                          item.Price | platformPrice | currency: "INR"
-                        }}</span>
+                        <ng-container *ngIf="item.Offer?.IsActive && item.DisplayPrice; else regularPrice">
+                          <span class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR":'symbol':'1.0-0' }}</span>
+                          <small class="offer-badge ml-5">{{ item.Offer.DiscountPercentage }}% off</small>
+                          <div><small class="old-price">MRP: {{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</small></div>
+                        </ng-container>
+                        <ng-template #regularPrice>
+                          <span class="amount">{{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</span>
+                        </ng-template>
                       </td>
                     </tr>
                   </tbody>
                   <tfoot>
+                    <tr *ngIf="cartService.computeCheckoutSummary(cartItems).offerDiscount > 0" class="cart-subtotal">
+                      <th>Offer Savings</th>
+                      <td>
+                        <span class="amount" style="color: green;">
+                          - {{ cartService.computeCheckoutSummary(cartItems).offerDiscount | currency: "INR" }}
+                        </span>
+                      </td>
+                    </tr>
                     <tr class="cart-subtotal">
                       <th>Cart Subtotal</th>
                       <td>
@@ -507,33 +520,20 @@
                         }}</span>
                       </td>
                     </tr>
-                    <tr class="cart-subtotal additional-charges">
-                      <th>
-                        <button
-                          class="charges-toggle"
-                          [class.collapsed]="!showChargesDetails"
-                          type="button"
-                          [attr.aria-expanded]="showChargesDetails"
-                          (click)="showChargesDetails = !showChargesDetails"
-                        >
-                          Additional Charges
-                        </button>
-                      </th>
-                      <td>
-                        <span class="amount">{{
-                          cartService.computeCheckoutSummary(cartItems).charges
-                            | currency: "INR"
-                        }}</span>
-                      </td>
-                    </tr>
-                    <tr
-                      *ngIf="showChargesDetails"
-                      class="cart-subtotal charges-detail"
-                    >
+                    <tr class="cart-subtotal">
                       <th>Platform Charges</th>
                       <td>
                         <span class="amount">{{
                           cartService.computeCheckoutSummary(cartItems).extra
+                            | currency: "INR"
+                        }}</span>
+                      </td>
+                    </tr>
+                    <tr class="cart-subtotal">
+                      <th>GST ({{ cartService.computeCheckoutSummary(cartItems).gstPercent }}%)</th>
+                      <td>
+                        <span class="amount">{{
+                          cartService.computeCheckoutSummary(cartItems).gst
                             | currency: "INR"
                         }}</span>
                       </td>

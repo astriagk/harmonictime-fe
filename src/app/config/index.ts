@@ -83,6 +83,7 @@ export const GET_PRODUCT_REVIEWS = `${baseUrl}/reviews/product/`;
 
 // cart
 export const USER_CART = `${baseUrl}/cart/user/`; // append the user id
+export const USER_CART_ITEM = (userId: string, productId: string) => `${baseUrl}/cart/user/${userId}/${productId}`;
 export const ADD_TO_CART = `${baseUrl}/cart`;
 export const DELETE_CART_ITEM = `${baseUrl}/cart/`; // append the cart id
 
@@ -90,6 +91,7 @@ export const DELETE_CART_ITEM = `${baseUrl}/cart/`; // append the cart id
 export const USER_WISHLIST = `${baseUrl}/wishlist/user/`; // append the user id
 export const ADD_TO_WISHLIST = `${baseUrl}/wishlist`;
 export const DELETE_WISHLIST_ITEM = `${baseUrl}/wishlist/`; // append the wishlist id
+export const WISHLIST_MOVE_TO_CART = (wishlistId: string) => `${baseUrl}/wishlist/${wishlistId}/move-to-cart`;
 
 // payments
 export const CREATE_PAYMENT_ORDER = `${baseUrl}/payments/create-order`;
@@ -159,7 +161,7 @@ export const OFFER_STATUS = (id: string) => `${baseUrl}/offers/${id}/status`; //
 
 // order charges applied on top of the cart subtotal at checkout
 export const ORDER_CHARGES = {
-  gstPercent: 18, // % of subtotal
+  gstPercent: environment.gstPercent, // % — configured per environment
   platformPercent: 2, // % baked into every displayed price (see withPlatformMarkup)
   extraFlat: 50, // flat amount in INR
 };

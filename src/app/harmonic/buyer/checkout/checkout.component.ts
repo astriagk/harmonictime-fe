@@ -46,7 +46,6 @@ export class CheckoutComponent {
   public isOpenLogin = false;
   public isOpenRegister = false;
   public isOpenCoupon = false;
-  public showChargesDetails = false;
   public couponCode: string = '';
   public payment_name: string = '';
   public countries = countries;

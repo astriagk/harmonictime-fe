@@ -134,26 +134,38 @@ export class CartService {
   computeCartTotal(cartItems: any) {
     return cartItems.reduce(
       (cartTotal: { total: number; quantity: number }, cartItem: any) => {
-        const { Price } = cartItem;
-        if (Price) {
-          // Platform fee is baked into the price the buyer pays.
-          cartTotal.total += withPlatformMarkup(Price);
-        }
+        const base = cartItem.DisplayPrice;
+        const offer = cartItem.Offer;
+        const price = (offer?.IsActive && base)
+          ? base * (1 - offer.DiscountPercentage / 100)
+          : base;
+        if (price) cartTotal.total += price;
         return cartTotal;
       },
       { total: 0, quantity: 0 },
     );
   }
 
-  // Subtotal (platform fee already baked into prices) + Platform charges, plus the
-  // grand total to pay. GST is computed but excluded from the total for now.
+  // Savings = DisplayPrice minus offer price
+  computeOfferDiscount(cartItems: any): number {
+    return cartItems.reduce((savings: number, cartItem: any) => {
+      const { DisplayPrice, Offer } = cartItem;
+      if (DisplayPrice && Offer?.IsActive) {
+        savings += DisplayPrice - DisplayPrice * (1 - Offer.DiscountPercentage / 100);
+      }
+      return savings;
+    }, 0);
+  }
+
+  // Subtotal (offer discount already applied, platform fee baked in) + GST + additional charges.
   computeCheckoutSummary(cartItems: any) {
     const subtotal = this.computeCartTotal(cartItems).total;
-    const gst = (subtotal * ORDER_CHARGES.gstPercent) / 100;
+    const offerDiscount = this.computeOfferDiscount(cartItems);
+    const gst = Math.round((subtotal * ORDER_CHARGES.gstPercent) / 100);
+    const gstPercent = ORDER_CHARGES.gstPercent;
     const extra = subtotal > 0 ? ORDER_CHARGES.extraFlat : 0;
-    const charges = extra; // additional charges (GST excluded for now)
-    const grandTotal = subtotal + charges;
-    return { subtotal, gst, extra, charges, grandTotal };
+    const grandTotal = subtotal + gst + extra;
+    return { subtotal, offerDiscount, gst, gstPercent, extra, grandTotal };
   }
 
   // quantity increment

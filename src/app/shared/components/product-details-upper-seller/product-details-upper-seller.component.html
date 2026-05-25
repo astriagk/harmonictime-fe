@@ -90,6 +90,14 @@
             <a class="cursor-pointer">{{ product.Details.DialColorName | dash }}</a>
           </span>
         </div>
+        <div class="product__tag mb-25" *ngIf="product.Quantity !== undefined">
+          <span>Quantity Added :</span>
+          <span><a class="cursor-pointer">{{ product.Quantity }}</a></span>
+        </div>
+        <div class="product__tag mb-25" *ngIf="product.RemainingQuantity !== undefined">
+          <span>Remaining :</span>
+          <span><a class="cursor-pointer">{{ product.RemainingQuantity }}</a></span>
+        </div>
       </div>
       <div class="pro-cart-btn mt-30">
         <a

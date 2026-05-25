@@ -230,6 +230,30 @@
       cursor: not-allowed;
     }
   }
+
+  &__breakdown {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  &__breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: $body-text-color;
+
+    &--deduct span:last-child {
+      color: #c0392b;
+    }
+
+    &--sub {
+      border-top: 1px dashed $border;
+      margin-top: 3px;
+      padding-top: 3px;
+      font-weight: 500;
+      color: $heading-color;
+    }
+  }
 }
 
 .status-chip {
@@ -491,12 +515,38 @@
     }
 
     tbody td {
-      padding: 14px;
+      padding: 10px 14px;
       font-size: 14px;
       color: $black-soft;
       border-bottom: 1px solid $border;
       vertical-align: middle;
     }
+  }
+
+  &__breakdown-label {
+    font-size: 12px;
+    color: $body-text-color;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    border-bottom: none !important;
+  }
+
+  &__breakdown-deduct {
+    font-size: 12px;
+    color: #c0392b;
+  }
+
+  &__breakdown-add {
+    font-size: 12px;
+    color: $body-text-color;
+    border-bottom: none !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  &__item-total td {
+    background: #f9f9f9;
+    font-size: 14px;
   }
 
   &__totals {
