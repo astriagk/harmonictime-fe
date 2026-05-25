@@ -25,7 +25,6 @@ export class AppComponent {
     //Add 'implements OnInit' to the class.
     if (localStorage.getItem('token')) {
       this.userService.loadUserFromLocalStorage();
-      this.store.dispatch(loadUser());
     } else {
       // Guests have no server cart/wishlist; hydrate the store from session storage
       this.cartService.loadGuestCart();

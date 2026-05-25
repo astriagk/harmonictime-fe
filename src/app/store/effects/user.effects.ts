@@ -96,6 +96,16 @@ export class UserEffects {
     )
   );
 
+  // Token expired or invalid — clear local state so the UI reverts to logged-out.
+  loadUserFailure$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(loadUserFailure),
+        tap(() => this.userService.logout())
+      ),
+    { dispatch: false }
+  );
+
   // After the user loads, merge any guest (session-storage) cart and wishlist
   // into the server. Each merge dispatches its load action once it completes.
   mergeGuestCartOnLogin$ = createEffect(

@@ -4,10 +4,11 @@ import { Store } from '@ngrx/store';
 import {
   loadUserSuccess,
   loginUserSuccess,
+  loginUserFailure,
 } from 'src/app/store/actions/user.actions';
 import { GenericService } from './generic.service';
 import { USER } from '@config/index';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -27,16 +28,21 @@ export class UserService {
   logout() {
     localStorage.clear();
     sessionStorage.clear();
-    localStorage.removeItem('token');
     this.userDataSubject.next(null);
-    this.store.dispatch(loginUserSuccess({ data: null }));
+    this.store.dispatch(loginUserFailure({ error: '' }));
     this.store.dispatch(loadUserSuccess({ user: null }));
   }
 
   getUserData(): Observable<any> {
     const url = USER;
-    return this.genericService
-      .getObservableToken(url)
-      .pipe(tap((response) => this.userDataSubject.next(response.data)));
+    return this.genericService.getObservableToken(url).pipe(
+      map((response) => {
+        if (response?.message === 'Unauthorized') {
+          throw new Error('Unauthorized');
+        }
+        return response;
+      }),
+      tap((response) => this.userDataSubject.next(response.data))
+    );
   }
 }

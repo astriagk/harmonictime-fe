@@ -634,11 +634,11 @@ export class AddEditComponent implements OnInit {
         next: (response) => {
           const newId = response?.data?._id ?? response?.data?.insertedId;
           if (newId) {
-            // Append the created item locally and auto-select it.
-            (this[cfg.arrayKey] as any[]).push({
-              _id: newId,
-              [cfg.nameField]: name,
-            });
+            // Replace the array so ng-select detects the change and shows the new item.
+            (this[cfg.arrayKey] as any[]) = [
+              ...(this[cfg.arrayKey] as any[]),
+              { _id: newId, [cfg.nameField]: name },
+            ];
             this.selectNewLookup(cfg, newId);
             this.toastrService.success(`${cfg.label} added successfully!`);
             this.closeAddLookup();
