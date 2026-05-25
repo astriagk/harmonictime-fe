@@ -2,6 +2,34 @@
 /*  5.  SHOP CSS START
 /*----------------------------------------*/
 
+// Shared offer price layout — used in cart, wishlist, and product cards
+.price-offer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.offer-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.old-price {
+  color: #8c8c8c;
+  text-decoration: line-through;
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
 .shop {
   &__area {}
 
@@ -818,7 +846,7 @@
     bottom: -30px;
     left: 0;
 
-    & span {
+    & span, & small {
       font-size: 14px;
       color: $black;
       font-weight: 500;
@@ -827,11 +855,23 @@
       &.old-price {
         color: #8c8c8c;
         text-decoration: line-through;
+        font-weight: 400;
+      }
+
+      &.offer-badge {
+        display: inline-block;
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 1px 6px;
+        border-radius: 3px;
+        margin-right: 6px;
       }
     }
 
     &-2 {
-      & span {
+      & span, & small {
         font-size: 14px;
         color: $black;
         font-weight: 500;
@@ -840,6 +880,18 @@
         &.old-price {
           color: #8c8c8c;
           text-decoration: line-through;
+          font-weight: 400;
+        }
+
+        &.offer-badge {
+          display: inline-block;
+          background-color: #e8f5e9;
+          color: #2e7d32;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 1px 6px;
+          border-radius: 3px;
+          margin-right: 6px;
         }
       }
     }

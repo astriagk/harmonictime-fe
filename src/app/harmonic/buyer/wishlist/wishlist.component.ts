@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { CartService } from 'src/app/shared/services/cart.service';
 import { WishlistService } from 'src/app/shared/services/wishlist.service';
 
 @Component({
@@ -8,8 +7,5 @@ import { WishlistService } from 'src/app/shared/services/wishlist.service';
   styleUrls: ['./wishlist.component.scss'],
 })
 export class WishlistComponent {
-  constructor(
-    public wishlistService: WishlistService,
-    public cartService: CartService
-  ) {}
+  constructor(public wishlistService: WishlistService) {}
 }

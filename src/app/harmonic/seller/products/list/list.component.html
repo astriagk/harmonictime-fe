@@ -35,6 +35,7 @@
           <th scope="col">Product Name</th>
           <th scope="col">Price</th>
           <th scope="col">Offer</th>
+          <th scope="col">Qty / Remaining</th>
           <th scope="col">Available</th>
         </tr>
       </thead>
@@ -58,6 +59,7 @@
               </span>
               <span *ngIf="!productOfferName(order)" class="text-muted">—</span>
             </td>
+            <td>{{ (order.Quantity ?? '—') }} / {{ (order.RemainingQuantity ?? '—') }}</td>
             <td (click)="$event.stopPropagation()">
               <span *ngIf="order.IsSold" class="sold-badge">Sold</span>
               <label *ngIf="!order.IsSold" class="availability-switch">

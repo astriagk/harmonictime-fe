@@ -90,17 +90,35 @@ export interface IProduct {
   }[];
 }
 
+export interface Offer {
+  _id: string;
+  OfferName: string;
+  Description?: string;
+  DiscountPercentage: number;
+  StartDate: string;
+  EndDate: string;
+  IsActive: boolean;
+}
+
 export interface Product {
   _id: string;
   UserID: string;
   ProductName: string;
   Price: number;
+  OfferID?: string | null;
+  Offer?: Offer | null;
   IsAvailable: boolean;
   DateListed: string;
   Description: Description;
   Details: Details;
   Images: Image[];
   DeliveryAndReturns: DeliveryAndReturns;
+  DisplayPrice?: number;
+  Quantity?: number;
+  SoldCount?: number;
+  IsSold?: boolean;
+  RemainingQuantity?: number;
+  Status?: string;
 }
 
 export interface Description {

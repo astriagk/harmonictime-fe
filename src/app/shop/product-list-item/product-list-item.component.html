@@ -10,11 +10,9 @@
             alt="product-img"
           />
         </a>
-        <div *ngIf="product.discount || product.new" class="product__sale">
-          <span *ngIf="product.new || product.discount" class="new">new</span>
-          <span *ngIf="product.discount" class="percent"
-            >-{{ product.discount }}%</span
-          >
+        <div *ngIf="product.Offer?.IsActive" class="product__sale">
+          <span class="new">Sale</span>
+          <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
         </div>
       </div>
     </div>
@@ -27,10 +25,12 @@
             }}</a>
           </h4>
           <div class="product__price-2 mb-10">
-            <span>{{ product.Price | platformPrice | currency : "INR" }}</span>
-            <!-- <span *ngIf="product.old_price" class="old-price"
-              >${{ product.old_price.toFixed(2) }}</span
-            > -->
+            <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
+              {{ product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100) | currency: "INR" }}
+            </span>
+            <span [class.old-price]="product.Offer?.IsActive && product.DisplayPrice">
+              {{ product.DisplayPrice | currency: "INR" }}
+            </span>
           </div>
           <p>{{ product.Description.Title }}</p>
           <div class="product__list mb-30">

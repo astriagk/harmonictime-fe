@@ -13,7 +13,6 @@ import {
   UPDATE_ADDRESS,
   WITHDRAWALS,
   WITHDRAWAL_BY_ID,
-  withPlatformMarkup,
 } from '@config/index';
 import { firstValueFrom } from 'rxjs';
 import { companyDetails } from '@shared/constants/companyDetails';
@@ -121,6 +120,8 @@ export class AccountComponent {
   // True while rendering the invoice off-screen for a direct (mobile) download,
   // so the modal/backdrop stay hidden but the DOM is still captured.
   public isCapturing = false;
+  // Tracks which order is currently being downloaded on mobile (by _id).
+  public downloadingOrderId: string | null = null;
 
   constructor(
     public cartService: CartService,
@@ -620,26 +621,32 @@ export class AccountComponent {
     }
   }
 
-  // Sum of the all-in (price + 2%, rounded) item prices — the same figure the
-  // buyer saw at checkout. See withPlatformMarkup in @config.
+  // Flat platform charge added at checkout.
+  get platformCharges(): number {
+    return this.selectedOrder ? ORDER_CHARGES.extraFlat : 0;
+  }
+
+  // GST applied on the platform charges.
+  get gstPercent(): number {
+    return ORDER_CHARGES.gstPercent;
+  }
+
+  get gstAmount(): number {
+    return this.selectedOrder
+      ? Math.round((this.invoiceSubtotal * ORDER_CHARGES.gstPercent) / 100)
+      : 0;
+  }
+
+  // Subtotal = sum of DisplayPrice across all items (buyer-facing price per product).
   get invoiceSubtotal(): number {
     return (this.selectedOrder?.Products ?? []).reduce(
-      (sum, product) => sum + withPlatformMarkup(product.Price),
-      0
+      (sum, p) => sum + (p.DisplayPrice ?? 0), 0
     );
   }
 
-  // Flat platform charge added at checkout (ORDER_CHARGES.extraFlat). Using the
-  // configured value avoids paise-level rounding artifacts that show up when
-  // deriving it from the stored TotalAmount (e.g. ₹49.98 instead of ₹50).
-  get platformCharges(): number {
-    return this.invoiceSubtotal > 0 ? ORDER_CHARGES.extraFlat : 0;
-  }
-
-  // Invoice grand total = marked-up item subtotal + flat charge. Matches the
-  // all-in figure shown to the buyer at checkout.
+  // Grand total is exactly what the buyer paid — use TotalAmount as the source of truth.
   get invoiceTotal(): number {
-    return this.invoiceSubtotal + this.platformCharges;
+    return this.selectedOrder?.TotalAmount ?? 0;
   }
 
   viewInvoice(order: Order): void {
@@ -703,6 +710,7 @@ export class AccountComponent {
       return;
     }
     this.selectedOrder = order;
+    this.downloadingOrderId = order._id;
     this.isCapturing = true;
     // Wait a frame so Angular renders the off-screen invoice and the
     // @ViewChild reference resolves before we capture it.
@@ -711,6 +719,7 @@ export class AccountComponent {
       await this.downloadInvoice();
     } finally {
       this.isCapturing = false;
+      this.downloadingOrderId = null;
       if (!this.isInvoiceModalOpen) {
         this.selectedOrder = null;
       }

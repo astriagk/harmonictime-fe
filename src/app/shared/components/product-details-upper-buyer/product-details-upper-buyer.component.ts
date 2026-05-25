@@ -12,13 +12,16 @@ import {
 import { IProduct, Product } from '../../types/product-d-t';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
+import { GenericService } from '../../services/generic.service';
 import { Store } from '@ngrx/store';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
+import { selectUserData } from 'src/app/store/selectors/user.selectors';
 import { ReviewFormComponent } from '../forms/review-form/review-form.component';
 import {
   getPrimaryImageUrl,
   sortImagesPrimaryFirst,
 } from '../../utils/product-images';
+import { USER_CART_ITEM } from '@config/index';
 
 @Component({
   selector: 'app-product-details-upper-buyer',
@@ -37,6 +40,8 @@ export class ProductDetailsUpperBuyerComponent
   @Output() reviewSubmitted: EventEmitter<void> = new EventEmitter<void>();
   cartItems: any = [];
   stars = [1, 2, 3, 4, 5];
+  isInCart = false;
+  private userId: string | null = null;
 
   @ViewChild('reviewModal') reviewModalRef?: ElementRef<HTMLElement>;
   @ViewChild(ReviewFormComponent) reviewFormCmp?: ReviewFormComponent;
@@ -45,6 +50,7 @@ export class ProductDetailsUpperBuyerComponent
     public productService: ProductService,
     public cartService: CartService,
     public store: Store,
+    private genericService: GenericService,
   ) {}
 
   // Reset the review form whenever the modal is closed
@@ -66,18 +72,34 @@ export class ProductDetailsUpperBuyerComponent
 
   ngOnInit() {
     this.store.select(selectCartItems).subscribe((state) => {
-      if (state?.length) {
-        this.cartItems = state;
-      } else {
-        this.cartItems = [];
-      }
+      this.cartItems = state?.length ? state : [];
+    });
+    this.store.select(selectUserData).subscribe((state) => {
+      this.userId = state?.user?.data?._id ?? null;
+      this.checkCartStatus();
     });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.product) {
       this.productService.activeImg = getPrimaryImageUrl(this.product.Images);
+      this.checkCartStatus();
     }
+  }
+
+  checkCartStatus(): void {
+    if (!this.userId || !this.product?._id) return;
+    this.genericService
+      .getObservable(USER_CART_ITEM(this.userId, this.product._id))
+      .subscribe({
+        next: () => (this.isInCart = true),
+        error: () => (this.isInCart = false),
+      });
+  }
+
+  addToCart(): void {
+    this.cartService.addCartProduct(this.product);
+    this.isInCart = true;
   }
 
   // Thumbnail strip with the primary image first.
@@ -86,7 +108,7 @@ export class ProductDetailsUpperBuyerComponent
   }
 
   isItemInCart(item: any): boolean {
-    return this.cartItems.some((prd: any) => prd.ProductID === item._id);
+    return this.isInCart || this.cartItems.some((prd: any) => prd.ProductID === item._id);
   }
 
   // Close the review modal after a successful post and let the parent reload the list
