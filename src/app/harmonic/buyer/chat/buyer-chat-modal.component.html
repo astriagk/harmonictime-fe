@@ -1,0 +1,43 @@
+<ng-container *ngIf="isOpen">
+  <!-- Backdrop -->
+  <div class="modal-backdrop fade show" style="z-index: 1050;" (click)="close()"></div>
+
+  <!-- Modal -->
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" style="z-index: 1055;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content chat-modal__content">
+
+        <!-- Header -->
+        <div class="chat-modal__header">
+          <h5>Chat with Seller</h5>
+          <button class="chat-modal__close" type="button" (click)="close()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body p-0">
+          <!-- Loading skeleton while thread is being created -->
+          <div *ngIf="isLoadingThread" style="padding: 20px;">
+            <app-skeleton type="list-row" [count]="4"></app-skeleton>
+          </div>
+
+          <!-- Error state -->
+          <div *ngIf="error" class="p-30 text-center">
+            <p class="text-danger">{{ error }}</p>
+            <button class="os-btn mt-10" (click)="close()">Close</button>
+          </div>
+
+          <!-- Chat window once thread is ready -->
+          <app-chat-window
+            *ngIf="thread && !isLoadingThread"
+            [threadId]="thread._id"
+            [currentUserId]="currentUserId"
+            [isClosed]="thread.Status === 'closed'"
+          ></app-chat-window>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</ng-container>

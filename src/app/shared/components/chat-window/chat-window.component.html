@@ -1,0 +1,44 @@
+<div class="chat-window">
+  <div class="chat-window__messages" #scrollContainer>
+    <div *ngIf="isLoading" class="chat-window__loading">
+      <app-skeleton type="list-row" [count]="4"></app-skeleton>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+      <div
+        *ngFor="let msg of messages$ | async"
+        class="chat-bubble"
+        [class.chat-bubble--mine]="msg.SenderID === currentUserId"
+        [class.chat-bubble--theirs]="msg.SenderID !== currentUserId"
+      >
+        <div class="chat-bubble__body">
+          <p>{{ msg.Text }}</p>
+        </div>
+        <span class="chat-bubble__time">{{
+          msg.CreatedAt | date: "shortTime"
+        }}</span>
+      </div>
+
+      <p *ngIf="isClosed" class="chat-closed-notice">
+        This conversation has been closed.
+      </p>
+
+      <app-empty-state
+        *ngIf="(messages$ | async)?.length === 0 && !isClosed"
+        message="No messages yet. Start the conversation!"
+      ></app-empty-state>
+    </ng-container>
+  </div>
+
+  <div *ngIf="!isClosed" class="chat-window__input">
+    <input
+      [(ngModel)]="draftText"
+      placeholder="Type a message…"
+      (keyup.enter)="send()"
+      class="chat-window__text-input"
+    />
+    <button class="os-btn os-btn-black chat-window__send-btn" (click)="send()">
+      Send
+    </button>
+  </div>
+</div>

@@ -17,34 +17,88 @@
             >
               <div
                 class="product__nav-img w-img"
-                (click)="productService.handleImageActive(img.ImageURL)"
+                (click)="selectMedia(img.ImageURL, img.mediaType === 'video')"
               >
-                <img
-                  [src]="img.ImageURL"
-                  alt="product-img"
-                  style="width: 92px; height: 117px"
-                />
+                <ng-container
+                  *ngIf="img.mediaType !== 'video'; else videoThumbBuyer"
+                >
+                  <img
+                    [src]="img.ImageURL"
+                    alt="product-img"
+                    style="width: 92px; height: 117px"
+                  />
+                </ng-container>
+                <ng-template #videoThumbBuyer>
+                  <div
+                    class="product__video-thumb"
+                    style="width: 92px; height: 117px"
+                  >
+                    <video
+                      [src]="img.ImageURL"
+                      muted
+                      preload="metadata"
+                      class="product__video-thumb-el"
+                    ></video>
+                    <div class="product__video-play-icon">
+                      <i class="fas fa-play"></i>
+                    </div>
+                  </div>
+                </ng-template>
               </div>
             </a>
           </div>
         </nav>
       </div>
       <div class="mb-20">
-        <div class="product__modal-img product__thumb w-img">
-          <img [src]="productService.activeImg" alt="product-img" />
-          <div *ngIf="product.Offer?.IsActive" class="product__sale">
-            <span class="new">Sale</span>
-            <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
+        <ng-container
+          *ngIf="!productService.activeIsVideo; else activeVideoBuyer"
+        >
+          <div class="product__modal-img product__thumb w-img">
+            <img [src]="productService.activeImg" alt="product-img" />
+            <div *ngIf="product.Offer?.IsActive" class="product__sale">
+              <span class="new">Sale</span>
+              <span class="percent"
+                >-{{ product.Offer?.DiscountPercentage }}%</span
+              >
+            </div>
           </div>
-        </div>
+        </ng-container>
+        <ng-template #activeVideoBuyer>
+          <div class="product__modal-img">
+            <video [src]="productService.activeImg" controls></video>
+            <div *ngIf="product.Offer?.IsActive" class="product__sale">
+              <span class="new">Sale</span>
+              <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
 
     <div *ngIf="style_2" class="product__modal-box">
       <div class="mb-20">
-        <div class="product__modal-img w-img">
-          <img [src]="productService.activeImg" alt="product-img" />
-        </div>
+        <ng-container
+          *ngIf="!productService.activeIsVideo; else activeVideoBuyer2"
+        >
+          <div class="product__modal-img w-img">
+            <img [src]="productService.activeImg" alt="product-img" />
+            <div *ngIf="product.Offer?.IsActive" class="product__sale">
+              <span class="new">Sale</span>
+              <span class="percent"
+                >-{{ product.Offer?.DiscountPercentage }}%</span
+              >
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #activeVideoBuyer2>
+          <div class="product__modal-img">
+            <video [src]="productService.activeImg" controls></video>
+            <div *ngIf="product.Offer?.IsActive" class="product__sale">
+              <span class="new">Sale</span>
+              <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
+            </div>
+          </div>
+        </ng-template>
       </div>
       <nav>
         <div class="nav nav-tabs" id="product-details" role="tablist">
@@ -55,13 +109,33 @@
           >
             <div
               class="product__nav-img w-img"
-              (click)="productService.handleImageActive(img.ImageURL)"
+              (click)="selectMedia(img.ImageURL, img.mediaType === 'video')"
             >
-              <img
-                [src]="img.ImageURL"
-                alt="product-img"
-                style="width: 92px; height: 117px"
-              />
+              <ng-container
+                *ngIf="img.mediaType !== 'video'; else videoThumbBuyer2"
+              >
+                <img
+                  [src]="img.ImageURL"
+                  alt="product-img"
+                  style="width: 92px; height: 117px"
+                />
+              </ng-container>
+              <ng-template #videoThumbBuyer2>
+                <div
+                  class="product__video-thumb"
+                  style="width: 92px; height: 117px"
+                >
+                  <video
+                    [src]="img.ImageURL"
+                    muted
+                    preload="metadata"
+                    class="product__video-thumb-el"
+                  ></video>
+                  <div class="product__video-play-icon">
+                    <i class="fas fa-play"></i>
+                  </div>
+                </div>
+              </ng-template>
             </div>
           </a>
         </div>
@@ -89,9 +163,14 @@
       </h5>
       <div class="product__price-2 mb-25">
         <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
-          {{ product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100) | currency: "INR" }}
+          {{
+            product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100)
+              | currency: "INR"
+          }}
         </span>
-        <span [class.old-price]="product.Offer?.IsActive && product.DisplayPrice">
+        <span
+          [class.old-price]="product.Offer?.IsActive && product.DisplayPrice"
+        >
           {{ product.DisplayPrice | currency: "INR" }}
         </span>
       </div>
@@ -110,7 +189,9 @@
         <div class="product__tag mb-25">
           <span>Color :</span>
           <span>
-            <a class="cursor-pointer">{{ product.Details.DialColorName | dash }}</a>
+            <a class="cursor-pointer">{{
+              product.Details.DialColorName | dash
+            }}</a>
           </span>
         </div>
       </div>
@@ -143,16 +224,23 @@
         <a
           *ngIf="!isItemInCart(product)"
           (click)="addToCart()"
-          class="add-cart-btn mb-20 cursor-pointer"
+          class="os-btn os-btn-black mb-20 cursor-pointer"
         >
           + Add to Cart
         </a>
         <a
           *ngIf="isItemInCart(product)"
           routerLink="/buyer/cart"
-          class="add-cart-btn mb-20 cursor-pointer"
+          class="os-btn os-btn-black mb-20 cursor-pointer"
         >
           Go to Cart
+        </a>
+        <a
+          *ngIf="product.UserID !== userId"
+          (click)="openChat()"
+          class="os-btn mb-20 cursor-pointer ml-10"
+        >
+          Chat with Seller
         </a>
       </div>
     </div>

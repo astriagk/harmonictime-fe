@@ -90,6 +90,7 @@ export class RegisterComponent implements OnDestroy {
       const payload = {
         email: formValue.email,
         password: formValue.password,
+        acceptedTerms: true,
       };
       // Drop any subscriptions from a previous submit so toasts don't stack
       this.userDataSub?.unsubscribe();

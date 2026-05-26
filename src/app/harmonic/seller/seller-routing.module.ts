@@ -5,6 +5,7 @@ import { ListComponent } from './products/list/list.component';
 import { DetailsComponent } from './products/details/details.component';
 import { AddEditComponent } from './products/add-edit/add-edit.component';
 import { OrdersComponent } from './orders/orders.component';
+import { SellerChatInboxComponent } from './chat/seller-chat-inbox.component';
 
 const routes: Routes = [
   {
@@ -35,6 +36,11 @@ const routes: Routes = [
         path: 'order-list',
         component: OrdersComponent,
         title: 'Order List',
+      },
+      {
+        path: 'chat',
+        component: SellerChatInboxComponent,
+        title: 'Chat Inbox',
       },
     ],
   },

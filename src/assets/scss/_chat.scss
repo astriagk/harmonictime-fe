@@ -1,0 +1,441 @@
+// ── Chat Window ──────────────────────────────────────────────────────────────
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  overflow: hidden;
+  background: $grey;
+
+  @media (max-width: 991px) {
+    height: 55vh;
+    min-height: 320px;
+  }
+
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+
+  &__loading {
+    padding: 10px 0;
+  }
+
+  &__input {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    border-top: 1px solid $border;
+    background: $white;
+  }
+
+  &__text-input {
+    flex: 1;
+    border: none;
+    padding: 14px 16px;
+    font-size: 14px;
+    outline: none;
+    background: $white;
+    color: $black;
+
+    &::placeholder {
+      color: $grey-3;
+    }
+  }
+
+  &__send-btn {
+    height: 50px;
+    line-height: 46px;
+    padding: 0 30px;
+    border-radius: 0;
+    flex-shrink: 0;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+  }
+}
+
+// ── Chat Bubbles ─────────────────────────────────────────────────────────────
+
+.chat-bubble {
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+  word-break: break-word;
+
+  &__body {
+    padding: 11px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &--mine {
+    align-self: flex-end;
+    align-items: flex-end;
+
+    .chat-bubble__body {
+      background: $theme-color;
+      color: #fff !important;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 2px 8px rgba(188, 130, 70, 0.25);
+
+      p, span, a {
+        color: #fff !important;
+      }
+    }
+  }
+
+  &--theirs {
+    align-self: flex-start;
+    align-items: flex-start;
+
+    .chat-bubble__body {
+      background: $white;
+      color: $heading-color;
+      border: 1px solid $border;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__time {
+    font-size: 11px;
+    color: $body-text-color;
+    margin-top: 5px;
+    padding: 0 6px;
+    letter-spacing: 0.02em;
+  }
+}
+
+.chat-closed-notice {
+  text-align: center;
+  color: $body-text-color;
+  font-size: 13px;
+  font-style: italic;
+  padding: 16px 0;
+  border-top: 1px dashed $border;
+  margin-top: 8px;
+}
+
+// ── Buyer Chat Modal ─────────────────────────────────────────────────────────
+
+.chat-modal {
+  &__content {
+    min-height: 540px;
+    display: flex;
+    flex-direction: column;
+
+    .modal-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      app-chat-window,
+      .chat-window {
+        flex: 1;
+        height: 100%;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid $border;
+
+    h5 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: $body-text-color;
+    padding: 0;
+    line-height: 1;
+
+    &:hover {
+      color: $black;
+    }
+  }
+}
+
+// ── Empty / Placeholder State ─────────────────────────────────────────────────
+
+.chat-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+
+  &__icon {
+    font-size: 48px;
+    color: $grey-2;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  &__title {
+    font-size: 22px;
+    font-weight: 600;
+    color: $heading-color;
+    margin: 0 0 10px;
+  }
+
+  &__text {
+    font-size: 14px;
+    color: $body-text-color;
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+// ── Two-Panel Chat Layout (buyer + seller pages) ──────────────────────────────
+
+.chat-page-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+
+  &__list {
+    width: 320px;
+    flex-shrink: 0;
+  }
+
+  &__panel-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: $heading-color;
+  }
+
+  &__window {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: $heading-color;
+    cursor: pointer;
+    padding: 0 0 16px;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $theme-color;
+    }
+  }
+
+  // ── Mobile: show list OR chat, not both ───────────────────────────────────
+  @media (max-width: 991px) {
+    flex-direction: column;
+    gap: 0;
+
+    &__list {
+      width: 100%;
+      display: block;
+    }
+
+    &__window {
+      display: none;
+      width: 100%;
+    }
+
+    // when a thread is selected, hide list and show window
+    &--show-chat {
+      .chat-page-layout__list {
+        display: none;
+      }
+
+      .chat-page-layout__window {
+        display: block;
+      }
+    }
+  }
+}
+
+// ── Seller Chat Inbox ─────────────────────────────────────────────────────────
+
+.chat-inbox {
+  &__thread-list {
+    overflow-y: auto;
+    max-height: 70vh;
+    border: 1px solid $border;
+    border-radius: 6px;
+
+    @media (max-width: 991px) {
+      max-height: 280px;
+    }
+  }
+
+  &__thread-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid $border;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: $grey;
+    }
+
+    &--active {
+      border-left: 3px solid $theme-color;
+      background: $grey;
+    }
+  }
+
+  &__thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+
+    &--placeholder {
+      background: $grey;
+    }
+  }
+
+  &__thread-meta {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      display: block;
+      font-size: 12px;
+      color: $body-text-color;
+    }
+
+    small {
+      display: block;
+      font-size: 12px;
+      color: $body-text-color;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__unread-badge {
+    background: $theme-color;
+    color: $white;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    text-align: center;
+  }
+
+  &__window-wrap {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid $border;
+    border-radius: 6px;
+    overflow: hidden;
+
+    app-chat-window .chat-window,
+    .chat-window {
+      flex: 1;
+      height: 520px;
+      border: none;
+      border-radius: 0;
+
+      @media (max-width: 991px) {
+        height: 55vh;
+        min-height: 320px;
+      }
+    }
+  }
+
+  &__window-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid $border;
+    background: $white;
+
+    h5 {
+      margin: 0 0 2px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    small {
+      font-size: 12px;
+      color: $body-text-color;
+    }
+  }
+
+  &__window-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__window-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid $border;
+  }
+}

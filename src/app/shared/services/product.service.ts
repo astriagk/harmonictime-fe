@@ -21,9 +21,11 @@ export class ProductService {
   constructor() {}
 
   activeImg: string | undefined;
+  activeIsVideo: boolean = false;
 
-  handleImageActive(img: string) {
+  handleImageActive(img: string, isVideo = false) {
     this.activeImg = img;
+    this.activeIsVideo = isVideo;
   }
 
   // Get Products By id

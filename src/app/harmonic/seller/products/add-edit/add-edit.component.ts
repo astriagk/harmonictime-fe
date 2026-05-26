@@ -64,6 +64,7 @@ interface SelectOption {
 interface UploadedImage {
   file?: File;
   url: string;
+  key?: string;
   isPrimary?: boolean;
 }
 
@@ -146,6 +147,10 @@ export class AddEditComponent implements OnInit {
   readonly minImages = 2;
   currentIndex = 0;
   userData: any;
+
+  // Video upload
+  readonly allowedVideoTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
+  uploadedVideo: { file?: File; url: string; _id?: string } | null = null;
 
   CREATE_PRODUCT_URL = POST_PRODUCT;
   CREATE_PRODUCT_DETAILS_URL = POST_PRODUCT_DETAILS;
@@ -303,14 +308,14 @@ export class AddEditComponent implements OnInit {
     });
 
     this.productDescription = this.fb.group({
-      shortTitle: [''],
-      detailedDescription: [''],
-      additionalDescription: [''],
+      shortTitle: ['', Validators.maxLength(50)],
+      detailedDescription: ['', Validators.maxLength(500)],
+      additionalDescription: ['', Validators.maxLength(500)],
     });
 
     this.deliveryAndReturns = this.fb.group({
-      deliveryInfo: [''],
-      returnsPolicy: [''],
+      deliveryInfo: ['', Validators.maxLength(500)],
+      returnsPolicy: ['', Validators.maxLength(500)],
     });
 
     this.media = this.fb.group({});
@@ -416,10 +421,14 @@ export class AddEditComponent implements OnInit {
             returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
           });
 
-          this.uploadedImages = data.Images.map((el: any) => {
-            return { url: el.ImageURL, isPrimary: !!el.IsPrimary, ...el };
-          });
+          this.uploadedImages = data.Images
+            .filter((el: any) => el.mediaType !== 'video')
+            .map((el: any) => ({ url: el.ImageURL, isPrimary: !!el.IsPrimary, ...el }));
           this.ensurePrimaryImage();
+          const videoEntry = data.Images.find((el: any) => el.mediaType === 'video');
+          if (videoEntry) {
+            this.uploadedVideo = { url: videoEntry.ImageURL, _id: videoEntry._id };
+          }
           this.isLoadingProduct = false;
         },
         error: (err) => {
@@ -545,6 +554,25 @@ export class AddEditComponent implements OnInit {
     this.ensurePrimaryImage();
   }
 
+  onVideoUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    if (!this.allowedVideoTypes.includes(file.type)) {
+      this.toastrService.error('Invalid video type. Please upload MP4, WebM, or MOV.');
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    this.uploadedVideo = { file, url };
+  }
+
+  removeVideo(): void {
+    if (this.uploadedVideo?._id) {
+      this.removedImageIds.push(this.uploadedVideo._id);
+    }
+    this.uploadedVideo = null;
+  }
+
   /** Mark a single image as the primary (the one shown first), clearing others. */
   setPrimaryImage(index: number): void {
     this.uploadedImages.forEach((img, i) => (img.isPrimary = i === index));
@@ -562,17 +590,15 @@ export class AddEditComponent implements OnInit {
     }
   }
 
-  /**
-   * Map freshly uploaded URLs (returned in the same order the files were
-   * appended) onto the IsPrimary flag the seller picked for each new image.
-   */
   private buildImageUrlsPayload(
-    uploadedUrls: string[],
-  ): { url: string; IsPrimary: boolean }[] {
+    uploadedFiles: { url: string; key: string }[],
+  ): { url: string; key: string; IsPrimary: boolean; mediaType: 'image' }[] {
     const newImages = this.uploadedImages.filter((img) => img.file);
-    return uploadedUrls.map((url, idx) => ({
+    return uploadedFiles.map(({ url, key }, idx) => ({
       url,
+      key,
       IsPrimary: !!newImages[idx]?.isPrimary,
+      mediaType: 'image' as const,
     }));
   }
 
@@ -744,6 +770,10 @@ export class AddEditComponent implements OnInit {
       }
     });
 
+    if (this.uploadedVideo?.file) {
+      formData.append('images', this.uploadedVideo.file);
+    }
+
     try {
       // Example of submitting the form
       if (this.isEditing) {
@@ -760,7 +790,7 @@ export class AddEditComponent implements OnInit {
   }
 
   createProduct(userId: string, productData: any, formData: any) {
-    const productPayload = {
+    const productPayload: Record<string, any> = {
       UserID: userId,
       ProductName: productData.productName,
       BrandID: productData.brandId,
@@ -818,11 +848,19 @@ export class AddEditComponent implements OnInit {
             .postObservableImages(this.POST_UPLOAD_IMAGES, formData)
             .pipe(
               concatMap((imageResponse) => {
+                const allFiles: { url: string; key: string }[] =
+                  imageResponse?.data?.files ??
+                  (imageResponse?.data?.urls ?? []).map((url: string) => ({ url, key: '' }));
+                const newImageCount = this.uploadedImages.filter(img => img.file).length;
+                const imageFiles = allFiles.slice(0, newImageCount);
+                const videoFile = this.uploadedVideo?.file ? (allFiles[newImageCount] ?? null) : null;
+
                 const imagesPayload = {
                   ProductID: productId,
-                  ImageURLs: this.buildImageUrlsPayload(
-                    imageResponse?.data?.urls ?? [],
-                  ),
+                  ImageURLs: [
+                    ...this.buildImageUrlsPayload(imageFiles),
+                    ...(videoFile ? [{ url: videoFile.url, key: videoFile.key, IsPrimary: false, mediaType: 'video' as const }] : []),
+                  ],
                 };
                 return this.genericService
                   .postObservable(
@@ -883,6 +921,7 @@ export class AddEditComponent implements OnInit {
     this.media.reset();
     this.uploadedImages = [];
     this.removedImageIds = [];
+    this.uploadedVideo = null;
   }
 
   updateProduct(userId: string, productData: any, formData: any) {
@@ -993,33 +1032,42 @@ export class AddEditComponent implements OnInit {
     );
 
     const hasNewImages = this.uploadedImages.some((image) => image.file);
+    const hasNewVideo = !!this.uploadedVideo?.file;
+    const hasNewMedia = hasNewImages || hasNewVideo;
 
-    // Nothing was edited and no new images were added — skip the API calls.
-    if (safeRequests.length === 0 && !hasNewImages) {
+    // Nothing was edited and no new media were added — skip the API calls.
+    if (safeRequests.length === 0 && !hasNewMedia) {
       this.isSubmitting = false;
       this.toastrService.info('No changes to update');
       return;
     }
 
-    // Upload images only when the user added new ones.
-    let imageUpload$: Observable<any> = of(null);
-    if (hasNewImages) {
-      // IDs travel in the multipart body, not the URL
+    // Upload images and/or video together to the same endpoint when either is new.
+    let mediaUpload$: Observable<any> = of(null);
+    if (hasNewMedia) {
       formData.append('userID', userId);
       formData.append('productID', productId);
 
-      imageUpload$ = this.genericService
+      mediaUpload$ = this.genericService
         .postObservableImages(this.POST_UPLOAD_IMAGES, formData)
         .pipe(
           switchMap((response) => {
-            const imagesPayload = {
-              ProductID: productId,
-              ImageURLs: this.buildImageUrlsPayload(response?.data?.urls ?? []),
-            };
-            return this.genericService.postObservable(
-              POST_PRODUCT_IMAGES,
-              imagesPayload,
-            );
+            const allFiles: { url: string; key: string }[] =
+              response?.data?.files ??
+              (response?.data?.urls ?? []).map((url: string) => ({ url, key: '' }));
+            const newImageCount = this.uploadedImages.filter(img => img.file).length;
+            const imageFiles = allFiles.slice(0, newImageCount);
+            const videoFile = hasNewVideo ? (allFiles[newImageCount] ?? null) : null;
+
+            const imageURLs = [
+              ...this.buildImageUrlsPayload(imageFiles),
+              ...(videoFile ? [{ url: videoFile.url, key: videoFile.key, IsPrimary: false, mediaType: 'video' as const }] : []),
+            ];
+
+            if (!imageURLs.length) return of(null);
+
+            const imagesPayload = { ProductID: productId, ImageURLs: imageURLs };
+            return this.genericService.postObservable(POST_PRODUCT_IMAGES, imagesPayload);
           }),
         );
     }
@@ -1030,7 +1078,7 @@ export class AddEditComponent implements OnInit {
 
     fieldUpdates$
       .pipe(
-        switchMap(() => imageUpload$),
+        switchMap(() => mediaUpload$),
         catchError((err) => {
           this.isSubmitting = false;
           console.error('Error updating product or related details:', err);

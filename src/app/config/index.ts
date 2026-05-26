@@ -64,6 +64,10 @@ export const UPDATE_PRODUCT_RETURN_POLICY = `${baseUrl}/delivery-returns/product
 
 // uploads
 export const POST_UPLOAD_IMAGES = `${baseUrl}/upload/images`;
+export const UPLOAD_SINGLE = `${baseUrl}/uploads/image`;
+
+// user update
+export const UPDATE_USER = (id: string) => `${baseUrl}/users/${id}`;
 // S3 deletion is keyed by image URL sent in the request body
 export const DELETE_IMAGE_S3 = `${baseUrl}/upload/images`;
 
@@ -80,6 +84,10 @@ export const DELETE_IMAGE_DB = `${baseUrl}/product-images/`;
 // reviews (append the product id to GET)
 export const POST_REVIEW = `${baseUrl}/reviews`;
 export const GET_PRODUCT_REVIEWS = `${baseUrl}/reviews/product/`;
+
+// user (seller) reviews
+export const POST_USER_REVIEW = `${baseUrl}/user-reviews`;
+export const GET_USER_REVIEWS = `${baseUrl}/user-reviews/user/`; // append the seller userID
 
 // cart
 export const USER_CART = `${baseUrl}/cart/user/`; // append the user id
@@ -152,6 +160,11 @@ export const adminUserAction = (id: string, action: 'block' | 'unblock' | 'suspe
 export const ADMIN_WITHDRAWALS = `${baseUrl}/admin/withdrawals`;
 export const adminWithdrawalAction = (id: string, action: 'pay' | 'reject') =>
   `${baseUrl}/admin/withdrawals/${id}/${action}`;
+
+// chat
+export const CHAT_THREADS = `${baseUrl}/chat/threads`;
+export const CHAT_THREAD_MSG = (id: string) => `${baseUrl}/chat/threads/${id}/messages`;
+export const CHAT_CLOSE_THREAD = (id: string) => `${baseUrl}/chat/threads/${id}/close`;
 
 // offers (admin)
 export const OFFERS = `${baseUrl}/offers`; // GET active, POST create

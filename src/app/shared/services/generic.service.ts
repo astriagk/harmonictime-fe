@@ -51,6 +51,19 @@ export class GenericService {
     return this._httpClient.delete(_url, this.tokenOptions());
   }
 
+  patchObservableToken(_url: string, data: any): Observable<any> {
+    return this._httpClient.patch(_url, data, this.tokenOptions());
+  }
+
+  uploadFormDataToken(_url: string, formData: FormData): Observable<any> {
+    const token = localStorage.getItem('token');
+    return this._httpClient.post(_url, formData, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token ? JSON.parse(token) : ''}`,
+      }),
+    });
+  }
+
   getObservableJw(_url: string): Observable<any> {
     const url = _url;
     return this._httpClient.get(url);

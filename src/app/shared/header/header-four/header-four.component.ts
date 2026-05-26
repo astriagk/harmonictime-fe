@@ -14,6 +14,7 @@ export class HeaderFourComponent {
   public sticky: boolean = false;
   public token: string = '';
   public cartItems: any = [];
+  public chatRoute = '/buyer/chat';
 
   constructor(
     public cartService: CartService,
@@ -23,17 +24,16 @@ export class HeaderFourComponent {
 
   ngOnInit(): void {
     this.token = localStorage.getItem('token') || '';
-    // Re-read the token on every user-state change so the header reflects
-    // login/logout immediately (no page reload needed)
-    this.store.select(selectUserData).subscribe(() => {
+    this.store.select(selectUserData).subscribe((state) => {
       this.token = localStorage.getItem('token') || '';
+      const roles: number[] = state?.user?.data?.roles ?? [];
+      // seller = has roles but not admin (role 1)
+      this.chatRoute = (roles.length > 0 && !roles.includes(1))
+        ? '/seller/chat'
+        : '/buyer/chat';
     });
     this.store.select(selectCartItems).subscribe((state) => {
-      if (state?.length) {
-        this.cartItems = state;
-      } else {
-        this.cartItems = [];
-      }
+      this.cartItems = state?.length ? state : [];
     });
   }
 

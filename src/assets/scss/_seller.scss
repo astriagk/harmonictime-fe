@@ -126,6 +126,39 @@
   color: $theme-color;
 }
 
+.product-upload__video {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 5px;
+  display: block;
+}
+
+/* ── Product detail video ── */
+.product__video-thumb {
+  position: relative;
+  overflow: hidden;
+
+  .product__video-thumb-el {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.7;
+  }
+
+  .product__video-play-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    pointer-events: none;
+  }
+}
+
 /* ── Lookup field label row (label + round add-new icon) ── */
 .lookup-label-row {
   margin: 0 0 5px;

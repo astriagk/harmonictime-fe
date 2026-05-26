@@ -557,6 +557,7 @@
                   placeholder="Short Title"
                   formControlName="shortTitle"
                 />
+                <span class="text-danger" *ngIf="productDescription.get('shortTitle')?.hasError('maxlength')">Max 50 characters</span>
               </div>
             </div>
           </div>
@@ -569,6 +570,7 @@
                   placeholder="Enter Detailed Description"
                   formControlName="detailedDescription"
                 ></textarea>
+                <span class="text-danger" *ngIf="productDescription.get('detailedDescription')?.hasError('maxlength')">Max 500 characters</span>
               </div>
             </div>
 
@@ -580,6 +582,7 @@
                   placeholder="Enter Additional Description"
                   formControlName="additionalDescription"
                 ></textarea>
+                <span class="text-danger" *ngIf="productDescription.get('additionalDescription')?.hasError('maxlength')">Max 500 characters</span>
               </div>
             </div>
           </div>
@@ -611,6 +614,7 @@
                   placeholder="Enter Delivery Information"
                   formControlName="deliveryInfo"
                 ></textarea>
+                <span class="text-danger" *ngIf="deliveryAndReturns.get('deliveryInfo')?.hasError('maxlength')">Max 500 characters</span>
               </div>
             </div>
 
@@ -622,6 +626,7 @@
                   placeholder="Enter Returns Policy"
                   formControlName="returnsPolicy"
                 ></textarea>
+                <span class="text-danger" *ngIf="deliveryAndReturns.get('returnsPolicy')?.hasError('maxlength')">Max 500 characters</span>
               </div>
             </div>
           </div>
@@ -708,6 +713,42 @@
               </div>
             </div>
           </div>
+          <!-- Video upload -->
+          <div class="row mt-30">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="checkout-form-list">
+                <label for="productVideo">Product Video (optional)</label>
+                <input
+                  id="productVideo"
+                  type="file"
+                  (change)="onVideoUpload($event)"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  [disabled]="!!uploadedVideo"
+                />
+                <small class="text-muted d-block mt-1">MP4, WebM or MOV — max 1 video</small>
+              </div>
+            </div>
+            <div class="col-12" *ngIf="uploadedVideo">
+              <div class="row">
+                <div class="col-auto m-2">
+                  <div class="position-relative product-upload__frame">
+                    <video
+                      [src]="uploadedVideo.url"
+                      controls
+                      class="product-upload__video m-2"
+                    ></video>
+                    <a
+                      (click)="removeVideo()"
+                      class="position-absolute top-0 end-0 text-danger cursor-pointer"
+                    >
+                      <i class="fa fa-times"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="d-md-flex justify-content-end">
             <button
               type="button"

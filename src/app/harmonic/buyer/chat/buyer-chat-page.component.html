@@ -1,0 +1,80 @@
+<app-breadcrumb-two title="My Messages" subtitle="Chat"></app-breadcrumb-two>
+
+<section class="tp-shop-area pt-40 pb-60">
+  <div class="container">
+
+    <!-- empty state: no conversations at all -->
+    <div *ngIf="!loading && threads.length === 0" class="chat-empty-state">
+      <i class="fas fa-comment-dots chat-empty-state__icon"></i>
+      <h3 class="chat-empty-state__title">No Conversations Yet</h3>
+      <p class="chat-empty-state__text">Browse products and click "Chat with Seller" to start a conversation.</p>
+      <a routerLink="/buyer/products" class="os-btn os-btn-black mt-20">Browse Products</a>
+    </div>
+
+    <div *ngIf="loading || threads.length > 0" class="chat-page-layout" [class.chat-page-layout--show-chat]="mobileShowChat">
+
+      <!-- Thread list panel -->
+      <div class="chat-page-layout__list">
+        <h5 class="chat-page-layout__panel-title">Conversations</h5>
+
+        <div *ngIf="loading" class="p-20">
+          <app-skeleton type="list-row" [count]="5"></app-skeleton>
+        </div>
+
+        <div *ngIf="!loading" class="chat-inbox__thread-list">
+          <div
+            *ngFor="let thread of threads"
+            class="chat-inbox__thread-item"
+            [class.chat-inbox__thread-item--active]="selectedThread?._id === thread._id"
+            (click)="selectThread(thread)"
+          >
+            <img *ngIf="thread.Product.PrimaryImage" [src]="thread.Product.PrimaryImage" alt="product" class="chat-inbox__thumb" />
+            <div *ngIf="!thread.Product.PrimaryImage" class="chat-inbox__thumb chat-inbox__thumb--placeholder"></div>
+
+            <div class="chat-inbox__thread-meta">
+              <strong>{{ thread.Product.ProductName }}</strong>
+              <small>{{ thread.Product.Description?.Title }}</small>
+            </div>
+
+            <span *ngIf="thread.unreadCount" class="chat-inbox__unread-badge">{{ thread.unreadCount }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat window panel -->
+      <div class="chat-page-layout__window">
+
+        <!-- Back button (mobile only) -->
+        <button class="chat-page-layout__back d-lg-none" (click)="backToList()">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+
+        <div *ngIf="!selectedThread" class="chat-inbox__placeholder">
+          <i class="fas fa-comment-dots chat-empty-state__icon"></i>
+          <h3 class="chat-empty-state__title">Select a Conversation</h3>
+          <p class="chat-empty-state__text">Choose a conversation from the list to view messages.</p>
+        </div>
+
+        <div *ngIf="selectedThread" class="chat-inbox__window-wrap">
+          <div class="chat-inbox__window-header">
+            <div class="chat-inbox__window-product">
+              <img *ngIf="selectedThread.Product.PrimaryImage" [src]="selectedThread.Product.PrimaryImage" class="chat-inbox__window-thumb" />
+              <div>
+                <h5>{{ selectedThread.Product.ProductName }}</h5>
+                <small>{{ selectedThread.Product.Description?.Title }}</small>
+              </div>
+            </div>
+            <span *ngIf="selectedThread.Status === 'closed'" class="sold-badge">Closed</span>
+          </div>
+          <app-chat-window
+            [threadId]="selectedThread._id"
+            [currentUserId]="buyerId"
+            [isClosed]="selectedThread.Status === 'closed'"
+          ></app-chat-window>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>

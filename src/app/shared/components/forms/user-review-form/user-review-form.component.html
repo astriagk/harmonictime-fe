@@ -1,0 +1,103 @@
+<form
+  class="conatct-post-form"
+  [formGroup]="reviewForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="row">
+    <!-- Product selector (hidden when only one product) -->
+    <div class="col-xl-12 mb-4" *ngIf="products.length > 1">
+      <div class="country-select review-product-select">
+        <select formControlName="productId">
+          <option value="" disabled>Select a product to review *</option>
+          <option *ngFor="let p of products" [value]="p.ProductID">
+            {{ p.ProductName }}
+          </option>
+        </select>
+        <span
+          *ngIf="reviewForm.get('productId')?.invalid && formSubmitted"
+          class="text-danger d-block mt-1"
+        >
+          Please select a product
+        </span>
+      </div>
+    </div>
+
+    <!-- Star rating -->
+    <div class="col-xl-12 mb-4">
+      <div class="review-rating">
+        <ul class="rating-stars">
+          <li
+            *ngFor="let star of stars"
+            class="cursor-pointer"
+            (click)="setRating(star)"
+            (mouseenter)="hoverRating = star"
+            (mouseleave)="hoverRating = 0"
+          >
+            <i
+              class="fa-star"
+              [ngClass]="(hoverRating || rating) >= star ? 'fas' : 'fal'"
+            ></i>
+          </li>
+        </ul>
+        <span *ngIf="formSubmitted && !rating" class="text-danger d-block mt-1">
+          Please select a rating
+        </span>
+      </div>
+    </div>
+
+    <!-- Subject -->
+    <div class="col-xl-12 mb-4">
+      <div class="contact-icon p-relative contacts-name">
+        <input type="text" placeholder="Subject *" formControlName="subject" />
+        <span
+          *ngIf="reviewForm.get('subject')?.invalid && formSubmitted"
+          class="text-danger"
+        >
+          Subject is required
+        </span>
+      </div>
+    </div>
+
+    <!-- Name (optional) -->
+    <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
+      <div class="contact-icon p-relative contacts-name">
+        <input type="text" placeholder="Name (optional)" formControlName="name" />
+      </div>
+    </div>
+
+    <!-- Email (pre-filled, read-only) -->
+    <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
+      <div class="contact-icon p-relative contacts-name">
+        <input type="email" placeholder="Email *" formControlName="email" readonly />
+        <span
+          *ngIf="reviewForm.get('email')?.invalid && formSubmitted"
+          class="text-danger"
+        >
+          A valid email is required
+        </span>
+      </div>
+    </div>
+
+    <!-- Comment -->
+    <div class="col-xl-12 mb-4">
+      <div class="contact-icon p-relative contacts-message">
+        <textarea
+          cols="30"
+          rows="6"
+          placeholder="Comments *"
+          formControlName="comment"
+        ></textarea>
+        <span
+          *ngIf="reviewForm.get('comment')?.invalid && formSubmitted"
+          class="text-danger"
+        >
+          Please write your review
+        </span>
+      </div>
+    </div>
+
+    <div class="col-xl-12">
+      <button class="os-btn os-btn-black" type="submit">Post Review</button>
+    </div>
+  </div>
+</form>
