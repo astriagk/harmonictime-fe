@@ -7,8 +7,8 @@ import {
   loginUserFailure,
 } from 'src/app/store/actions/user.actions';
 import { GenericService } from './generic.service';
-import { USER } from '@config/index';
-import { BehaviorSubject, Observable, tap, map } from 'rxjs';
+import { UPDATE_USER, UPLOAD_SINGLE, USER } from '@config/index';
+import { BehaviorSubject, Observable, map, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { ChatService } from './chat.service';
 
@@ -37,6 +37,19 @@ export class UserService {
     this.userDataSubject.next(null);
     this.store.dispatch(loginUserFailure({ error: '' }));
     this.store.dispatch(loadUserSuccess({ user: null }));
+  }
+
+  uploadAndSaveAvatar(userId: string, file: File): Observable<string> {
+    const form = new FormData();
+    form.append('image', file);
+    return this.genericService.uploadFormDataToken(UPLOAD_SINGLE, form).pipe(
+      switchMap((res: any) => {
+        const url: string = res?.url ?? res?.data?.url ?? '';
+        return this.genericService
+          .putObservableToken(UPDATE_USER(userId), { profilePicUrl: url })
+          .pipe(map(() => url));
+      })
+    );
   }
 
   getUserData(): Observable<any> {

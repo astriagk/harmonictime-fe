@@ -520,15 +520,7 @@
                         }}</span>
                       </td>
                     </tr>
-                    <tr class="cart-subtotal">
-                      <th>Platform Charges</th>
-                      <td>
-                        <span class="amount">{{
-                          cartService.computeCheckoutSummary(cartItems).extra
-                            | currency: "INR"
-                        }}</span>
-                      </td>
-                    </tr>
+
                     <tr class="cart-subtotal">
                       <th>GST ({{ cartService.computeCheckoutSummary(cartItems).gstPercent }}%)</th>
                       <td>

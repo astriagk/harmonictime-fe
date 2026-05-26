@@ -64,6 +64,10 @@ export const UPDATE_PRODUCT_RETURN_POLICY = `${baseUrl}/delivery-returns/product
 
 // uploads
 export const POST_UPLOAD_IMAGES = `${baseUrl}/upload/images`;
+export const UPLOAD_SINGLE = `${baseUrl}/uploads/image`;
+
+// user update
+export const UPDATE_USER = (id: string) => `${baseUrl}/users/${id}`;
 // S3 deletion is keyed by image URL sent in the request body
 export const DELETE_IMAGE_S3 = `${baseUrl}/upload/images`;
 

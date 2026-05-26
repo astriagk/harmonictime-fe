@@ -7,8 +7,21 @@
       <div class="row align-items-center">
         <div class="col-xxl-6 col-md-6">
           <div class="profile__basic d-md-flex align-items-center">
-            <div class="profile__basic-thumb mr-30">
-              <img src="assets/img/blog/comments/avater-3.png" alt="" />
+            <div class="profile__basic-thumb mr-30 profile__avatar-wrap" (click)="triggerAvatarUpload()">
+              <img
+                [src]="userData?.profilePicUrl || 'assets/img/blog/comments/avater-3.png'"
+                alt="Profile picture"
+              />
+              <span class="profile__avatar-overlay">
+                <i class="fas" [ngClass]="avatarUploading ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
+              </span>
+              <input
+                #avatarInput
+                type="file"
+                accept="image/*"
+                class="d-none"
+                (change)="onAvatarFileChange($event)"
+              />
             </div>
             <div class="profile__basic-content">
               <h3 class="profile__basic-title">
@@ -1095,10 +1108,7 @@
                 <span>Subtotal</span>
                 <span>{{ invoiceSubtotal | currency: "INR" }}</span>
               </div>
-              <div class="invoice__totals-row" *ngIf="platformCharges > 0">
-                <span>Platform Charges</span>
-                <span>{{ platformCharges | currency: "INR" }}</span>
-              </div>
+
               <div class="invoice__totals-row" *ngIf="gstAmount > 0">
                 <span>GST ({{ gstPercent }}%)</span>
                 <span>{{ gstAmount | currency: "INR" }}</span>

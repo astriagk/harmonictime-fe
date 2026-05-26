@@ -10,7 +10,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { IProduct, Product } from '../../types/product-d-t';
+import { Product } from '../../types/product-d-t';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { GenericService } from '../../services/generic.service';
@@ -85,8 +85,13 @@ export class ProductDetailsUpperBuyerComponent
   ngOnChanges(changes: SimpleChanges): void {
     if (this.product) {
       this.productService.activeImg = getPrimaryImageUrl(this.product.Images);
+      this.productService.activeIsVideo = false;
       this.checkCartStatus();
     }
+  }
+
+  selectMedia(url: string, isVideo: boolean): void {
+    this.productService.handleImageActive(url, isVideo);
   }
 
   checkCartStatus(): void {
