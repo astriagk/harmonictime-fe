@@ -61,6 +61,15 @@
   .login-action label {
     display: inline-block;
     margin-left: 5px;
+
+    a {
+      color: $theme-color;
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
   }
 
   .or-divide {

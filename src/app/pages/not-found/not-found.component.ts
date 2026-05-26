@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { companyDetails } from '@shared/constants/companyDetails';
 
 @Component({
   selector: 'app-not-found',
@@ -6,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./not-found.component.scss']
 })
 export class NotFoundComponent {
-
+  email = companyDetails.email;
 }

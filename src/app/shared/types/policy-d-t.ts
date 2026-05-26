@@ -1,6 +1,7 @@
 export interface IPolicySection {
   heading?: string;
-  content: string;
+  content?: string;
+  items?: string[];
 }
 
 export interface IPolicyPage {

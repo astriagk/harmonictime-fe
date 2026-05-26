@@ -97,17 +97,26 @@ const policy_data: IPolicyData = {
   terms: {
     title: 'Terms & Conditions',
     intro:
-      'By using our platform, you agree to comply with the following terms and conditions.',
+      'By using our platform, you agree to comply with the following terms and conditions. These terms apply to all buyers and sellers on the platform.',
     sections: [
       {
-        heading: 'Marketplace Responsibility',
-        content:
-          'Users are responsible for providing accurate product information while listing watches on the platform.',
+        heading: 'Seller Terms',
+        items: [
+          'While listing a product, ensure the actual item is added with original pictures showing how it truly looks. Misleading images are not allowed.',
+          'Payments will be withheld until the product is delivered. After confirmed delivery, withdrawal will be processed within 7 business days.',
+          'Sellers must clearly mention their return policy in the product listing, stating what action will be taken in case of a return request.',
+          'A 2% platform service charge will be deducted from the seller\'s withdrawal amount.',
+          'The payment will be sent to the bank account added by the seller. It is the seller\'s responsibility to add accurate and correct bank details — we are not liable for errors.',
+          'Before posting any product, sellers must take clear photos and videos of the item to avoid disputes or claims regarding its condition.',
+        ],
       },
       {
-        heading: 'Authenticity',
-        content:
-          'Sellers must ensure that all listed products are authentic and legally owned.',
+        heading: 'Buyer Terms',
+        items: [
+          'Carefully review the product listing, description, and images before making a purchase. Sellers are verified by us before being allowed to list items.',
+          'All payments are subject to a 2% platform service charge.',
+          'The responsibility for the product\'s condition as described lies with the seller. Upon receiving the item, buyers must record an unboxing video and take photographs to support any future query or dispute.',
+        ],
       },
       {
         heading: 'Platform Rights',

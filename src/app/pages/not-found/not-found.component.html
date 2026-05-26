@@ -1,10 +1,13 @@
 <!-- header start -->
-<app-header-one [transparent]="true" [white_bg]="true"></app-header-one>
+<app-header-four></app-header-four>
 <!-- header end -->
 
 <main>
   <!-- breadcrumb start -->
-  <app-breadcrumb-one title="404" subtitle="404"></app-breadcrumb-one>
+  <app-breadcrumb-two
+    title="404 Not Found"
+    subtitle="404 Not Found"
+  ></app-breadcrumb-two>
   <!-- breadcrumb end -->
 
   <!-- 404 area start -->
@@ -21,7 +24,7 @@
             The page are looking for has been moved or doesn’t exist anymore, if
             you like you can return to our homepage. If the problem persists,
             please send us an email to
-            <span class="highlight comment">basictheme400@gmail.com</span>
+            <span class="highlight comment">{{ email }}</span>
           </p>
 
           <div class="error__search">

@@ -999,5 +999,20 @@ p {
         margin-bottom: 0;
       }
     }
+
+    ol {
+      padding-left: 20px;
+      margin-bottom: 0;
+
+      li {
+        color: $body-text-color;
+        margin-bottom: 10px;
+        line-height: 1.7;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
   }
 }
