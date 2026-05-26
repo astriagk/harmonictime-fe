@@ -10,13 +10,18 @@ import { GenericService } from './generic.service';
 import { USER } from '@config/index';
 import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { Router } from '@angular/router';
+import { ChatService } from './chat.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private userDataSubject = new BehaviorSubject<any>(null); // Initial value is null
-  constructor(private store: Store, private genericService: GenericService) {}
+  constructor(
+    private store: Store,
+    private genericService: GenericService,
+    private chatService: ChatService,
+  ) {}
 
   loadUserFromLocalStorage() {
     const token = localStorage.getItem('token');
@@ -26,6 +31,7 @@ export class UserService {
   }
 
   logout() {
+    this.chatService.disconnect();
     localStorage.clear();
     sessionStorage.clear();
     this.userDataSubject.next(null);

@@ -143,18 +143,26 @@
         <a
           *ngIf="!isItemInCart(product)"
           (click)="addToCart()"
-          class="add-cart-btn mb-20 cursor-pointer"
+          class="os-btn os-btn-black mb-20 cursor-pointer"
         >
           + Add to Cart
         </a>
         <a
           *ngIf="isItemInCart(product)"
           routerLink="/buyer/cart"
-          class="add-cart-btn mb-20 cursor-pointer"
+          class="os-btn os-btn-black mb-20 cursor-pointer"
         >
           Go to Cart
         </a>
+        <a
+          *ngIf="product.UserID !== userId"
+          (click)="openChat()"
+          class="os-btn mb-20 cursor-pointer ml-10"
+        >
+          Chat with Seller
+        </a>
       </div>
+
     </div>
   </div>
 </div>

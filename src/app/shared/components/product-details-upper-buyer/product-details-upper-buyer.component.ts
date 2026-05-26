@@ -9,6 +9,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { IProduct, Product } from '../../types/product-d-t';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
@@ -41,7 +42,7 @@ export class ProductDetailsUpperBuyerComponent
   cartItems: any = [];
   stars = [1, 2, 3, 4, 5];
   isInCart = false;
-  private userId: string | null = null;
+  userId: string | null = null;
 
   @ViewChild('reviewModal') reviewModalRef?: ElementRef<HTMLElement>;
   @ViewChild(ReviewFormComponent) reviewFormCmp?: ReviewFormComponent;
@@ -51,6 +52,7 @@ export class ProductDetailsUpperBuyerComponent
     public cartService: CartService,
     public store: Store,
     private genericService: GenericService,
+    private router: Router,
   ) {}
 
   // Reset the review form whenever the modal is closed
@@ -109,6 +111,16 @@ export class ProductDetailsUpperBuyerComponent
 
   isItemInCart(item: any): boolean {
     return this.isInCart || this.cartItems.some((prd: any) => prd.ProductID === item._id);
+  }
+
+  openChat(): void {
+    if (!this.userId) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+    this.router.navigate(['/buyer/chat'], {
+      queryParams: { productId: this.product._id },
+    });
   }
 
   // Close the review modal after a successful post and let the parent reload the list

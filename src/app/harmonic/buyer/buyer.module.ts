@@ -18,6 +18,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ShopModule } from 'src/app/shop/shop.module';
 import { AccountComponent } from './account/account.component';
+import { BuyerChatPageComponent } from './chat/buyer-chat-page.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { AccountComponent } from './account/account.component';
     CheckoutComponent,
     OrdersComponent,
     AccountComponent,
+    BuyerChatPageComponent,
   ],
   imports: [
     CommonModule,

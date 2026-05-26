@@ -153,6 +153,11 @@ export const ADMIN_WITHDRAWALS = `${baseUrl}/admin/withdrawals`;
 export const adminWithdrawalAction = (id: string, action: 'pay' | 'reject') =>
   `${baseUrl}/admin/withdrawals/${id}/${action}`;
 
+// chat
+export const CHAT_THREADS = `${baseUrl}/chat/threads`;
+export const CHAT_THREAD_MSG = (id: string) => `${baseUrl}/chat/threads/${id}/messages`;
+export const CHAT_CLOSE_THREAD = (id: string) => `${baseUrl}/chat/threads/${id}/close`;
+
 // offers (admin)
 export const OFFERS = `${baseUrl}/offers`; // GET active, POST create
 export const OFFERS_ALL = `${baseUrl}/offers/all`; // GET all incl. disabled

@@ -16,6 +16,7 @@ const menuData: IMenuType[] = [
       { link: '/seller/product-list', title: 'Product List' },
       { link: '/seller/order-list', title: 'Order List' },
       { link: '/seller/add-product', title: 'Add Product' },
+      { link: '/seller/chat', title: 'Chat Inbox' },
     ],
   },
   {
@@ -51,6 +52,7 @@ export const mobile_menus: IMobileMenu[] = [
       { link: '/seller/product-list', title: 'Product List' },
       { link: '/seller/order-list', title: 'Order List' },
       { link: '/seller/add-product', title: 'Add Product' },
+      { link: '/seller/chat', title: 'Chat Inbox' },
     ],
   },
   {

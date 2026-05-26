@@ -47,6 +47,8 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
 import { PlatformPricePipe } from './pipes/platform-price.pipe';
 import { PrimaryImagePipe, SecondaryImagePipe } from './pipes/primary-image.pipe';
 import { DashPipe } from './pipes/dash.pipe';
+import { ChatWindowComponent } from './components/chat-window/chat-window.component';
+import { BuyerChatModalComponent } from '../harmonic/buyer/chat/buyer-chat-modal.component';
 
 @NgModule({
   declarations: [
@@ -95,6 +97,8 @@ import { DashPipe } from './pipes/dash.pipe';
     PrimaryImagePipe,
     SecondaryImagePipe,
     DashPipe,
+    ChatWindowComponent,
+    BuyerChatModalComponent,
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -136,6 +140,8 @@ import { DashPipe } from './pipes/dash.pipe';
     PrimaryImagePipe,
     SecondaryImagePipe,
     DashPipe,
+    ChatWindowComponent,
+    BuyerChatModalComponent,
   ],
 })
 export class SharedModule {}
