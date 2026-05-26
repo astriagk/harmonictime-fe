@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IProduct, Product } from '../../types/product-d-t';
+import { Product } from '../../types/product-d-t';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import {
@@ -26,7 +26,12 @@ export class ProductDetailsUpperSellerComponent {
   ngOnInit() {
     if (this.product) {
       this.productService.activeImg = getPrimaryImageUrl(this.product.Images);
+      this.productService.activeIsVideo = false;
     }
+  }
+
+  selectMedia(url: string, isVideo: boolean): void {
+    this.productService.handleImageActive(url, isVideo);
   }
 
   // Thumbnail strip with the primary image first.

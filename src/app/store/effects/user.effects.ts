@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Actions, ofType, createEffect } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
@@ -25,7 +26,8 @@ export class UserEffects {
     private genericService: GenericService,
     public userService: UserService,
     private cartService: CartService,
-    private wishlistService: WishlistService
+    private wishlistService: WishlistService,
+    private router: Router
   ) {}
 
   registerUser$ = createEffect(() =>
@@ -96,18 +98,15 @@ export class UserEffects {
     )
   );
 
-  // Token expired or invalid — clear local state so the UI reverts to logged-out.
   loadUserFailure$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(loadUserFailure),
-        tap(() => this.userService.logout())
+        tap(() => this.router.navigate(['/not-found']))
       ),
     { dispatch: false }
   );
 
-  // After the user loads, merge any guest (session-storage) cart and wishlist
-  // into the server. Each merge dispatches its load action once it completes.
   mergeGuestCartOnLogin$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -118,6 +117,7 @@ export class UserEffects {
             this.cartService.mergeGuestCart(userId);
             this.wishlistService.mergeGuestWishlist(userId);
           }
+          this.router.navigate(['/buyer/products']);
         })
       ),
     { dispatch: false }

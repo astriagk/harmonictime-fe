@@ -1,4 +1,9 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   BANK_ACCOUNTS,
@@ -117,6 +122,10 @@ export class AccountComponent {
   // preload a same-origin asset and inline it instead.
   public companyLogoDataUrl: string | null = null;
 
+  // Profile picture upload
+  @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
+  public avatarUploading = false;
+
   // Invoice modal state — manual modal pattern (see seller/orders).
   @ViewChild('invoiceContent') invoiceContent!: ElementRef<HTMLElement>;
   public isInvoiceModalOpen = false;
@@ -132,7 +141,9 @@ export class AccountComponent {
     public cartService: CartService,
     private store: Store,
     private toastrService: ToastrService,
-    private genericService: GenericService
+    private genericService: GenericService,
+    private userService: UserService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   // --- Address book ----------------------------------------------------------
@@ -188,8 +199,8 @@ export class AccountComponent {
         await firstValueFrom(
           this.genericService.putObservable(
             `${UPDATE_ADDRESS}${editingId}`,
-            payload
-          )
+            payload,
+          ),
         );
         this.toastrService.success('Address updated');
       } else {
@@ -197,7 +208,7 @@ export class AccountComponent {
           this.genericService.postObservable(CREATE_ADDRESS, {
             ...payload,
             UserID: userId,
-          })
+          }),
         );
         this.toastrService.success('Address added');
       }
@@ -298,7 +309,7 @@ export class AccountComponent {
       await firstValueFrom(
         this.genericService.postObservableToken(WITHDRAWALS, {
           BankAccountID: this.selectedBankAccountId,
-        })
+        }),
       );
       this.toastrService.success('Withdrawal requested');
       this.closeWithdraw();
@@ -308,7 +319,8 @@ export class AccountComponent {
       this.loadWithdrawals();
     } catch (error: any) {
       const message =
-        error?.error?.message ?? 'Failed to request withdrawal. Please try again.';
+        error?.error?.message ??
+        'Failed to request withdrawal. Please try again.';
       this.toastrService.error(message);
       this.requestingWithdrawal = false;
     }
@@ -325,8 +337,8 @@ export class AccountComponent {
       await firstValueFrom(
         this.genericService.putObservableToken(
           `${WITHDRAWAL_BY_ID}${id}/cancel`,
-          {}
-        )
+          {},
+        ),
       );
       this.toastrService.success('Withdrawal cancelled');
       this.loadWallet();
@@ -334,7 +346,8 @@ export class AccountComponent {
       this.loadWithdrawals();
     } catch (error: any) {
       const message =
-        error?.error?.message ?? 'Failed to cancel withdrawal. Please try again.';
+        error?.error?.message ??
+        'Failed to cancel withdrawal. Please try again.';
       this.toastrService.error(message);
     } finally {
       this.cancellingId = null;
@@ -384,13 +397,13 @@ export class AccountComponent {
         await firstValueFrom(
           this.genericService.putObservableToken(
             `${BANK_ACCOUNT_BY_ID}${editingId}`,
-            payload
-          )
+            payload,
+          ),
         );
         this.toastrService.success('Bank account updated');
       } else {
         await firstValueFrom(
-          this.genericService.postObservableToken(BANK_ACCOUNTS, payload)
+          this.genericService.postObservableToken(BANK_ACCOUNTS, payload),
         );
         this.toastrService.success('Bank account added');
       }
@@ -398,7 +411,8 @@ export class AccountComponent {
       this.loadBankAccounts();
     } catch (error: any) {
       const message =
-        error?.error?.message ?? 'Failed to save bank account. Please try again.';
+        error?.error?.message ??
+        'Failed to save bank account. Please try again.';
       this.toastrService.error(message);
       this.savingBankAccount = false;
     }
@@ -436,13 +450,14 @@ export class AccountComponent {
     this.deletingBankId = id;
     try {
       await firstValueFrom(
-        this.genericService.deleteObservableToken(`${BANK_ACCOUNT_BY_ID}${id}`)
+        this.genericService.deleteObservableToken(`${BANK_ACCOUNT_BY_ID}${id}`),
       );
       this.toastrService.success('Bank account removed');
       this.loadBankAccounts();
     } catch (error: any) {
       const message =
-        error?.error?.message ?? 'Failed to remove bank account. Please try again.';
+        error?.error?.message ??
+        'Failed to remove bank account. Please try again.';
       this.toastrService.error(message);
     } finally {
       this.deletingBankId = null;
@@ -468,7 +483,7 @@ export class AccountComponent {
     this.verifyingId = id;
     try {
       const res = await firstValueFrom(
-        this.genericService.postObservableToken(bankAccountVerify(id), {})
+        this.genericService.postObservableToken(bankAccountVerify(id), {}),
       );
       const data = res?.data;
       const verifiedName: string = data?.VerifiedName ?? '';
@@ -486,7 +501,7 @@ export class AccountComponent {
         this.toastrService.warning(
           `The bank-registered name (${verifiedName}) is different from what you entered. Please ensure this is correct.`,
           '',
-          { timeOut: 8000 }
+          { timeOut: 8000 },
         );
       }
 
@@ -557,7 +572,7 @@ export class AccountComponent {
   // reflects the real state.
   private async clearOtherDefaultAddresses(skipId?: string): Promise<void> {
     const others = this.addresses.filter(
-      (a) => a?._id && a._id !== skipId && a.IsDefault
+      (a) => a?._id && a._id !== skipId && a.IsDefault,
     );
     await Promise.all(
       others.map((a) =>
@@ -573,16 +588,15 @@ export class AccountComponent {
             PostalCode: a.PostalCode,
             Phone: a.Phone,
             IsDefault: false,
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   }
 
   deleteAddress(address: any): void {
-    this.openConfirm(
-      'Remove this address? This action cannot be undone.',
-      () => this.doDeleteAddress(address),
+    this.openConfirm('Remove this address? This action cannot be undone.', () =>
+      this.doDeleteAddress(address),
     );
   }
 
@@ -595,7 +609,7 @@ export class AccountComponent {
     this.deletingAddressId = id;
     try {
       await firstValueFrom(
-        this.genericService.deleteObservable(`${DELETE_ADDRESS}${id}`)
+        this.genericService.deleteObservable(`${DELETE_ADDRESS}${id}`),
       );
       this.toastrService.success('Address removed');
       this.loadAddresses(userId);
@@ -676,7 +690,8 @@ export class AccountComponent {
   // Subtotal = sum of DisplayPrice across all items (buyer-facing price per product).
   get invoiceSubtotal(): number {
     return (this.selectedOrder?.Products ?? []).reduce(
-      (sum, p) => sum + (p.DisplayPrice ?? 0), 0
+      (sum, p) => sum + (p.DisplayPrice ?? 0),
+      0,
     );
   }
 
@@ -760,6 +775,55 @@ export class AccountComponent {
         this.selectedOrder = null;
       }
     }
+  }
+
+  triggerAvatarUpload(): void {
+    this.avatarInput?.nativeElement.click();
+  }
+
+  onAvatarFileChange(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    const userId = this.userData?._id;
+    if (!file || !userId || this.avatarUploading) return;
+
+    this.avatarUploading = true;
+    this.userService.uploadAndSaveAvatar(userId, file).subscribe({
+      next: (url: string) => {
+        this.userData = { ...this.userData, profilePicUrl: url };
+        this.avatarUploading = false;
+        this.cdr.markForCheck();
+        this.toastrService.success('Profile picture updated');
+        this.avatarInput.nativeElement.value = '';
+      },
+      error: (err) => {
+        this.avatarUploading = false;
+        const raw = err?.error?.data ?? err?.error?.message ?? '';
+        const msg = raw.toLowerCase().includes('too large')
+          ? 'Image is too large. Please upload a smaller file.'
+          : raw || 'Failed to update profile picture';
+        this.toastrService.error(msg);
+        this.avatarInput.nativeElement.value = '';
+      },
+    });
+  }
+
+  // --- Seller review modal ---------------------------------------------------
+
+  public reviewingOrderProducts: any[] = [];
+  public isReviewModalOpen = false;
+
+  openReviewModal(order: any): void {
+    this.reviewingOrderProducts = order.Products ?? [];
+    this.isReviewModalOpen = true;
+  }
+
+  closeReviewModal(): void {
+    this.reviewingOrderProducts = [];
+    this.isReviewModalOpen = false;
+  }
+
+  onUserReviewSubmitted(): void {
+    this.closeReviewModal();
   }
 
   ngOnInit(): void {

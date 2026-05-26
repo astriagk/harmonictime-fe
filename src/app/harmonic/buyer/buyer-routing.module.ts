@@ -7,6 +7,7 @@ import { WishlistComponent } from './wishlist/wishlist.component';
 import { CheckoutComponent } from './checkout/checkout.component';
 import { BuyerLayoutComponent } from 'src/app/shared/layout/buyer-layout/buyer-layout.component';
 import { AccountComponent } from './account/account.component';
+import { BuyerChatPageComponent } from './chat/buyer-chat-page.component';
 
 const routes: Routes = [
   {
@@ -47,6 +48,11 @@ const routes: Routes = [
         path: 'account',
         component: AccountComponent,
         title: 'Account',
+      },
+      {
+        path: 'chat',
+        component: BuyerChatPageComponent,
+        title: 'My Messages',
       },
     ],
   },

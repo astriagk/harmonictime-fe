@@ -10,6 +10,7 @@ import { AddEditComponent } from './products/add-edit/add-edit.component';
 import { DetailsComponent } from './products/details/details.component';
 import { OrdersComponent } from './orders/orders.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
+import { SellerChatInboxComponent } from './chat/seller-chat-inbox.component';
 import { ShopModule } from 'src/app/shop/shop.module';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatInputModule } from '@angular/material/input';
@@ -26,6 +27,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
     DetailsComponent,
     OrdersComponent,
     AnalyticsComponent,
+    SellerChatInboxComponent,
   ],
   imports: [
     CommonModule,

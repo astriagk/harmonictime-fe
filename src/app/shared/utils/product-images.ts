@@ -7,38 +7,45 @@
 interface ProductImage {
   ImageURL?: string;
   IsPrimary?: boolean;
+  mediaType?: string;
   [key: string]: any;
 }
 
-/** The URL to show as the product's lead image (primary, else first). */
+/** The URL to show as the product's lead image (primary, else first). Videos are excluded. */
 export function getPrimaryImageUrl(
   images: ProductImage[] | null | undefined,
 ): string {
   if (!images?.length) return '';
-  const primary = images.find((img) => img?.IsPrimary);
-  return (primary ?? images[0])?.ImageURL ?? '';
+  const imageOnly = images.filter((img) => img?.mediaType !== 'video');
+  const pool = imageOnly.length ? imageOnly : images;
+  const primary = pool.find((img) => img?.IsPrimary);
+  return (primary ?? pool[0])?.ImageURL ?? '';
 }
 
 /**
- * The image to reveal on hover — the one shown after the primary (i.e. the
- * first non-primary image). Falls back to the primary when there's only one
- * image, so a single-image product just keeps showing it.
+ * The image to reveal on hover — the first non-primary image. Videos are excluded.
+ * Falls back to the primary when there's only one image.
  */
 export function getSecondaryImageUrl(
   images: ProductImage[] | null | undefined,
 ): string {
   if (!images?.length) return '';
-  const ordered = sortImagesPrimaryFirst(images);
+  const imageOnly = images.filter((img) => img?.mediaType !== 'video');
+  const ordered = sortImagesPrimaryFirst(imageOnly.length ? imageOnly : images);
   return (ordered[1] ?? ordered[0])?.ImageURL ?? '';
 }
 
-/** A copy of the images with the primary one first, the rest in their original order. */
+/**
+ * Images first (primary image at top), videos last.
+ */
 export function sortImagesPrimaryFirst<T extends ProductImage>(
   images: T[] | null | undefined,
 ): T[] {
   if (!images?.length) return [];
-  // Stable sort: primary images bubble to the front, everything else keeps order.
-  return [...images].sort(
-    (a, b) => (b?.IsPrimary ? 1 : 0) - (a?.IsPrimary ? 1 : 0),
-  );
+  return [...images].sort((a, b) => {
+    const aIsVideo = a?.mediaType === 'video';
+    const bIsVideo = b?.mediaType === 'video';
+    if (aIsVideo !== bIsVideo) return aIsVideo ? 1 : -1;
+    return (b?.IsPrimary ? 1 : 0) - (a?.IsPrimary ? 1 : 0);
+  });
 }

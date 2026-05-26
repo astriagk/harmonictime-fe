@@ -1,0 +1,14 @@
+.review-product-select {
+  margin-bottom: 0;
+
+  &::before {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  select {
+    padding-right: 40px;
+    font-size: 14px;
+    color: #848b8a;
+  }
+}

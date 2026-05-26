@@ -79,6 +79,15 @@
                   <app-mini-cart></app-mini-cart>
                   <!-- mini cart end -->
                 </li>
+                <li *ngIf="isLoggedIn">
+                  <a
+                    [routerLink]="isSeller ? '/seller/chat' : '/buyer/chat'"
+                    class="cursor-pointer"
+                    title="Messages"
+                  >
+                    <i class="fas fa-comment-dots"></i> Chat
+                  </a>
+                </li>
                 <li>
                   <a class="cursor-pointer"><i class="far fa-bars"></i></a>
                   <!-- extra info start -->
@@ -112,6 +121,15 @@
                 <!-- mini cart start -->
                 <app-mini-cart></app-mini-cart>
                 <!-- mini cart end -->
+              </li>
+              <li *ngIf="isLoggedIn">
+                <a
+                  [routerLink]="isSeller ? '/seller/chat' : '/buyer/chat'"
+                  class="cursor-pointer"
+                  title="Messages"
+                >
+                  <i class="fas fa-comment-dots"></i> Chat
+                </a>
               </li>
               <li>
                 <a class="cursor-pointer"><i class="far fa-bars"></i></a>

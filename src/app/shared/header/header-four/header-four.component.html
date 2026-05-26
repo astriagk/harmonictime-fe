@@ -51,6 +51,11 @@
                   </button>
                 </li>
                 <li *ngIf="token">
+                  <a [routerLink]="chatRoute" class="cursor-pointer" title="Messages">
+                    <i class="fas fa-comment-dots"></i>
+                  </a>
+                </li>
+                <li *ngIf="token">
                   <a class="cursor-pointer"><i class="fas fa-user"></i></a>
                   <app-extra-info></app-extra-info>
                 </li>

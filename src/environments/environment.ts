@@ -2,6 +2,7 @@
 export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:5000/api',
+  socketBaseUrl: 'http://localhost:5000',
   imageUploadUrl: 'http://localhost:5000/upload',
   razorpayKeyId: 'rzp_test_S7JpGRMIETfbv5',
   companyLogoUrl:

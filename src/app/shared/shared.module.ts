@@ -27,6 +27,7 @@ import { EmptyStateComponent } from './ui/empty-state/empty-state.component';
 import { SkeletonComponent } from './ui/skeleton/skeleton.component';
 import { ProductDetailsUpperComponent } from './components/product-details-upper/product-details-upper.component';
 import { ReviewFormComponent } from './components/forms/review-form/review-form.component';
+import { UserReviewFormComponent } from './components/forms/user-review-form/user-review-form.component';
 import { BlogSidebarComponent } from './components/blogs/blog-sidebar/blog-sidebar.component';
 import { BlogPostboxItemComponent } from './components/blogs/blog-postbox-item/blog-postbox-item.component';
 import { BlogAreaComponent } from './components/blogs/blog-area/blog-area.component';
@@ -47,6 +48,8 @@ import { ProductDetailsUpperBuyerComponent } from './components/product-details-
 import { PlatformPricePipe } from './pipes/platform-price.pipe';
 import { PrimaryImagePipe, SecondaryImagePipe } from './pipes/primary-image.pipe';
 import { DashPipe } from './pipes/dash.pipe';
+import { ChatWindowComponent } from './components/chat-window/chat-window.component';
+import { BuyerChatModalComponent } from '../harmonic/buyer/chat/buyer-chat-modal.component';
 
 @NgModule({
   declarations: [
@@ -74,6 +77,7 @@ import { DashPipe } from './pipes/dash.pipe';
     SkeletonComponent,
     ProductDetailsUpperComponent,
     ReviewFormComponent,
+    UserReviewFormComponent,
     BlogSidebarComponent,
     BlogPostboxItemComponent,
     BlogAreaComponent,
@@ -95,6 +99,8 @@ import { DashPipe } from './pipes/dash.pipe';
     PrimaryImagePipe,
     SecondaryImagePipe,
     DashPipe,
+    ChatWindowComponent,
+    BuyerChatModalComponent,
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -118,6 +124,7 @@ import { DashPipe } from './pipes/dash.pipe';
     SkeletonComponent,
     ProductDetailsUpperComponent,
     ReviewFormComponent,
+    UserReviewFormComponent,
     BlogSidebarComponent,
     BlogPostboxItemComponent,
     BlogAreaComponent,
@@ -136,6 +143,8 @@ import { DashPipe } from './pipes/dash.pipe';
     PrimaryImagePipe,
     SecondaryImagePipe,
     DashPipe,
+    ChatWindowComponent,
+    BuyerChatModalComponent,
   ],
 })
 export class SharedModule {}
