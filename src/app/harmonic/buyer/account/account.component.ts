@@ -98,6 +98,11 @@ export class AccountComponent {
   public savingBankAccount = false;
   public deletingBankId: string | null = null;
 
+  // Generic confirmation modal — set pendingAction to the fn to run on confirm.
+  public confirmModalOpen = false;
+  public confirmModalMessage = '';
+  private pendingAction: (() => void) | null = null;
+
   // Bank account verification (Razorpay penny-drop).
   public verifyConfirmAccount: any = null; // non-null = confirm dialog is open
   public verifyingId: string | null = null;
@@ -399,7 +404,31 @@ export class AccountComponent {
     }
   }
 
-  async deleteBankAccount(account: any): Promise<void> {
+  openConfirm(message: string, action: () => void): void {
+    this.confirmModalMessage = message;
+    this.pendingAction = action;
+    this.confirmModalOpen = true;
+  }
+
+  closeConfirm(): void {
+    this.confirmModalOpen = false;
+    this.confirmModalMessage = '';
+    this.pendingAction = null;
+  }
+
+  runConfirm(): void {
+    this.pendingAction?.();
+    this.closeConfirm();
+  }
+
+  deleteBankAccount(account: any): void {
+    this.openConfirm(
+      'Remove this bank account? This action cannot be undone.',
+      () => this.doDeleteBankAccount(account),
+    );
+  }
+
+  private async doDeleteBankAccount(account: any): Promise<void> {
     const id = account?._id;
     if (!id || this.deletingBankId) {
       return;
@@ -550,7 +579,14 @@ export class AccountComponent {
     );
   }
 
-  async deleteAddress(address: any): Promise<void> {
+  deleteAddress(address: any): void {
+    this.openConfirm(
+      'Remove this address? This action cannot be undone.',
+      () => this.doDeleteAddress(address),
+    );
+  }
+
+  private async doDeleteAddress(address: any): Promise<void> {
     const id = address?._id;
     const userId = this.userData?._id;
     if (!id || !userId || this.deletingAddressId) {

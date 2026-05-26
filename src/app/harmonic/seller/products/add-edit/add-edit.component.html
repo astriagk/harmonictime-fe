@@ -12,6 +12,17 @@
       </div>
     </div>
 
+    <div *ngIf="!isLoadingProduct && productData" class="d-flex justify-content-end mb-20">
+      <button
+        type="button"
+        class="os-btn"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? "Updating..." : "Update Product" }}
+      </button>
+    </div>
+
     <mat-vertical-stepper
       *ngIf="!isLoadingProduct"
       [linear]="isLinear"

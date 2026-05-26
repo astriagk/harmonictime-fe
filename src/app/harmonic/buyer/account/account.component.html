@@ -913,6 +913,35 @@
 </section>
 <!-- profile menu area end -->
 
+<!-- Confirm delete modal -->
+<div
+  *ngIf="confirmModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeConfirm()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">Confirm</h3>
+          <p class="mb-20">{{ confirmModalMessage }}</p>
+          <div class="d-flex justify-content-end mt-10">
+            <button type="button" class="os-btn mr-5" (click)="closeConfirm()">Cancel</button>
+            <button type="button" class="os-btn os-btn-black" (click)="runConfirm()">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="confirmModalOpen" class="modal-backdrop fade show"></div>
+
 <!-- Invoice modal -->
 <div
   *ngIf="isInvoiceModalOpen || isCapturing"

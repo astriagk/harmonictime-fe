@@ -105,28 +105,30 @@ const hero_slider_five: IHeroSlider[] = [
 const hero_slider_seven: IHeroSlider[] = [
   {
     id: 1,
-    bgImg: '/assets/img/slider/06/e-01.webp',
-    sm_title: 'Milky White',
+    bgImg:
+      'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/hero_slider/dd4e9818-06b0-409b-8f94-7e5004ae1262-1779444094794',
+    sm_title: 'Founded in 1755',
     meta: true,
-    title: 'HMT Janata',
-    subtitle:
-      'The Janata is HMT’s most storied, emblematic and charming watch for good reason. ',
+    title: 'Vacheron Constantin',
+    subtitle: 'Heritage and philosophy, Craftsmanship and innovation.',
   },
   {
     id: 2,
-    bgImg: '/assets/img/slider/05/slide112.webp',
-    sm_title: 'Quick parcel delivery',
-    title: 'Creative theme <br/>Awesome.',
-    subtitle:
-      'Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.',
+    bgImg:
+      'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/hero_slider/3deca549-89dc-43a1-aaba-fbbd343cb50a-1779443686822',
+    sm_title: 'Founded in 1775',
+    title: 'Breguet',
+    subtitle: 'Modern Era, Cultural Significance.',
+    meta: true,
   },
   {
     id: 3,
-    bgImg: '/assets/img/slider/05/slide113.webp',
-    sm_title: 'Quick parcel delivery',
-    title: 'The world is<br/>make all.',
-    subtitle:
-      'Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.',
+    bgImg:
+      'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/hero_slider/e276614e-9acf-47f1-b930-ef5d39905349-1779443775866',
+    sm_title: 'Founded in 1833',
+    title: 'Jaeger-LeCoultre',
+    subtitle: 'Iconic creations, Contemporary presence.',
+    meta: true,
   },
 ];
 

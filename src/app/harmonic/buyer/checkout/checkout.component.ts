@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CartService } from 'src/app/shared/services/cart.service';
 import { ToastrService } from 'ngx-toastr';
 import {
@@ -42,7 +42,7 @@ declare var Razorpay: any;
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
-export class CheckoutComponent {
+export class CheckoutComponent implements OnDestroy {
   public isOpenLogin = false;
   public isOpenRegister = false;
   public isOpenCoupon = false;
@@ -56,6 +56,7 @@ export class CheckoutComponent {
   // Saved addresses for logged-in users — pick one to prefill the billing form.
   public savedAddresses: any[] = [];
   public selectedAddressId: string | null = null;
+  private selectedAddressSnapshot: any = null; // form values at the moment of selection
   private addressesLoadedFor: string | null = null; // guards repeat loads
 
   public placingOrder = false; // disables Place order while we verify + pay
@@ -192,8 +193,12 @@ export class CheckoutComponent {
   // new address manually (clears the billing fields).
   onSelectSavedAddress(addressId: string | null) {
     this.selectedAddressId = addressId || null;
+    this.selectedAddressSnapshot = null;
     if (!addressId) {
-      this.checkoutForm.reset({ country: 'India', email: this.userData?.email ?? null });
+      this.checkoutForm.reset({
+        country: 'India',
+        email: this.userData?.email ?? null,
+      });
       return;
     }
     const addr = this.savedAddresses.find((a) => a._id === addressId);
@@ -215,8 +220,47 @@ export class CheckoutComponent {
       state: addr.State ?? '',
       zipCode: addr.PostalCode ?? '',
       phone: addr.Phone ?? '',
-      email: this.checkoutForm.get('email')?.value || this.userData?.email || '',
+      email:
+        this.checkoutForm.get('email')?.value || this.userData?.email || '',
     });
+    // Capture values immediately after patch so we can detect edits later.
+    this.selectedAddressSnapshot = { ...this.checkoutForm.value };
+  }
+
+  private readonly ADDRESS_FIELDS = [
+    'firstName', 'lastName', 'country', 'address',
+    'apartment', 'city', 'state', 'zipCode', 'phone',
+  ] as const;
+
+  // Returns true if the user edited any address field after selecting a saved address.
+  private addressWasEdited(formValue: any): boolean {
+    if (!this.selectedAddressSnapshot) return true;
+    return this.ADDRESS_FIELDS.some(
+      (f) => formValue[f] !== this.selectedAddressSnapshot[f],
+    );
+  }
+
+  // Builds the address payload for /create-order based on the three cases:
+  // 1. No saved address selected  → full new address fields
+  // 2. Saved address, no edits    → { _id } only (backend reuses existing record)
+  // 3. Saved address, user edited → full address fields (treat as new)
+  private buildAddressPayload(formValue: any): any {
+    if (this.selectedAddressId && !this.addressWasEdited(formValue)) {
+      return { _id: this.selectedAddressId };
+    }
+    return {
+      FirstName: formValue.firstName,
+      LastName: formValue.lastName,
+      Country: formValue.country,
+      AddressLine1: formValue.address,
+      AddressLine2: formValue.apartment ?? '',
+      City: formValue.city,
+      State: formValue.state,
+      PostalCode: formValue.zipCode,
+      Phone: formValue.phone,
+      orderNotes: formValue.orderNote,
+      IsDefault: false,
+    };
   }
 
   // Verify every cart product is still purchasable before taking payment.
@@ -233,7 +277,7 @@ export class CheckoutComponent {
         );
         const product = res?.data ?? res;
         return product?.IsAvailable === false
-          ? item?.ProductName ?? 'A product'
+          ? (item?.ProductName ?? 'A product')
           : null;
       } catch {
         return null;
@@ -454,19 +498,7 @@ export class CheckoutComponent {
           UserID: this.userData._id,
           amount,
           currency: 'INR',
-          address: {
-            FirstName: formValue.firstName,
-            LastName: formValue.lastName,
-            Country: formValue.country,
-            AddressLine1: formValue.address,
-            AddressLine2: '',
-            City: formValue.city,
-            State: formValue.state,
-            PostalCode: formValue.zipCode,
-            Phone: formValue.phone,
-            orderNotes: formValue.orderNote,
-            IsDefault: false,
-          },
+          address: this.buildAddressPayload(formValue),
           checkout: {
             ProductIDs: cartItems,
             TotalAmount: grandTotal,
@@ -563,6 +595,11 @@ export class CheckoutComponent {
     }
   }
 
+  ngOnDestroy() {
+    this.authDataSub?.unsubscribe();
+    this.authErrorSub?.unsubscribe();
+  }
+
   private async finalizeCheckout(
     orderRes: any,
     checkoutId: string,
@@ -582,21 +619,11 @@ export class CheckoutComponent {
         ),
       );
 
-      const updateProducts = {
-        ProductIDs: cartItems,
-      };
-
-      const updateProductsRes = await firstValueFrom(
-        this.genericService.putObservable(UPDATE_PRODUCT, updateProducts),
+      this.router.navigate(['/buyer/products']);
+      await this.store.dispatch(loadCart());
+      await this.toastrService.success(
+        'Payment and Checkout Completed Successfully!',
       );
-
-      if (updateProductsRes) {
-        this.router.navigate(['/buyer/products']);
-        await this.store.dispatch(loadCart());
-        await this.toastrService.success(
-          'Payment and Checkout Completed Successfully!',
-        );
-      }
     } catch (error) {
       console.error('Error in checkout process:', error);
       this.toastrService.error('Checkout Failed!');
