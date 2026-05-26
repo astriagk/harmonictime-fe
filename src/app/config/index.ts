@@ -85,6 +85,10 @@ export const DELETE_IMAGE_DB = `${baseUrl}/product-images/`;
 export const POST_REVIEW = `${baseUrl}/reviews`;
 export const GET_PRODUCT_REVIEWS = `${baseUrl}/reviews/product/`;
 
+// user (seller) reviews
+export const POST_USER_REVIEW = `${baseUrl}/user-reviews`;
+export const GET_USER_REVIEWS = `${baseUrl}/user-reviews/user/`; // append the seller userID
+
 // cart
 export const USER_CART = `${baseUrl}/cart/user/`; // append the user id
 export const USER_CART_ITEM = (userId: string, productId: string) => `${baseUrl}/cart/user/${userId}/${productId}`;

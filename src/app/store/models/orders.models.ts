@@ -4,6 +4,8 @@ export interface OfferApplied {
 }
 
 export interface Product {
+  _id?: string;
+  ProductID?: string;
   ProductName: string;
   Price: number;
   OfferApplied?: OfferApplied | null;
@@ -39,6 +41,7 @@ export interface Order {
   PaymentStatus: string;
   CheckoutDate: string;
   DeliveryStatus: string;
+  ProductIDs?: string[];
   Products: Product[];
   Shipments?: Shipment[];
   ShippingAddress?: ShippingAddress;
