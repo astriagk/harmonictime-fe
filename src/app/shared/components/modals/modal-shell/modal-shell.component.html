@@ -1,0 +1,31 @@
+<div
+  class="modal fade show offer__modal"
+  tabindex="-1"
+  role="dialog"
+  [style.z-index]="zIndex"
+>
+  <div
+    class="modal-dialog modal-dialog-centered"
+    [class.modal-lg]="size === 'lg'"
+    [class.modal-xl]="size === 'xl'"
+    role="document"
+  >
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closed.emit()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner">
+          <h4 *ngIf="title" class="modal-shell__title">{{ title }}</h4>
+          <ng-content></ng-content>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal-backdrop fade show"
+  [style.z-index]="backdropZIndex"
+></div>

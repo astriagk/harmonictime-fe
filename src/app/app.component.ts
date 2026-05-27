@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { CartService } from '@shared/services/cart.service';
 import { WishlistService } from '@shared/services/wishlist.service';
 import { UserService } from '@shared/services/user.service';
-import { loadUser } from './store/actions/user.actions';
 
 @Component({
   selector: 'app-root',
@@ -21,12 +20,9 @@ export class AppComponent {
   ) {}
 
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     if (localStorage.getItem('token')) {
       this.userService.loadUserFromLocalStorage();
     } else {
-      // Guests have no server cart/wishlist; hydrate the store from session storage
       this.cartService.loadGuestCart();
       this.wishlistService.loadGuestWishlist();
     }

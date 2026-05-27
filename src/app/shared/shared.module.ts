@@ -34,9 +34,11 @@ import { BlogAreaComponent } from './components/blogs/blog-area/blog-area.compon
 import { BlogDetailsAreaComponent } from './components/blogs/blog-details-area/blog-details-area.component';
 import { BlogReplyFormComponent } from './components/forms/blog-reply-form/blog-reply-form.component';
 import { ProductModalComponent } from './components/modals/product-modal/product-modal.component';
+import { ModalShellComponent } from './components/modals/modal-shell/modal-shell.component';
 import { ContactFormComponent } from './components/forms/contact-form/contact-form.component';
 import { AddressFormComponent } from './components/forms/address-form/address-form.component';
 import { BankAccountFormComponent } from './components/forms/bank-account-form/bank-account-form.component';
+import { GstFormComponent } from './components/forms/gst-form/gst-form.component';
 import { OffcanvasComponent } from './components/offcanvas/offcanvas.component';
 import { AuthLayoutComponent } from './layout/auth-layout/auth-layout.component';
 import { SellerLayoutComponent } from './layout/seller-layout/seller-layout.component';
@@ -84,9 +86,11 @@ import { BuyerChatModalComponent } from '../harmonic/buyer/chat/buyer-chat-modal
     BlogDetailsAreaComponent,
     BlogReplyFormComponent,
     ProductModalComponent,
+    ModalShellComponent,
     ContactFormComponent,
     AddressFormComponent,
     BankAccountFormComponent,
+    GstFormComponent,
     OffcanvasComponent,
     AuthLayoutComponent,
     SellerLayoutComponent,
@@ -130,9 +134,11 @@ import { BuyerChatModalComponent } from '../harmonic/buyer/chat/buyer-chat-modal
     BlogAreaComponent,
     BlogDetailsAreaComponent,
     ProductModalComponent,
+    ModalShellComponent,
     ContactFormComponent,
     AddressFormComponent,
     BankAccountFormComponent,
+    GstFormComponent,
     OffcanvasComponent,
     BuyerLayoutComponent,
     AdminLayoutComponent,

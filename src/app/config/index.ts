@@ -161,6 +161,15 @@ export const ADMIN_WITHDRAWALS = `${baseUrl}/admin/withdrawals`;
 export const adminWithdrawalAction = (id: string, action: 'pay' | 'reject') =>
   `${baseUrl}/admin/withdrawals/${id}/${action}`;
 
+// admin — seller verification
+export const ADMIN_SELLERS = `${baseUrl}/admin/sellers`;
+export const ADMIN_SELLER_BY_ID = (id: string) => `${baseUrl}/admin/sellers/${id}`;
+export const adminSellerAction = (id: string, action: 'approve' | 'reject' | 'request-info') =>
+  `${baseUrl}/admin/sellers/${id}/${action}`;
+
+// GST onboarding
+export const GST_ONBOARDING = `${baseUrl}/gst`;
+
 // chat
 export const CHAT_THREADS = `${baseUrl}/chat/threads`;
 export const CHAT_THREAD_MSG = (id: string) => `${baseUrl}/chat/threads/${id}/messages`;

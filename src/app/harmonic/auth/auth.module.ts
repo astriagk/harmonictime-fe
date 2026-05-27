@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginComponent } from './login/login.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { GstOnboardingComponent } from './gst-onboarding/gst-onboarding.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
     LoginComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
+    GstOnboardingComponent,
   ],
   imports: [
     CommonModule,

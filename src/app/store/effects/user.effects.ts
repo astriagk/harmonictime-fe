@@ -117,7 +117,13 @@ export class UserEffects {
             this.cartService.mergeGuestCart(userId);
             this.wishlistService.mergeGuestWishlist(userId);
           }
-          this.router.navigate(['/buyer/products']);
+          const pendingGst = localStorage.getItem('_pendingGstRedirect');
+          if (pendingGst) {
+            localStorage.removeItem('_pendingGstRedirect');
+            this.router.navigate(['/auth/gst-onboarding']);
+          } else {
+            this.router.navigate(['/buyer/products']);
+          }
         })
       ),
     { dispatch: false }

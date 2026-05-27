@@ -1,0 +1,95 @@
+<form [formGroup]="gstForm" (ngSubmit)="onSubmit()" class="checkbox-form">
+  <div class="row">
+
+    <!-- GSTIN -->
+    <div class="col-md-6">
+      <div class="checkout-form-list">
+        <label>GSTIN <span class="required">*</span></label>
+        <input
+          type="text"
+          placeholder="e.g. 27AAPFU0939F1ZV"
+          formControlName="GSTIN"
+          style="text-transform:uppercase"
+        />
+        <span *ngIf="GSTIN?.hasError('required') && (GSTIN?.touched || formSubmitted)" class="text-danger">
+          GSTIN is required.
+        </span>
+        <span *ngIf="GSTIN?.hasError('pattern') && (GSTIN?.touched || formSubmitted)" class="text-danger">
+          Enter a valid 15-character GSTIN.
+        </span>
+      </div>
+    </div>
+
+    <!-- Legal Business Name -->
+    <div class="col-md-6">
+      <div class="checkout-form-list">
+        <label>Legal Business Name <span class="required">*</span></label>
+        <input
+          type="text"
+          placeholder="As per GST registration"
+          formControlName="LegalBusinessName"
+        />
+        <span *ngIf="LegalBusinessName?.invalid && (LegalBusinessName?.touched || formSubmitted)" class="text-danger">
+          Legal Business Name is required.
+        </span>
+      </div>
+    </div>
+
+    <!-- Trade Name -->
+    <div class="col-md-6">
+      <div class="checkout-form-list">
+        <label>Trade Name <span class="optional">(optional)</span></label>
+        <input type="text" placeholder="Brand / display name" formControlName="TradeName" />
+      </div>
+    </div>
+
+    <!-- Business Type -->
+    <div class="col-md-6">
+      <div class="checkout-form-list">
+        <label>Business Type <span class="optional">(optional)</span></label>
+        <select formControlName="BusinessType">
+          <option [ngValue]="null" disabled>Select a business type</option>
+          <option *ngFor="let type of businessTypes" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Registered Address -->
+    <div class="col-md-12">
+      <div class="checkout-form-list">
+        <label>Registered Address <span class="optional">(optional)</span></label>
+        <input type="text" placeholder="As per GST registration" formControlName="RegisteredAddress" />
+      </div>
+    </div>
+
+    <!-- PinCode -->
+    <div class="col-md-6">
+      <div class="checkout-form-list">
+        <label>Pin Code <span class="optional">(optional)</span></label>
+        <input type="text" placeholder="6-digit PIN code" formControlName="PinCode" maxlength="6" />
+        <span *ngIf="PinCode?.hasError('pattern') && (PinCode?.touched || formSubmitted)" class="text-danger">
+          Enter a valid 6-digit PIN code.
+        </span>
+      </div>
+    </div>
+
+    <!-- State -->
+    <div class="col-md-6">
+      <div class="checkout-form-list">
+        <label>State <span class="optional">(optional)</span></label>
+        <select formControlName="State">
+          <option [ngValue]="null" disabled>Select a state</option>
+          <option *ngFor="let s of indianStates" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="d-flex justify-content-end mt-10">
+    <button type="button" class="os-btn mr-5" (click)="onCancel()">Cancel</button>
+    <button type="submit" class="os-btn os-btn-black" [disabled]="saving">
+      {{ saving ? 'Saving…' : gst?._id ? 'Update GST Details' : 'Submit GST Details' }}
+    </button>
+  </div>
+</form>

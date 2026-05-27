@@ -1999,6 +1999,28 @@ p.checkout-coupon input[type="text"] {
   width: 100%;
 }
 
+.checkout-form-list select {
+  background: #ffffff;
+  border: 1px solid #eaedff;
+  border-radius: 0;
+  height: 45px;
+  padding: 0 30px 0 10px;
+  width: 100%;
+  color: #6f7172;
+  font-family: $pop;
+  font-size: 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236f7172' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #bc8246;
+  }
+}
+
 .checkout-form-list textarea {
   background: #ffffff;
   border: 1px solid #eaedff;
@@ -2370,5 +2392,72 @@ html .ui-button.ui-state-disabled:active {
   &:hover::after,
   &.active::after {
     border-color: var(--swatch-accent, #fbaf5d) !important;
+  }
+}
+
+// Seller verification banner — rendered inside breadcrumb components
+.seller-verify-banner {
+  position: relative;
+  background-color: $heading-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 50px 10px 20px;
+  min-height: 42px;
+
+  &__body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__icon {
+    color: $theme-color;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    font-family: $pop;
+    font-size: 13px;
+    font-weight: 400;
+    color: $white;
+    line-height: 1.4;
+  }
+
+  &__link {
+    font-family: $pop;
+    font-size: 12px;
+    font-weight: 600;
+    color: $theme-color;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+    @include transition(.3s);
+
+    &:hover {
+      color: lighten($theme-color, 15%);
+    }
+  }
+
+  &__close {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px 6px;
+    cursor: pointer;
+    color: $grey-3;
+    font-size: 13px;
+    line-height: 1;
+    @include transition(.3s);
+
+    &:hover {
+      color: $white;
+    }
   }
 }
