@@ -28,6 +28,7 @@ const menuData: IMenuType[] = [
     dropdownItems: [
       { link: '/admin/approve-payments', title: 'Approve Payments' },
       { link: '/admin/manage-users', title: 'Manage Users' },
+      { link: '/admin/products', title: 'Products' },
       { link: '/admin/offers', title: 'Offers' },
     ],
   },
@@ -61,6 +62,7 @@ export const mobile_menus: IMobileMenu[] = [
     dropdownMenu: [
       { link: '/admin/approve-payments', title: 'Approve Payments' },
       { link: '/admin/manage-users', title: 'Manage Users' },
+      { link: '/admin/products', title: 'Products' },
       { link: '/admin/offers', title: 'Offers' },
     ],
   },

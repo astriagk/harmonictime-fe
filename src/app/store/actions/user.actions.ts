@@ -26,10 +26,13 @@ export const loginUserFailure = createAction(
   props<{ error: string }>()
 );
 
-export const loadUser = createAction('[User] Load User');
+export const loadUser = createAction(
+  '[User] Load User',
+  props<{ skipNavigation?: boolean }>()
+);
 export const loadUserSuccess = createAction(
   '[User] Load User Success',
-  props<{ user: any }>()
+  props<{ user: any; skipNavigation?: boolean }>()
 );
 export const loadUserFailure = createAction(
   '[User] Load User Failure',

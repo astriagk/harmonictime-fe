@@ -36,10 +36,11 @@ export class UserEffects {
       mergeMap((action) =>
         this.genericService.postObservable(action.url, action.payload).pipe(
           map((result: any) => {
-            // Persist the token here so the loadUser effect (triggered next)
-            // can authenticate getUserData
             if (result?.data?.token) {
               localStorage.setItem('token', JSON.stringify(result.data.token));
+            }
+            if (result?.data?.refreshToken) {
+              localStorage.setItem('refreshToken', JSON.stringify(result.data.refreshToken));
             }
             return registerUserSuccess({ data: result.data });
           }),
@@ -57,10 +58,11 @@ export class UserEffects {
       mergeMap((action) =>
         this.genericService.postObservable(action.url, action.payload).pipe(
           map((result: any) => {
-            // Persist the token here so the loadUser effect (triggered next)
-            // can authenticate getUserData
             if (result?.data?.token) {
               localStorage.setItem('token', JSON.stringify(result.data.token));
+            }
+            if (result?.data?.refreshToken) {
+              localStorage.setItem('refreshToken', JSON.stringify(result.data.refreshToken));
             }
             return loginUserSuccess({ data: result.data });
           }),
@@ -74,24 +76,24 @@ export class UserEffects {
 
   loginSuccessLoadUser$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginUserSuccess), // Wait for login to succeed
-      map(() => loadUser()) // Dispatch loadUser action
+      ofType(loginUserSuccess),
+      map(() => loadUser({ skipNavigation: false }))
     )
   );
 
   registerSuccessLoadUser$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(registerUserSuccess), // Wait for login to succeed
-      map(() => loadUser()) // Dispatch loadUser action
+      ofType(registerUserSuccess),
+      map(() => loadUser({ skipNavigation: false }))
     )
   );
 
   loadUser$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadUser),
-      switchMap(() =>
+      switchMap((action) =>
         this.userService.getUserData().pipe(
-          map((user) => loadUserSuccess({ user })),
+          map((user) => loadUserSuccess({ user, skipNavigation: action.skipNavigation })),
           catchError((error) => of(loadUserFailure({ error })))
         )
       )
@@ -117,6 +119,7 @@ export class UserEffects {
             this.cartService.mergeGuestCart(userId);
             this.wishlistService.mergeGuestWishlist(userId);
           }
+          if (action.skipNavigation) return;
           const pendingGst = localStorage.getItem('_pendingGstRedirect');
           if (pendingGst) {
             localStorage.removeItem('_pendingGstRedirect');

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
-import { ADMIN_USERS, ADMIN_SELLERS, ADMIN_SELLER_BY_ID, adminUserAction, adminSellerAction } from 'src/app/config';
+import { ADMIN_USERS, ADMIN_USER_BY_ID, ADMIN_SELLERS, ADMIN_SELLER_BY_ID, adminUserAction, adminSellerAction } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
 
@@ -63,6 +63,13 @@ interface SellerProfileData {
   products: SellerProductStats;
 }
 
+interface AdminUserDetail extends AdminUser {
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  lastLogin?: string;
+}
+
 type PageView = 'customers' | 'sellers';
 type StatusFilter = 'all' | 'active' | 'blocked' | 'suspended';
 type SellerStatusFilter = 'all' | 'Unverified' | 'Pending' | 'Approved' | 'Rejected';
@@ -87,6 +94,10 @@ export class UsersComponent implements OnInit {
   activeFilter: StatusFilter = 'all';
   actionInProgress: string | null = null;
   confirmAction: { user: AdminUser; action: UserAction } | null = null;
+
+  // --- user detail ---
+  selectedUser: AdminUserDetail | null = null;
+  userDetailLoading = false;
 
   readonly filters: { label: string; value: StatusFilter }[] = [
     { label: 'All', value: 'all' },
@@ -219,6 +230,25 @@ export class UsersComponent implements OnInit {
 
   actionLabel(action: UserAction): string {
     return action.charAt(0).toUpperCase() + action.slice(1);
+  }
+
+  // --- user detail ---
+
+  openUserDetail(user: AdminUser): void {
+    this.selectedUser = { ...user };
+    this.userDetailLoading = true;
+
+    this.genericService
+      .getObservableToken(ADMIN_USER_BY_ID + user._id)
+      .pipe(finalize(() => (this.userDetailLoading = false)))
+      .subscribe({
+        next: (res) => { if (res?.data) this.selectedUser = res.data; },
+        error: () => this.toastr.error('Failed to load user details'),
+      });
+  }
+
+  closeUserDetail(): void {
+    this.selectedUser = null;
   }
 
   // --- sellers ---

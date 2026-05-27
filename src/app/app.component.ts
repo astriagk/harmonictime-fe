@@ -21,7 +21,7 @@ export class AppComponent {
 
   ngOnInit(): void {
     if (localStorage.getItem('token')) {
-      this.userService.loadUserFromLocalStorage();
+      this.userService.verifyAndRestoreSession();
     } else {
       this.cartService.loadGuestCart();
       this.wishlistService.loadGuestWishlist();

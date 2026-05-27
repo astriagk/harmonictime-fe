@@ -34,24 +34,37 @@
           <th scope="col">Brand Name</th>
           <th scope="col">Product Name</th>
           <th scope="col">Price</th>
+          <th scope="col">Status</th>
           <th scope="col">Offer</th>
           <th scope="col">Qty / Remaining</th>
           <th scope="col">Available</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
         <ng-container *ngFor="let order of paginationOrders; let i = index">
           <tr
             [routerLink]="
-              order.RemainingQuantity === 0 ? null : ['/seller/product-details', order._id]
+              order.ApprovalStatus === 'Approved' && order.RemainingQuantity !== 0
+                ? ['/seller/product-details', order._id]
+                : null
             "
-            [class.product-list__row]="order.RemainingQuantity !== 0"
-            [attr.aria-label]="'View order #' + order.id + ' details'"
+            [class.product-list__row]="order.ApprovalStatus === 'Approved' && order.RemainingQuantity !== 0"
           >
             <td>{{ i + 1 }}</td>
             <td>{{ order.Details?.BrandName }}</td>
             <td>{{ order.ProductName }}</td>
             <td>{{ order.Price | currency: "INR" }}</td>
+            <td>
+              <span class="admin-status-badge admin-status-badge--seller-{{ order.ApprovalStatus | lowercase }}">
+                {{ order.ApprovalStatus ?? 'Pending' }}
+              </span>
+              <small
+                *ngIf="order.ApprovalStatus === 'Rejected' && order.ApprovalNote"
+                class="d-block text-danger mt-5"
+                style="font-size: 11px; max-width: 200px"
+              >{{ order.ApprovalNote }}</small>
+            </td>
             <td (click)="$event.stopPropagation()">
               <span *ngIf="productOfferName(order)" class="offer-pill">
                 {{ productOfferName(order) }} ·
@@ -70,6 +83,14 @@
                 />
                 <span class="slider"></span>
               </label>
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <a
+                *ngIf="order.ApprovalStatus !== 'Approved'"
+                class="admin-table__action-link cursor-pointer"
+                [routerLink]="['/seller/add-product', order._id]"
+              >Edit</a>
+              <span *ngIf="order.ApprovalStatus === 'Approved'" class="text-muted">—</span>
             </td>
           </tr>
         </ng-container>

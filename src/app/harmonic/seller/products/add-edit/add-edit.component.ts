@@ -287,6 +287,7 @@ export class AddEditComponent implements OnInit {
       categoryId: [null, Validators.required],
       collectionId: [null, Validators.required],
       price: ['', Validators.required],
+      isPriceInclusiveOfTax: [null, Validators.required],
       quantity: [null, [Validators.required, Validators.min(1)]],
       recipientId: [null, Validators.required],
     });
@@ -376,7 +377,7 @@ export class AddEditComponent implements OnInit {
     try {
       this.isLoadingProduct = true;
       const url = GET_PRODUCT_BY_ID + `${this.productId}`;
-      this.genericService.getObservable(url).subscribe({
+      this.genericService.getObservableToken(url).subscribe({
         next: (response) => {
           const data = response?.data[0];
           this.productData = response?.data[0];
@@ -393,6 +394,7 @@ export class AddEditComponent implements OnInit {
             categoryId: data.Details.CategoryId,
             collectionId: data.Details.CollectionId,
             price: data.Price,
+            isPriceInclusiveOfTax: data.IsPriceInclusiveOfTax ?? null,
             quantity: data.Quantity,
             recipientId: data.Details.RecipientId,
           });
@@ -473,6 +475,9 @@ export class AddEditComponent implements OnInit {
   }
   get price() {
     return this.basicProductInformation.get('price');
+  }
+  get isPriceInclusiveOfTax() {
+    return this.basicProductInformation.get('isPriceInclusiveOfTax');
   }
   get quantity() {
     return this.basicProductInformation.get('quantity');
@@ -797,6 +802,7 @@ export class AddEditComponent implements OnInit {
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      IsPriceInclusiveOfTax: productData.isPriceInclusiveOfTax,
       Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
@@ -894,11 +900,9 @@ export class AddEditComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.isSubmitting = false;
-          this.toastrService.success('Product created successfully !');
+          this.toastrService.success('Product created successfully! It will be visible once approved by admin.');
           this.resetForm();
-          if (newProductId) {
-            this.goToProductDetails(newProductId);
-          }
+          this.goToProductList();
         },
         error: (err) => {
           this.isSubmitting = false;
@@ -908,9 +912,8 @@ export class AddEditComponent implements OnInit {
       });
   }
 
-  // Open the seller product-details page for the given product.
-  private goToProductDetails(productId: string): void {
-    this.router.navigate(['/seller/product-details', productId]);
+  private goToProductList(): void {
+    this.router.navigate(['/seller/product-list']);
   }
 
   resetForm() {
@@ -934,6 +937,7 @@ export class AddEditComponent implements OnInit {
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      IsPriceInclusiveOfTax: productData.isPriceInclusiveOfTax,
       Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
@@ -1090,7 +1094,7 @@ export class AddEditComponent implements OnInit {
         this.isSubmitting = false;
         this.toastrService.success('Product updated successfully!');
         this.resetForm();
-        this.goToProductDetails(productId);
+        this.goToProductList();
       });
   }
 }

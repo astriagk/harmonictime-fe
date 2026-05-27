@@ -93,24 +93,18 @@
             </td>
             <td>{{ user.dateCreated | date: "mediumDate" }}</td>
             <td (click)="$event.stopPropagation()">
-              <ng-container
-                *ngFor="let action of actionsFor(user); let last = last"
-              >
+              <a
+                class="admin-table__action-link cursor-pointer mr-15"
+                (click)="openUserDetail(user)"
+              >View</a>
+              <ng-container *ngFor="let action of actionsFor(user)">
                 <a
-                  class="admin-table__action-link cursor-pointer"
-                  [class.mr-15]="!last"
+                  class="admin-table__action-link cursor-pointer mr-15"
                   [class.disabled]="actionInProgress === user._id"
-                  (click)="
-                    actionInProgress !== user._id && requestAction(user, action)
-                  "
+                  (click)="actionInProgress !== user._id && requestAction(user, action)"
                 >
-                  <i
-                    *ngIf="actionInProgress === user._id"
-                    class="fal fa-spinner fa-spin"
-                  ></i>
-                  <ng-container *ngIf="actionInProgress !== user._id">{{
-                    actionLabel(action)
-                  }}</ng-container>
+                  <i *ngIf="actionInProgress === user._id" class="fal fa-spinner fa-spin"></i>
+                  <ng-container *ngIf="actionInProgress !== user._id">{{ actionLabel(action) }}</ng-container>
                 </a>
               </ng-container>
             </td>
@@ -216,6 +210,62 @@
     </button>
   </div>
 </app-modal-shell>
+
+<!-- ==================== USER DETAIL MODAL ==================== -->
+<app-modal-shell
+  *ngIf="selectedUser"
+  title="User Detail"
+  size="lg"
+  (closed)="closeUserDetail()"
+>
+  <div *ngIf="userDetailLoading" class="py-40 text-center">
+    <i class="fal fa-spinner fa-spin fa-2x"></i>
+  </div>
+
+  <ng-container *ngIf="!userDetailLoading && selectedUser">
+
+    <div class="row mb-20">
+        <div class="col-md-6">
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Email</small></div>
+            <div class="col-7">{{ selectedUser.email }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Phone</small></div>
+            <div class="col-7">{{ selectedUser.phone || '—' }}</div>
+          </div>
+          <div *ngIf="selectedUser.firstName || selectedUser.lastName" class="row mb-5">
+            <div class="col-5"><small class="text-muted">Name</small></div>
+            <div class="col-7">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Status</small></div>
+            <div class="col-7">
+              <span class="admin-status-badge admin-status-badge--{{ selectedUser.status ?? 'active' }}">
+                {{ selectedUser.status ?? 'active' }}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="selectedUser.role" class="row mb-5">
+            <div class="col-5"><small class="text-muted">Role</small></div>
+            <div class="col-7">{{ selectedUser.role }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Joined</small></div>
+            <div class="col-7">{{ selectedUser.dateCreated | date: 'mediumDate' }}</div>
+          </div>
+          <div *ngIf="selectedUser.lastLogin" class="row mb-5">
+            <div class="col-5"><small class="text-muted">Last Login</small></div>
+            <div class="col-7">{{ selectedUser.lastLogin | date: 'mediumDate' }}</div>
+          </div>
+        </div>
+      </div>
+
+  </ng-container>
+</app-modal-shell>
+
 
 <!-- ==================== SELLER PROFILE MODAL ==================== -->
 <app-modal-shell

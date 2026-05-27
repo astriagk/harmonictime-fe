@@ -5,6 +5,7 @@ const baseUrl = environment.apiBaseUrl;
 // auth
 export const REGISTER_USER = `${baseUrl}/auth/register`;
 export const LOGIN_USER = `${baseUrl}/auth/login`;
+export const VERIFY_TOKEN = `${baseUrl}/auth/verify-token`;
 export const USER = `${baseUrl}/users/profile`;
 // password reset — request an OTP by email, then submit the OTP + new password
 export const VERIFY_EMAIL = `${baseUrl}/auth/verify-email`;
@@ -166,6 +167,11 @@ export const ADMIN_SELLERS = `${baseUrl}/admin/sellers`;
 export const ADMIN_SELLER_BY_ID = (id: string) => `${baseUrl}/admin/sellers/${id}`;
 export const adminSellerAction = (id: string, action: 'approve' | 'reject' | 'request-info') =>
   `${baseUrl}/admin/sellers/${id}/${action}`;
+
+// admin — product moderation
+export const ADMIN_PRODUCTS = `${baseUrl}/admin/products`;
+export const adminProductAction = (id: string, action: 'approve' | 'reject') =>
+  `${baseUrl}/admin/products/${id}/${action}`;
 
 // GST onboarding
 export const GST_ONBOARDING = `${baseUrl}/gst`;
