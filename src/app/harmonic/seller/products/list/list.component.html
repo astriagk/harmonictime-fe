@@ -45,25 +45,36 @@
         <ng-container *ngFor="let order of paginationOrders; let i = index">
           <tr
             [routerLink]="
-              order.ApprovalStatus === 'Approved' && order.RemainingQuantity !== 0
+              order.ApprovalStatus === 'Approved' &&
+              order.RemainingQuantity !== 0
                 ? ['/seller/product-details', order._id]
                 : null
             "
-            [class.product-list__row]="order.ApprovalStatus === 'Approved' && order.RemainingQuantity !== 0"
+            [class.product-list__row]="
+              order.ApprovalStatus === 'Approved' &&
+              order.RemainingQuantity !== 0
+            "
           >
             <td>{{ i + 1 }}</td>
             <td>{{ order.Details?.BrandName }}</td>
             <td>{{ order.ProductName }}</td>
             <td>{{ order.Price | currency: "INR" }}</td>
             <td>
-              <span class="admin-status-badge admin-status-badge--seller-{{ order.ApprovalStatus | lowercase }}">
-                {{ order.ApprovalStatus ?? 'Pending' }}
+              <span
+                class="admin-status-badge admin-status-badge--seller-{{
+                  order.ApprovalStatus | lowercase
+                }}"
+              >
+                {{ order.ApprovalStatus ?? "Pending" }}
               </span>
               <small
-                *ngIf="order.ApprovalStatus === 'Rejected' && order.ApprovalNote"
+                *ngIf="
+                  order.ApprovalStatus === 'Rejected' && order.ApprovalNote
+                "
                 class="d-block text-danger mt-5"
                 style="font-size: 11px; max-width: 200px"
-              >{{ order.ApprovalNote }}</small>
+                >{{ order.ApprovalNote }}</small
+              >
             </td>
             <td (click)="$event.stopPropagation()">
               <span *ngIf="productOfferName(order)" class="offer-pill">
@@ -72,10 +83,17 @@
               </span>
               <span *ngIf="!productOfferName(order)" class="text-muted">—</span>
             </td>
-            <td>{{ (order.Quantity ?? '—') }} / {{ (order.RemainingQuantity ?? '—') }}</td>
+            <td>
+              {{ order.Quantity ?? "—" }} / {{ order.RemainingQuantity ?? "—" }}
+            </td>
             <td (click)="$event.stopPropagation()">
-              <span *ngIf="order.RemainingQuantity === 0" class="sold-badge">Sold</span>
-              <label *ngIf="order.RemainingQuantity !== 0" class="availability-switch">
+              <span *ngIf="order.RemainingQuantity === 0" class="sold-badge"
+                >Sold</span
+              >
+              <label
+                *ngIf="order.RemainingQuantity !== 0"
+                class="availability-switch"
+              >
                 <input
                   type="checkbox"
                   [checked]="order.IsAvailable"
@@ -89,8 +107,13 @@
                 *ngIf="order.ApprovalStatus !== 'Approved'"
                 class="admin-table__action-link cursor-pointer"
                 [routerLink]="['/seller/add-product', order._id]"
-              >Edit</a>
-              <span *ngIf="order.ApprovalStatus === 'Approved'" class="text-muted">—</span>
+                >Edit</a
+              >
+              <span
+                *ngIf="order.ApprovalStatus === 'Approved'"
+                class="text-muted"
+                >—</span
+              >
             </td>
           </tr>
         </ng-container>

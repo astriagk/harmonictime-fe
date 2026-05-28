@@ -10,6 +10,11 @@
   height: 90px;
   object-fit: cover;
   border: 1px solid #ebebeb;
+
+  &--video {
+    object-fit: contain;
+    background: #000;
+  }
 }
 
 .gap-10 { gap: 10px; }

@@ -46,9 +46,13 @@ export class UserService {
           this.router.navigate(['/auth/login']);
         }
       },
-      error: () => {
-        this.logout();
-        this.router.navigate(['/auth/login']);
+      error: (err: any) => {
+        if (err?.status === 401) {
+          this.logout();
+          this.router.navigate(['/auth/login']);
+        } else {
+          this.router.navigate(['/not-found']);
+        }
       },
     });
   }

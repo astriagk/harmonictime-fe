@@ -144,11 +144,13 @@ export class AdminProductsComponent implements OnInit {
     );
   }
 
-  allImages(product: AdminProduct): string[] {
-    return (product.Images ?? [])
-      .filter((i) => i.mediaType === 'image')
-      .sort((a, b) => (b.IsPrimary ? 1 : 0) - (a.IsPrimary ? 1 : 0))
-      .map((i) => i.ImageURL);
+  allMedia(product: AdminProduct): { ImageURL: string; IsPrimary: boolean; mediaType: string }[] {
+    return [...(product.Images ?? [])].sort((a, b) => {
+      const aIsVideo = a.mediaType === 'video';
+      const bIsVideo = b.mediaType === 'video';
+      if (aIsVideo !== bIsVideo) return aIsVideo ? 1 : -1;
+      return (b.IsPrimary ? 1 : 0) - (a.IsPrimary ? 1 : 0);
+    });
   }
 
   actionsFor(status: ApprovalStatus): ProductAction[] {

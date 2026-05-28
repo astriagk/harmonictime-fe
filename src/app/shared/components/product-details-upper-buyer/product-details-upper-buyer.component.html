@@ -6,7 +6,7 @@
         : 'col-xl-6 col-lg-6'
     "
   >
-    <div *ngIf="!style_2" class="product__modal-box d-flex">
+    <div *ngIf="!style_2" class="product__modal-box d-none d-md-flex">
       <div class="product__modal-nav mr-20">
         <nav>
           <div class="nav nav-tabs" id="product-details" role="tablist">
@@ -68,14 +68,16 @@
             <video [src]="productService.activeImg" controls></video>
             <div *ngIf="product.Offer?.IsActive" class="product__sale">
               <span class="new">Sale</span>
-              <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
+              <span class="percent"
+                >-{{ product.Offer?.DiscountPercentage }}%</span
+              >
             </div>
           </div>
         </ng-template>
       </div>
     </div>
 
-    <div *ngIf="style_2" class="product__modal-box">
+    <div *ngIf="style_2" class="product__modal-box d-none d-md-block">
       <div class="mb-20">
         <ng-container
           *ngIf="!productService.activeIsVideo; else activeVideoBuyer2"
@@ -95,7 +97,9 @@
             <video [src]="productService.activeImg" controls></video>
             <div *ngIf="product.Offer?.IsActive" class="product__sale">
               <span class="new">Sale</span>
-              <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
+              <span class="percent"
+                >-{{ product.Offer?.DiscountPercentage }}%</span
+              >
             </div>
           </div>
         </ng-template>
@@ -141,6 +145,14 @@
         </div>
       </nav>
     </div>
+
+    <!-- Mobile only: swipeable carousel with dot/play-icon indicators -->
+    <app-product-media-mobile-carousel
+      class="d-block d-md-none"
+      [images]="product.Images"
+      (mediaSelected)="selectMedia($event.url, $event.isVideo)"
+    >
+    </app-product-media-mobile-carousel>
   </div>
 
   <div
@@ -165,8 +177,8 @@
         <div class="product__price-2">
           <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
             {{
-              product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100)
-                | currency: "INR"
+              product.DisplayPrice *
+                (1 - product.Offer.DiscountPercentage / 100) | currency: "INR"
             }}
           </span>
           <span
@@ -175,7 +187,10 @@
             {{ product.DisplayPrice | currency: "INR" }}
           </span>
         </div>
-        <p *ngIf="product.IsPriceInclusiveOfTax" class="product__tax-note mt-5 mb-0">
+        <p
+          *ngIf="product.IsPriceInclusiveOfTax"
+          class="product__tax-note mt-5 mb-0"
+        >
           <i class="fas fa-check-circle"></i> Price inclusive of all taxes
         </p>
       </div>
@@ -184,7 +199,7 @@
       </div>
       <div class="product__modal-form mb-25">
         <div class="product__tag mb-25">
-          <span>Manufacturer Product Number :</span>
+          <span>Product Number :</span>
           <span
             ><a class="cursor-pointer">{{
               product.Details.ManufacturerProductNumber | dash
@@ -249,7 +264,11 @@
             data-bs-placement="top"
             title="Add to Wishlist"
           >
-            <i [ngClass]="isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'"></i>
+            <i
+              [ngClass]="
+                isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'
+              "
+            ></i>
           </a>
           <a
             *ngIf="product.UserID !== userId"

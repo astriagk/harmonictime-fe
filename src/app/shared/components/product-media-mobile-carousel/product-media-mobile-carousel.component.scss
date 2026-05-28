@@ -1,0 +1,71 @@
+@import 'variables';
+
+.pm-carousel {
+  width: 100%;
+
+  &__slides {
+    position: relative;
+    width: 100%;
+    height: 340px;
+    overflow: hidden;
+  }
+
+  &__slide {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  &__video-wrap {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  &__dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+  }
+
+  &__dot {
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease-out;
+  }
+
+  &__dot-circle {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: $grey-3;
+    transition: background-color 0.3s ease-out;
+  }
+
+  &__dot-play {
+    font-size: 10px;
+    color: $grey-3;
+    transition: color 0.3s ease-out;
+  }
+
+  &__dot--active {
+    .pm-carousel__dot-circle { background-color: $theme-color; }
+    .pm-carousel__dot-play   { color: $theme-color; }
+  }
+}

@@ -6,4 +6,10 @@
     class="os-btn os-btn-black mt-20 cursor-pointer"
     >{{ actionLabel }}</a
   >
+  <a
+    *ngIf="actionLabel && !actionLink"
+    (click)="actionClick.emit()"
+    class="os-btn os-btn-black mt-20 cursor-pointer"
+    >{{ actionLabel }}</a
+  >
 </div>

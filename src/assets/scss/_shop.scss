@@ -983,27 +983,39 @@
     &-tab-nav {
       & .nav-tabs {
         border: none;
+        flex-wrap: nowrap;
 
         & .nav-link {
-          padding: 0 50px;
-          border: 0;
+          padding: 10px 28px;
+          border: none;
+          border-bottom: 3px solid transparent;
           font-size: 14px;
-          color: #a3a3a3;
           font-weight: 500;
+          color: $body-text-color;
+          background: transparent;
+          white-space: nowrap;
+          @include border-radius(0);
+          @include transition(.3s);
+
+          &:hover {
+            color: $theme-color;
+          }
 
           &.active {
-            color: $black;
+            color: $heading-color;
+            background: transparent;
+            border-bottom: 3px solid $theme-color;
+            font-weight: 600;
           }
 
           @media #{$sm} {
-            padding: 0 25px;
+            padding: 10px 16px;
+            font-size: 13px;
           }
 
           @media #{$xs} {
-            padding: 0px;
-            text-align: left;
-            margin-bottom: 10px;
-            margin-right: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
           }
         }
       }
@@ -1492,13 +1504,18 @@
   &-nav {
     & .nav {
       display: block !important;
+      gap: 0;
 
       & .nav-item {
-        opacity: .5;
+        opacity: .65;
+        @include transition(.3s);
+
+        &:hover {
+          opacity: 1;
+        }
 
         &.active {
           opacity: 1;
-
         }
       }
     }
@@ -1510,12 +1527,19 @@
 
       & .nav-link {
         padding: 0;
-        border: none;
-        border: 2px solid transparent;
+        border: 2px solid $border;
         @include border-radius(0);
+        @include transition(.3s);
+        margin-bottom: 6px;
+        display: block;
+
+        &:hover:not(.active) {
+          border-color: $grey-3;
+        }
 
         &.active {
           border: 2px solid $theme-color;
+          box-shadow: 0 0 0 1px $theme-color;
         }
       }
     }
@@ -1525,6 +1549,7 @@
         & .nav-link {
           &.active {
             border: 2px solid $theme-2-color;
+            box-shadow: 0 0 0 1px $theme-2-color;
           }
         }
       }

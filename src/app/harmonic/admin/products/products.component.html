@@ -75,15 +75,24 @@
 <!-- ==================== PRODUCT REVIEW MODAL ==================== -->
 <app-modal-shell *ngIf="selectedProduct" title="Product Review" size="lg" (closed)="closeProduct()">
 
-  <!-- Images -->
+  <!-- Images & Videos -->
   <div class="d-flex gap-10 flex-wrap mb-20">
-    <img
-      *ngFor="let img of allImages(selectedProduct)"
-      [src]="img"
-      class="admin-product-thumb"
-      alt="Product image"
-    />
-    <p *ngIf="!allImages(selectedProduct).length" class="text-muted">No images uploaded.</p>
+    <ng-container *ngFor="let media of allMedia(selectedProduct)">
+      <img
+        *ngIf="media.mediaType !== 'video'"
+        [src]="media.ImageURL"
+        class="admin-product-thumb"
+        alt="Product image"
+      />
+      <video
+        *ngIf="media.mediaType === 'video'"
+        [src]="media.ImageURL"
+        controls
+        preload="metadata"
+        class="admin-product-thumb admin-product-thumb--video"
+      ></video>
+    </ng-container>
+    <p *ngIf="!allMedia(selectedProduct).length" class="text-muted">No images uploaded.</p>
   </div>
 
   <!-- Title + status -->

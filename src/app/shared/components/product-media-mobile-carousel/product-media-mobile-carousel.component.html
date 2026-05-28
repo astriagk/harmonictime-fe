@@ -1,0 +1,44 @@
+<div class="pm-carousel">
+
+  <!-- Swipeable slide area -->
+  <div class="pm-carousel__slides"
+       (touchstart)="onTouchStart($event)"
+       (touchend)="onTouchEnd($event)">
+    <div *ngFor="let img of orderedImages; let i = index"
+         [hidden]="i !== activeIndex"
+         class="pm-carousel__slide">
+
+      <!-- Image slide -->
+      <img *ngIf="img.mediaType !== 'video'"
+           [src]="img.ImageURL"
+           [alt]="img.AltText"
+           class="pm-carousel__img" />
+
+      <!-- Video slide -->
+      <div *ngIf="img.mediaType === 'video'" class="pm-carousel__video-wrap">
+        <video [src]="img.ImageURL" controls preload="metadata"
+               class="pm-carousel__video"></video>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Dot / play-icon indicators — only shown when more than one media item -->
+  <div *ngIf="orderedImages.length > 1" class="pm-carousel__dots mt-15">
+    <span *ngFor="let img of orderedImages; let i = index"
+          class="pm-carousel__dot cursor-pointer"
+          [class.pm-carousel__dot--active]="i === activeIndex"
+          (click)="goTo(i)">
+
+      <!-- Circle dot for images -->
+      <span *ngIf="img.mediaType !== 'video'"
+            class="pm-carousel__dot-circle"></span>
+
+      <!-- Play icon for videos -->
+      <i *ngIf="img.mediaType === 'video'"
+         class="fas fa-play pm-carousel__dot-play"></i>
+
+    </span>
+  </div>
+
+</div>
