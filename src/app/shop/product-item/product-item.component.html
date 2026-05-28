@@ -65,6 +65,9 @@
           {{ product.DisplayPrice | currency: "INR" }}
         </span>
       </div>
+      <p *ngIf="product.IsPriceInclusiveOfTax" class="product__tax-note">
+        <i class="fas fa-check-circle"></i> Incl. all taxes
+      </p>
     </div>
     <div class="add-cart p-absolute transition-3">
       <a

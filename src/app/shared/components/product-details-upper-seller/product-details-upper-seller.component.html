@@ -107,8 +107,13 @@
           product.ProductName
         }}</a>
       </h5>
-      <div class="product__price-2 mb-25">
-        <span>{{ product.Price | currency: "INR" }}</span>
+      <div class="mb-25">
+        <div class="product__price-2">
+          <span>{{ product.Price | currency: "INR" }}</span>
+        </div>
+        <p *ngIf="product.IsPriceInclusiveOfTax" class="product__tax-note mt-5 mb-0">
+          <i class="fas fa-check-circle"></i> Price inclusive of all taxes
+        </p>
       </div>
       <div class="product__modal-des mb-30" *ngIf="product.Description.Content">
         <p>{{ product.Description.Content }}</p>

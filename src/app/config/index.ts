@@ -191,7 +191,6 @@ export const OFFER_STATUS = (id: string) => `${baseUrl}/offers/${id}/status`; //
 export const ORDER_CHARGES = {
   gstPercent: environment.gstPercent, // % — configured per environment
   platformPercent: 2, // % baked into every displayed price (see withPlatformMarkup)
-  extraFlat: 50, // flat amount in INR
 };
 
 // The platform fee is baked directly into the price shown to buyers (lists,

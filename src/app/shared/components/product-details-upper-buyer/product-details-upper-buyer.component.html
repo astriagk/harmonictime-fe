@@ -161,18 +161,23 @@
           product.ProductName
         }}</a>
       </h5>
-      <div class="product__price-2 mb-25">
-        <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
-          {{
-            product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100)
-              | currency: "INR"
-          }}
-        </span>
-        <span
-          [class.old-price]="product.Offer?.IsActive && product.DisplayPrice"
-        >
-          {{ product.DisplayPrice | currency: "INR" }}
-        </span>
+      <div class="mb-25">
+        <div class="product__price-2">
+          <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
+            {{
+              product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100)
+                | currency: "INR"
+            }}
+          </span>
+          <span
+            [class.old-price]="product.Offer?.IsActive && product.DisplayPrice"
+          >
+            {{ product.DisplayPrice | currency: "INR" }}
+          </span>
+        </div>
+        <p *ngIf="product.IsPriceInclusiveOfTax" class="product__tax-note mt-5 mb-0">
+          <i class="fas fa-check-circle"></i> Price inclusive of all taxes
+        </p>
       </div>
       <div class="product__modal-des mb-25" *ngIf="product.Description.Content">
         <p>{{ product.Description.Content }}</p>

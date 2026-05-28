@@ -733,11 +733,6 @@ export class AccountComponent {
     }
   }
 
-  // Flat platform charge added at checkout.
-  get platformCharges(): number {
-    return this.selectedOrder ? ORDER_CHARGES.extraFlat : 0;
-  }
-
   // GST applied on the platform charges.
   get gstPercent(): number {
     return ORDER_CHARGES.gstPercent;
