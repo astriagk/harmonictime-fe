@@ -216,13 +216,21 @@ export class UsersComponent implements OnInit {
     this.confirmAction = null;
     this.actionInProgress = user._id;
 
+    const statusMap: Record<UserAction, AdminUser['status']> = {
+      block: 'blocked',
+      unblock: 'active',
+      suspend: 'suspended',
+    };
+
     this.genericService
       .putObservableToken(adminUserAction(user._id, action), {})
       .pipe(finalize(() => (this.actionInProgress = null)))
       .subscribe({
         next: () => {
           this.toastr.success(`User ${action}ed successfully`);
-          this.loadUsers();
+          const newStatus = statusMap[action];
+          this.users = this.users.map(u => u._id === user._id ? { ...u, status: newStatus } : u);
+          this.paginatedUsers = this.paginatedUsers.map(u => u._id === user._id ? { ...u, status: newStatus } : u);
         },
         error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
       });

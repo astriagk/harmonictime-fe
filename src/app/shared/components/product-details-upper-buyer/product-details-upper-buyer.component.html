@@ -225,28 +225,43 @@
         >
       </div>
 
-      <div class="pro-cart-btn">
+      <div class="add-cart-list d-flex align-items-center mb-20">
         <a
           *ngIf="!isItemInCart(product)"
           (click)="addToCart()"
-          class="os-btn os-btn-black mb-20 cursor-pointer"
+          class="os-btn os-btn-black mr-10 cursor-pointer"
         >
-          + Add to Cart
+          Add to Cart
         </a>
         <a
           *ngIf="isItemInCart(product)"
           routerLink="/buyer/cart"
-          class="os-btn os-btn-black mb-20 cursor-pointer"
+          class="os-btn os-btn-black mr-10 cursor-pointer"
         >
-          Go to Cart
+          View Cart
         </a>
-        <a
-          *ngIf="product.UserID !== userId"
-          (click)="openChat()"
-          class="os-btn mb-20 cursor-pointer ml-10"
-        >
-          Chat with Seller
-        </a>
+        <div class="product__action-2 transition-3">
+          <a
+            (click)="addToWishlist()"
+            class="cursor-pointer"
+            [class.active]="isItemInWishlist(product)"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Add to Wishlist"
+          >
+            <i [ngClass]="isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'"></i>
+          </a>
+          <a
+            *ngIf="product.UserID !== userId"
+            (click)="openChat()"
+            class="cursor-pointer"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Chat with Seller"
+          >
+            <i class="fal fa-comment-alt"></i>
+          </a>
+        </div>
       </div>
     </div>
   </div>

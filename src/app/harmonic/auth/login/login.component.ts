@@ -5,7 +5,7 @@ import { GenericService } from 'src/app/shared/services/generic.service';
 import { LOGIN_USER } from 'src/app/config';
 import { Store } from '@ngrx/store';
 import { AppState } from 'src/app/store/app.state';
-import { loadUser, loginUser } from 'src/app/store/actions/user.actions';
+import { loginUser } from 'src/app/store/actions/user.actions';
 import {
   selectUserData,
   selectUserError,
@@ -47,12 +47,8 @@ export class LoginComponent implements OnDestroy {
     });
   }
 
-  get email() {
-    return this.loginForm.get('email');
-  }
-  get password() {
-    return this.loginForm.get('password');
-  }
+  get email() { return this.loginForm.get('email'); }
+  get password() { return this.loginForm.get('password'); }
 
   onSubmit() {
     const url = LOGIN_USER;
@@ -63,7 +59,6 @@ export class LoginComponent implements OnDestroy {
         email: formValue.email,
         password: formValue.password,
       };
-      // Drop any subscriptions from a previous submit so toasts don't stack
       this.userDataSub?.unsubscribe();
       this.userErrorSub?.unsubscribe();
 
@@ -76,9 +71,19 @@ export class LoginComponent implements OnDestroy {
           filter((error: any) => !!error),
           take(1)
         )
-        .subscribe(() => {
+        .subscribe((error: any) => {
           this.isSubmitting = false;
-          this.toastrService.error('Please check email and password !');
+          if (error?.status === 403 && error?.error?.data?.blocked) {
+            this.router.navigate(['/auth/account-blocked'], { queryParams: { reason: 'blocked' } });
+          } else if (error?.status === 403 && error?.error?.data?.suspended) {
+            this.router.navigate(['/auth/account-blocked'], { queryParams: { reason: 'suspended' } });
+          } else if (error?.status === 403 && error?.error?.data?.emailVerified === false) {
+            this.router.navigate(['/auth/check-email'], {
+              queryParams: { reason: 'unverified', email: formValue.email },
+            });
+          } else {
+            this.toastrService.error('Please check email and password!');
+          }
         });
 
       this.userDataSub = this.store
@@ -90,9 +95,9 @@ export class LoginComponent implements OnDestroy {
         .subscribe((state: any) => {
           localStorage.setItem('token', JSON.stringify(state?.data?.token));
           this.isSubmitting = false;
-          this.toastrService.success('Login successful !');
+          this.toastrService.success('Login successful!');
           this.loginForm.reset();
-          this.formSubmitted = false; // Reset the form submission state
+          this.formSubmitted = false;
           this.router.navigate(['/buyer/products']);
         });
     }

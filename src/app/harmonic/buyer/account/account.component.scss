@@ -1,5 +1,39 @@
 @import 'variables';
 
+.wallet__breakdown {
+  font-size: 12px;
+}
+
+.wallet__breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  color: $body-text-color;
+
+  span:last-child {
+    font-weight: 500;
+    color: $heading-color;
+    text-align: right;
+  }
+
+  &--deduct span:last-child {
+    color: #c0392b;
+  }
+
+  &--sub {
+    border-top: 1px solid $border;
+    margin-top: 3px;
+    padding-top: 5px;
+
+    span:last-child {
+      font-weight: 600;
+      color: $heading-color;
+    }
+  }
+}
+
 .profile__avatar-wrap {
   position: relative;
   cursor: pointer;

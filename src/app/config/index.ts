@@ -6,6 +6,9 @@ const baseUrl = environment.apiBaseUrl;
 export const REGISTER_USER = `${baseUrl}/auth/register`;
 export const LOGIN_USER = `${baseUrl}/auth/login`;
 export const VERIFY_TOKEN = `${baseUrl}/auth/verify-token`;
+export const CONFIRM_EMAIL = `${baseUrl}/auth/confirm-email`;
+export const RESEND_VERIFICATION = `${baseUrl}/auth/resend-verification`;
+export const UPDATE_UNVERIFIED_EMAIL = `${baseUrl}/auth/update-unverified-email`;
 export const USER = `${baseUrl}/users/profile`;
 // password reset — request an OTP by email, then submit the OTP + new password
 export const VERIFY_EMAIL = `${baseUrl}/auth/verify-email`;
@@ -108,6 +111,8 @@ export const VERIFY_PAYMENT_ORDER = `${baseUrl}/payments/verify`;
 
 // contact / help — stores the message and emails the team
 export const POST_CONTACT = `${baseUrl}/contact`;
+import { companyDetails } from 'src/app/shared/constants/companyDetails';
+export const SUPPORT_EMAIL = companyDetails.email;
 
 // site content — CMS-managed blocks (hero slider, etc.) keyed by `type`
 export const GET_SITE_CONTENT = `${baseUrl}/site-content`;

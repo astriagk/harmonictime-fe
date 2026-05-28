@@ -9,6 +9,9 @@ import { LoginComponent } from './login/login.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { GstOnboardingComponent } from './gst-onboarding/gst-onboarding.component';
+import { VerifyEmailComponent } from './verify-email/verify-email.component';
+import { CheckEmailComponent } from './check-email/check-email.component';
+import { AccountBlockedComponent } from './account-blocked/account-blocked.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +20,9 @@ import { GstOnboardingComponent } from './gst-onboarding/gst-onboarding.componen
     ForgotPasswordComponent,
     ResetPasswordComponent,
     GstOnboardingComponent,
+    VerifyEmailComponent,
+    CheckEmailComponent,
+    AccountBlockedComponent,
   ],
   imports: [
     CommonModule,

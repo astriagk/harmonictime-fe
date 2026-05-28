@@ -38,3 +38,8 @@ export const loadUserFailure = createAction(
   '[User] Load User Failure',
   props<{ error: any }>()
 );
+
+export const userBlocked = createAction(
+  '[User] Account Blocked',
+  props<{ suspended: boolean }>()
+);

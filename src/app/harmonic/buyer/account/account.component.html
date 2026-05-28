@@ -529,11 +529,11 @@
                     <table class="table">
                       <thead>
                         <tr>
-                          <th style="width: 200px">Product</th>
-                          <th style="width: 120px">Sale Date</th>
-                          <th style="width: 140px">Earnings Breakdown</th>
+                          <th style="width: 180px">Product</th>
+                          <th style="width: 100px">Sale Date</th>
+                          <th style="width: 210px">Earnings Breakdown</th>
                           <th style="width: 100px">You Receive</th>
-                          <th style="width: 100px">Status</th>
+                          <th style="width: 90px">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -606,11 +606,21 @@
                                   }}</span
                                 >
                               </div>
+                              <ng-container *ngIf="item.GSTAmount > 0">
+                                <div class="wallet__breakdown-row wallet__breakdown-row--deduct">
+                                  <span>GST ({{ item.GSTRate }}%)</span>
+                                  <span>− {{ item.GSTAmount | currency: "INR" }}</span>
+                                </div>
+                                <div class="wallet__breakdown-row wallet__breakdown-row--sub">
+                                  <span>After GST</span>
+                                  <span>{{ item.NetAmountAfterGST | currency: "INR" }}</span>
+                                </div>
+                              </ng-container>
                             </div>
                           </td>
                           <td class="order__title pr-2 pl-2">
                             <strong>{{
-                              item.NetAmount | currency: "INR"
+                              (item.GSTAmount > 0 ? item.NetAmountAfterGST : item.NetAmount) | currency: "INR"
                             }}</strong>
                           </td>
                           <td class="order__title pr-2 pl-2">

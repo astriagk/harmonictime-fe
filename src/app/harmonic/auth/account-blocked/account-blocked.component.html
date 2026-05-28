@@ -1,0 +1,50 @@
+<section class="login-area pt-100 pb-100">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 offset-lg-3">
+        <div class="basic-login text-center">
+          <!-- icon circle -->
+          <div class="ab-icon-wrap mb-25">
+            <i [class]="isBlocked ? 'fal fa-ban' : 'fal fa-pause-circle'"></i>
+          </div>
+
+          <!-- heading -->
+          <h3 class="mt-20 mb-10">
+            {{
+              isBlocked
+                ? "Your account has been blocked"
+                : "Your account has been suspended"
+            }}
+          </h3>
+
+          <!-- body copy -->
+          <p class="mb-5">You are currently unable to access Harmonic Time.</p>
+          <p class="ab-sub mb-35">
+            If you believe this is a mistake or need further assistance, please
+            reach out to our support team and we will look into it promptly.
+          </p>
+
+          <!-- divider -->
+          <div class="ab-divider mb-30"></div>
+
+          <!-- contact -->
+          <p class="ab-contact-label mb-12">Need help? Contact support</p>
+          <a
+            [href]="'mailto:' + supportEmail"
+            class="ab-contact-email mb-40 d-inline-flex align-items-center"
+          >
+            <i class="fal fa-envelope mr-10"></i>
+            {{ supportEmail }}
+          </a>
+
+          <div class="ab-divider mb-30"></div>
+
+          <!-- cta -->
+          <a routerLink="/auth/login" class="os-btn os-btn-black w-100">
+            Back to Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

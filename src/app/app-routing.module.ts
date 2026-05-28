@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { blockedGuard } from './shared/guards/blocked.guard';
 
 const routes: Routes = [
   {
@@ -29,17 +30,19 @@ const routes: Routes = [
   },
   {
     path: 'seller',
-    canActivate: [authGuard],
+    canActivate: [authGuard, blockedGuard],
     loadChildren: () =>
       import('./harmonic/seller/seller.module').then((m) => m.SellerModule),
   },
   {
     path: 'buyer',
+    canActivate: [blockedGuard],
     loadChildren: () =>
       import('./harmonic/buyer/buyer.module').then((m) => m.BuyerModule),
   },
   {
     path: 'admin',
+    canActivate: [blockedGuard],
     loadChildren: () =>
       import('./harmonic/admin/admin.module').then((m) => m.AdminModule),
   },
