@@ -1,0 +1,141 @@
+<section class="login-area pt-100 pb-100">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 offset-lg-2">
+        <div class="basic-login">
+          <h3 class="text-center mb-20">GST Onboarding</h3>
+          <p class="text-center mb-40" style="color:#848b8a;font-size:14px;">
+            Required once cumulative sales reach ₹2,00,000. You can skip for now.
+          </p>
+
+          <form [formGroup]="gstForm" (ngSubmit)="onSubmit()">
+
+            <!-- GSTIN -->
+            <div class="mb-20">
+              <label for="gstin">GSTIN <span>**</span></label>
+              <div class="auth-input">
+                <input
+                  id="gstin"
+                  type="text"
+                  placeholder="e.g. 27AAPFU0939F1ZV"
+                  formControlName="GSTIN"
+                  style="text-transform:uppercase"
+                />
+              </div>
+              <span
+                *ngIf="GSTIN?.invalid && (GSTIN?.touched || formSubmitted)"
+                class="text-danger"
+              >
+                <ng-container *ngIf="GSTIN?.hasError('required')">GSTIN is required.</ng-container>
+                <ng-container *ngIf="GSTIN?.hasError('pattern')">Enter a valid 15-character GSTIN (e.g. 27AAPFU0939F1ZV).</ng-container>
+              </span>
+            </div>
+
+            <!-- Legal Business Name -->
+            <div class="mb-20">
+              <label for="legalName">Legal Business Name <span>**</span></label>
+              <div class="auth-input">
+                <input
+                  id="legalName"
+                  type="text"
+                  placeholder="As per GST registration"
+                  formControlName="LegalBusinessName"
+                />
+              </div>
+              <span
+                *ngIf="LegalBusinessName?.invalid && (LegalBusinessName?.touched || formSubmitted)"
+                class="text-danger"
+              >
+                Legal Business Name is required.
+              </span>
+            </div>
+
+            <!-- Trade Name -->
+            <div class="mb-20">
+              <label for="tradeName">Trade Name <span style="color:#848b8a;font-weight:400;">(optional)</span></label>
+              <div class="auth-input">
+                <input
+                  id="tradeName"
+                  type="text"
+                  placeholder="Brand / display name"
+                  formControlName="TradeName"
+                />
+              </div>
+            </div>
+
+            <!-- Business Type -->
+            <div class="mb-20">
+              <label for="businessType">Business Type <span style="color:#848b8a;font-weight:400;">(optional)</span></label>
+              <div class="auth-input">
+                <select id="businessType" formControlName="BusinessType">
+                  <option [ngValue]="null" disabled>Select a business type</option>
+                  <option *ngFor="let type of businessTypes" [value]="type">{{ type }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Registered Address -->
+            <div class="mb-20">
+              <label for="address">Registered Address <span style="color:#848b8a;font-weight:400;">(optional)</span></label>
+              <div class="auth-input">
+                <input
+                  id="address"
+                  type="text"
+                  placeholder="As per GST registration"
+                  formControlName="RegisteredAddress"
+                />
+              </div>
+            </div>
+
+            <!-- PinCode -->
+            <div class="mb-20">
+              <label for="pincode">Pin Code <span style="color:#848b8a;font-weight:400;">(optional)</span></label>
+              <div class="auth-input">
+                <input
+                  id="pincode"
+                  type="text"
+                  placeholder="6-digit PIN code"
+                  formControlName="PinCode"
+                  maxlength="6"
+                />
+              </div>
+              <span
+                *ngIf="PinCode?.hasError('pattern') && (PinCode?.touched || formSubmitted)"
+                class="text-danger"
+              >
+                Enter a valid 6-digit PIN code.
+              </span>
+            </div>
+
+            <!-- State -->
+            <div class="mb-20">
+              <label for="state">State <span style="color:#848b8a;font-weight:400;">(optional)</span></label>
+              <div class="auth-input">
+                <select id="state" formControlName="State">
+                  <option [ngValue]="null" disabled>Select a state</option>
+                  <option *ngFor="let s of indianStates" [value]="s">{{ s }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <button
+              type="submit"
+              class="os-btn w-100"
+              [disabled]="isSubmitting"
+            >
+              {{ isSubmitting ? 'Submitting...' : 'Submit GST Details' }}
+            </button>
+
+            <div class="or-divide"><span>or</span></div>
+
+            <button type="button" class="os-btn os-btn-black w-100" (click)="skip()">
+              Skip for Now
+            </button>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

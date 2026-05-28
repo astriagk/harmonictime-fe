@@ -285,10 +285,11 @@ export class AddEditComponent implements OnInit {
       // the placeholder); use null so "- Please select -" shows on a fresh form.
       brandId: [null, Validators.required],
       categoryId: [null, Validators.required],
-      collectionId: [null, Validators.required],
+      collectionId: [null],
       price: ['', Validators.required],
+      isPriceInclusiveOfTax: [null, Validators.required],
       quantity: [null, [Validators.required, Validators.min(1)]],
-      recipientId: [null, Validators.required],
+      recipientId: [null],
     });
 
     this.productInformation = this.fb.group({
@@ -296,13 +297,13 @@ export class AddEditComponent implements OnInit {
       // native <select>s (waterResistant, guarantee) keep '' for their
       // disabled value="" placeholder option.
       dialColorId: [null, Validators.required],
-      diameter: ['', Validators.required],
+      diameter: [null],
       waterResistant: [''],
-      movementId: [null, Validators.required],
-      strapMaterialId: [null, Validators.required],
-      caseMaterialId: [null, Validators.required],
-      watchMarkersId: [null, Validators.required],
-      manufacturerProductNumber: ['', Validators.required],
+      movementId: [null],
+      strapMaterialId: [null],
+      caseMaterialId: [null],
+      watchMarkersId: [null],
+      manufacturerProductNumber: [''],
       guarantee: [''],
       deliveryOptionId: [null],
     });
@@ -376,16 +377,17 @@ export class AddEditComponent implements OnInit {
     try {
       this.isLoadingProduct = true;
       const url = GET_PRODUCT_BY_ID + `${this.productId}`;
-      this.genericService.getObservable(url).subscribe({
+      this.genericService.getObservableToken(url).subscribe({
         next: (response) => {
           const data = response?.data[0];
           this.productData = response?.data[0];
           // In edit mode quantity can be 0 (no stock), so relax the min to 0.
-          this.basicProductInformation.get('quantity')?.setValidators([
-            Validators.required,
-            Validators.min(0),
-          ]);
-          this.basicProductInformation.get('quantity')?.updateValueAndValidity();
+          this.basicProductInformation
+            .get('quantity')
+            ?.setValidators([Validators.required, Validators.min(0)]);
+          this.basicProductInformation
+            .get('quantity')
+            ?.updateValueAndValidity();
 
           this.basicProductInformation.setValue({
             productName: data.ProductName,
@@ -393,6 +395,7 @@ export class AddEditComponent implements OnInit {
             categoryId: data.Details.CategoryId,
             collectionId: data.Details.CollectionId,
             price: data.Price,
+            isPriceInclusiveOfTax: data.IsPriceInclusiveOfTax ?? null,
             quantity: data.Quantity,
             recipientId: data.Details.RecipientId,
           });
@@ -421,13 +424,22 @@ export class AddEditComponent implements OnInit {
             returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
           });
 
-          this.uploadedImages = data.Images
-            .filter((el: any) => el.mediaType !== 'video')
-            .map((el: any) => ({ url: el.ImageURL, isPrimary: !!el.IsPrimary, ...el }));
+          this.uploadedImages = data.Images.filter(
+            (el: any) => el.mediaType !== 'video',
+          ).map((el: any) => ({
+            url: el.ImageURL,
+            isPrimary: !!el.IsPrimary,
+            ...el,
+          }));
           this.ensurePrimaryImage();
-          const videoEntry = data.Images.find((el: any) => el.mediaType === 'video');
+          const videoEntry = data.Images.find(
+            (el: any) => el.mediaType === 'video',
+          );
           if (videoEntry) {
-            this.uploadedVideo = { url: videoEntry.ImageURL, _id: videoEntry._id };
+            this.uploadedVideo = {
+              url: videoEntry.ImageURL,
+              _id: videoEntry._id,
+            };
           }
           this.isLoadingProduct = false;
         },
@@ -473,6 +485,9 @@ export class AddEditComponent implements OnInit {
   }
   get price() {
     return this.basicProductInformation.get('price');
+  }
+  get isPriceInclusiveOfTax() {
+    return this.basicProductInformation.get('isPriceInclusiveOfTax');
   }
   get quantity() {
     return this.basicProductInformation.get('quantity');
@@ -559,7 +574,9 @@ export class AddEditComponent implements OnInit {
     if (!input.files?.length) return;
     const file = input.files[0];
     if (!this.allowedVideoTypes.includes(file.type)) {
-      this.toastrService.error('Invalid video type. Please upload MP4, WebM, or MOV.');
+      this.toastrService.error(
+        'Invalid video type. Please upload MP4, WebM, or MOV.',
+      );
       return;
     }
     const url = URL.createObjectURL(file);
@@ -752,6 +769,7 @@ export class AddEditComponent implements OnInit {
       return;
     }
 
+
     this.isSubmitting = true;
     const formData = new FormData();
 
@@ -797,6 +815,7 @@ export class AddEditComponent implements OnInit {
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      IsPriceInclusiveOfTax: productData.isPriceInclusiveOfTax,
       Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
@@ -850,16 +869,32 @@ export class AddEditComponent implements OnInit {
               concatMap((imageResponse) => {
                 const allFiles: { url: string; key: string }[] =
                   imageResponse?.data?.files ??
-                  (imageResponse?.data?.urls ?? []).map((url: string) => ({ url, key: '' }));
-                const newImageCount = this.uploadedImages.filter(img => img.file).length;
+                  (imageResponse?.data?.urls ?? []).map((url: string) => ({
+                    url,
+                    key: '',
+                  }));
+                const newImageCount = this.uploadedImages.filter(
+                  (img) => img.file,
+                ).length;
                 const imageFiles = allFiles.slice(0, newImageCount);
-                const videoFile = this.uploadedVideo?.file ? (allFiles[newImageCount] ?? null) : null;
+                const videoFile = this.uploadedVideo?.file
+                  ? (allFiles[newImageCount] ?? null)
+                  : null;
 
                 const imagesPayload = {
                   ProductID: productId,
                   ImageURLs: [
                     ...this.buildImageUrlsPayload(imageFiles),
-                    ...(videoFile ? [{ url: videoFile.url, key: videoFile.key, IsPrimary: false, mediaType: 'video' as const }] : []),
+                    ...(videoFile
+                      ? [
+                          {
+                            url: videoFile.url,
+                            key: videoFile.key,
+                            IsPrimary: false,
+                            mediaType: 'video' as const,
+                          },
+                        ]
+                      : []),
                   ],
                 };
                 return this.genericService
@@ -894,11 +929,11 @@ export class AddEditComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.isSubmitting = false;
-          this.toastrService.success('Product created successfully !');
+          this.toastrService.success(
+            'Product created successfully! It will be visible once approved by admin.',
+          );
           this.resetForm();
-          if (newProductId) {
-            this.goToProductDetails(newProductId);
-          }
+          this.goToProductList();
         },
         error: (err) => {
           this.isSubmitting = false;
@@ -908,9 +943,8 @@ export class AddEditComponent implements OnInit {
       });
   }
 
-  // Open the seller product-details page for the given product.
-  private goToProductDetails(productId: string): void {
-    this.router.navigate(['/seller/product-details', productId]);
+  private goToProductList(): void {
+    this.router.navigate(['/seller/product-list']);
   }
 
   resetForm() {
@@ -934,6 +968,7 @@ export class AddEditComponent implements OnInit {
       CollectionID: productData.collectionId,
       CategoryID: productData.categoryId,
       Price: productData.price,
+      IsPriceInclusiveOfTax: productData.isPriceInclusiveOfTax,
       Quantity: productData.quantity,
       RecipientID: productData.recipientId,
     };
@@ -1054,20 +1089,42 @@ export class AddEditComponent implements OnInit {
           switchMap((response) => {
             const allFiles: { url: string; key: string }[] =
               response?.data?.files ??
-              (response?.data?.urls ?? []).map((url: string) => ({ url, key: '' }));
-            const newImageCount = this.uploadedImages.filter(img => img.file).length;
+              (response?.data?.urls ?? []).map((url: string) => ({
+                url,
+                key: '',
+              }));
+            const newImageCount = this.uploadedImages.filter(
+              (img) => img.file,
+            ).length;
             const imageFiles = allFiles.slice(0, newImageCount);
-            const videoFile = hasNewVideo ? (allFiles[newImageCount] ?? null) : null;
+            const videoFile = hasNewVideo
+              ? (allFiles[newImageCount] ?? null)
+              : null;
 
             const imageURLs = [
               ...this.buildImageUrlsPayload(imageFiles),
-              ...(videoFile ? [{ url: videoFile.url, key: videoFile.key, IsPrimary: false, mediaType: 'video' as const }] : []),
+              ...(videoFile
+                ? [
+                    {
+                      url: videoFile.url,
+                      key: videoFile.key,
+                      IsPrimary: false,
+                      mediaType: 'video' as const,
+                    },
+                  ]
+                : []),
             ];
 
             if (!imageURLs.length) return of(null);
 
-            const imagesPayload = { ProductID: productId, ImageURLs: imageURLs };
-            return this.genericService.postObservable(POST_PRODUCT_IMAGES, imagesPayload);
+            const imagesPayload = {
+              ProductID: productId,
+              ImageURLs: imageURLs,
+            };
+            return this.genericService.postObservable(
+              POST_PRODUCT_IMAGES,
+              imagesPayload,
+            );
           }),
         );
     }
@@ -1090,7 +1147,7 @@ export class AddEditComponent implements OnInit {
         this.isSubmitting = false;
         this.toastrService.success('Product updated successfully!');
         this.resetForm();
-        this.goToProductDetails(productId);
+        this.goToProductList();
       });
   }
 }

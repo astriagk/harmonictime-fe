@@ -1,0 +1,92 @@
+<section class="login-area pt-100 pb-100">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 offset-lg-3">
+        <div class="basic-login">
+
+          <!-- ── Pending (after register) ── -->
+          <ng-container *ngIf="reason === 'pending'">
+            <div class="text-center mb-30">
+              <i class="fal fa-envelope" style="font-size:3rem;color:#888;"></i>
+            </div>
+            <h3 class="text-center mb-20">Check your inbox</h3>
+            <p class="text-center mb-10">
+              We've sent a verification link to
+              <strong>{{ email || 'your email address' }}</strong>.
+            </p>
+            <p class="text-center text-muted mb-40" style="font-size:0.9em;">
+              Click the link in the email to activate your account. The link expires in 24 hours.
+            </p>
+            <a routerLink="/auth/login" class="os-btn os-btn-black w-100">Back to Login</a>
+          </ng-container>
+
+          <!-- ── Unverified (login blocked) — button only ── -->
+          <ng-container *ngIf="reason === 'unverified'">
+            <div class="text-center mb-30">
+              <i class="fal fa-envelope-open" style="font-size:3rem;color:#888;"></i>
+            </div>
+            <h3 class="text-center mb-20">Verify your email to continue</h3>
+            <p class="text-center mb-10">
+              Your account is not yet verified. We sent the verification link to
+              <strong>{{ email }}</strong>.
+            </p>
+            <p class="text-center text-muted mb-30" style="font-size:0.9em;">
+              Check your inbox or request a new link below.
+            </p>
+            <ng-container *ngIf="!resendDone; else resendSuccess">
+              <button type="button" class="os-btn w-100 mb-15" [disabled]="isResending" (click)="resend()">
+                {{ isResending ? 'Sending…' : 'Resend Verification Email' }}
+              </button>
+              <a routerLink="/auth/login" class="os-btn os-btn-black w-100">Back to Login</a>
+            </ng-container>
+          </ng-container>
+
+          <!-- ── Expired link — editable email + smart resend ── -->
+          <ng-container *ngIf="reason === 'expired'">
+            <div class="text-center mb-30">
+              <i class="fal fa-clock" style="font-size:3rem;color:#888;"></i>
+            </div>
+            <h3 class="text-center mb-20">Your link has expired</h3>
+            <p class="text-center text-muted mb-30" style="font-size:0.9em;">
+              Verify your email address below — correct it if there's a typo — then request a new link.
+            </p>
+            <ng-container *ngIf="!resendDone; else resendSuccess">
+              <form [formGroup]="expiredForm" (ngSubmit)="resendExpired()">
+                <div class="mb-20">
+                  <label for="expired-email">Email Address</label>
+                  <div class="auth-input">
+                    <input
+                      id="expired-email"
+                      type="text"
+                      placeholder="Enter your email address"
+                      formControlName="email"
+                    />
+                  </div>
+                  <span *ngIf="expiredEmailCtrl?.invalid && expiredEmailCtrl?.touched" class="text-danger">
+                    Email is required and must be a valid email address
+                  </span>
+                </div>
+                <button type="submit" class="os-btn w-100 mb-15" [disabled]="isResending">
+                  {{ isResending ? 'Sending…' : 'Resend Verification Email' }}
+                </button>
+              </form>
+              <a routerLink="/auth/login" class="os-btn os-btn-black w-100">Back to Login</a>
+            </ng-container>
+          </ng-container>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<ng-template #resendSuccess>
+  <div class="text-center mb-30">
+    <i class="fal fa-check-circle mb-20" style="font-size:3rem;color:#4caf50;display:block;"></i>
+    <h4 class="mb-15">Email sent!</h4>
+    <p class="text-muted" style="font-size:0.9em;">
+      A new verification link has been sent to <strong>{{ updatedEmail || email }}</strong>. Check your inbox.
+    </p>
+  </div>
+  <a routerLink="/auth/login" class="os-btn os-btn-black w-100">Back to Login</a>
+</ng-template>

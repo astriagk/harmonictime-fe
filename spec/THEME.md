@@ -167,6 +167,44 @@ reflects state ("Add"/"Update", "Save"/"Saving…").
 - Validation messages: `<span class="text-danger">…</span>`, shown after submit.
 - Use Reactive Forms (`FormBuilder`) for new forms, matching existing components.
 
+### Input / Select baseline (`.basic-login` context)
+
+All text inputs **and** `<select>` elements inside auth forms share these exact
+properties — never override them individually:
+
+```scss
+height: 60px;
+border: 2px solid #eaedff;
+color: #6f7172;           // matches ::placeholder color
+padding: 0 20px;
+font-family: $pop;
+font-size: 14px;
+background-color: $white;
+```
+
+Focus state: `border-color: $theme-color` (`#bc8246`), no outline.
+
+### Select dropdown pattern
+
+Wrap the `<select>` in `.auth-input` (same as password inputs) — the global
+`_login.scss` rule inside `.auth-input select` already applies the shared
+baseline plus a custom SVG chevron and `appearance: none`. Do **not** add
+component-level select styles; just use the wrapper class.
+
+```html
+<div class="auth-input">
+  <select formControlName="accountType">
+    <option value="individual">Individual</option>
+    <option value="business">Business</option>
+  </select>
+</div>
+```
+
+> **Rule:** every `<select>` in an auth form goes inside `.auth-input`. Every
+> new option type (e.g. role, plan) follows the same two-option value/label
+> pattern above. Pre-select the most common value as the `FormControl` default
+> — never leave it blank.
+
 ---
 
 ## 8. Feedback (toasts)

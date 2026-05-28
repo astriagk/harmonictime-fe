@@ -12,7 +12,10 @@
       </div>
     </div>
 
-    <div *ngIf="!isLoadingProduct && productData" class="d-flex justify-content-end mb-20">
+    <div
+      *ngIf="!isLoadingProduct && productData"
+      class="d-flex justify-content-end mb-20"
+    >
       <button
         type="button"
         class="os-btn"
@@ -124,9 +127,7 @@
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="country-select">
                 <div class="lookup-label-row">
-                  <label for="collection"
-                    >Collection<span class="required">*</span></label
-                  >
+                  <label for="collection">Collection</label>
                   <button
                     type="button"
                     class="add-lookup-icon"
@@ -146,13 +147,6 @@
                   placeholder="- Please select -"
                   [clearable]="false"
                 ></ng-select>
-                <span
-                  *ngIf="
-                    collectionId?.hasError('required') && collectionId?.touched
-                  "
-                  class="text-danger"
-                  >Collection is required</span
-                >
               </div>
             </div>
 
@@ -174,8 +168,37 @@
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+              <div class="country-select">
+                <label for="isPriceInclusiveOfTax"
+                  >Price Inclusive of GST (18%)?
+                  <span class="required">*</span></label
+                >
+                <select
+                  id="isPriceInclusiveOfTax"
+                  formControlName="isPriceInclusiveOfTax"
+                >
+                  <option [value]="null" disabled>- Please select -</option>
+                  <option [value]="true">
+                    Yes — price already includes 18% GST
+                  </option>
+                  <option [value]="false">No — GST will be added on top</option>
+                </select>
+                <span
+                  *ngIf="
+                    isPriceInclusiveOfTax?.hasError('required') &&
+                    isPriceInclusiveOfTax?.touched
+                  "
+                  class="text-danger"
+                  >Please specify GST inclusion</span
+                >
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="checkout-form-list">
-                <label for="quantity">Quantity <span class="required">*</span></label>
+                <label for="quantity"
+                  >Quantity <span class="required">*</span></label
+                >
                 <input
                   id="quantity"
                   type="number"
@@ -199,9 +222,7 @@
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="country-select">
                 <div class="lookup-label-row">
-                  <label for="recipientId"
-                    >Recipient <span class="required">*</span></label
-                  >
+                  <label for="recipientId">Recipient</label>
                   <button
                     type="button"
                     class="add-lookup-icon"
@@ -221,13 +242,6 @@
                   placeholder="- Please select -"
                   [clearable]="false"
                 ></ng-select>
-                <span
-                  *ngIf="
-                    recipientId?.hasError('required') && recipientId?.touched
-                  "
-                  class="text-danger"
-                  >Recipient is required</span
-                >
               </div>
             </div>
           </div>
@@ -292,20 +306,13 @@
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="checkout-form-list">
-                <label for="diameter"
-                  >Diameter <span class="required">*</span></label
-                >
+                <label for="diameter">Diameter</label>
                 <input
                   id="diameter"
                   type="text"
                   placeholder="Enter Diameter"
                   formControlName="diameter"
                 />
-                <span
-                  *ngIf="diameter?.hasError('required') && diameter?.touched"
-                  class="text-danger"
-                  >Diameter is required</span
-                >
               </div>
             </div>
 
@@ -324,9 +331,7 @@
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="country-select">
                 <div class="lookup-label-row">
-                  <label for="movementId"
-                    >Movement <span class="required">*</span></label
-                  >
+                  <label for="movementId">Movement</label>
                   <button
                     type="button"
                     class="add-lookup-icon"
@@ -346,22 +351,13 @@
                   placeholder="- Please select -"
                   [clearable]="false"
                 ></ng-select>
-                <span
-                  *ngIf="
-                    movementId?.hasError('required') && movementId?.touched
-                  "
-                  class="text-danger"
-                  >Movement is required</span
-                >
               </div>
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="country-select">
                 <div class="lookup-label-row">
-                  <label for="strapMaterialId"
-                    >Strap Material <span class="required">*</span></label
-                  >
+                  <label for="strapMaterialId">Strap Material</label>
                   <button
                     type="button"
                     class="add-lookup-icon"
@@ -381,23 +377,13 @@
                   placeholder="- Please select -"
                   [clearable]="false"
                 ></ng-select>
-                <span
-                  *ngIf="
-                    strapMaterialId?.hasError('required') &&
-                    strapMaterialId?.touched
-                  "
-                  class="text-danger"
-                  >Strap Material is required</span
-                >
               </div>
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="country-select">
                 <div class="lookup-label-row">
-                  <label for="caseMaterialId"
-                    >Case Material <span class="required">*</span></label
-                  >
+                  <label for="caseMaterialId">Case Material</label>
                   <button
                     type="button"
                     class="add-lookup-icon"
@@ -417,23 +403,13 @@
                   placeholder="- Please select -"
                   [clearable]="false"
                 ></ng-select>
-                <span
-                  *ngIf="
-                    caseMaterialId?.hasError('required') &&
-                    caseMaterialId?.touched
-                  "
-                  class="text-danger"
-                  >Case Material is required</span
-                >
               </div>
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="country-select">
                 <div class="lookup-label-row">
-                  <label for="watchMarkersId"
-                    >Watch Markers <span class="required">*</span></label
-                  >
+                  <label for="watchMarkersId">Watch Markers</label>
                   <button
                     type="button"
                     class="add-lookup-icon"
@@ -453,22 +429,13 @@
                   placeholder="- Please select -"
                   [clearable]="false"
                 ></ng-select>
-                <span
-                  *ngIf="
-                    watchMarkersId?.hasError('required') &&
-                    watchMarkersId?.touched
-                  "
-                  class="text-danger"
-                  >Watch Markers is required</span
-                >
               </div>
             </div>
 
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
               <div class="checkout-form-list">
                 <label for="manufacturerProductNumber"
-                  >Manufacturer Product Number
-                  <span class="required">*</span></label
+                  >Manufacturer Product Number</label
                 >
                 <input
                   id="manufacturerProductNumber"
@@ -476,14 +443,6 @@
                   placeholder="Enter Manufacturer Product Number"
                   formControlName="manufacturerProductNumber"
                 />
-                <span
-                  *ngIf="
-                    manufacturerProductNumber?.hasError('required') &&
-                    manufacturerProductNumber?.touched
-                  "
-                  class="text-danger"
-                  >Manufacturer Product Number is required</span
-                >
               </div>
             </div>
 
@@ -557,7 +516,13 @@
                   placeholder="Short Title"
                   formControlName="shortTitle"
                 />
-                <span class="text-danger" *ngIf="productDescription.get('shortTitle')?.hasError('maxlength')">Max 50 characters</span>
+                <span
+                  class="text-danger"
+                  *ngIf="
+                    productDescription.get('shortTitle')?.hasError('maxlength')
+                  "
+                  >Max 50 characters</span
+                >
               </div>
             </div>
           </div>
@@ -570,7 +535,15 @@
                   placeholder="Enter Detailed Description"
                   formControlName="detailedDescription"
                 ></textarea>
-                <span class="text-danger" *ngIf="productDescription.get('detailedDescription')?.hasError('maxlength')">Max 500 characters</span>
+                <span
+                  class="text-danger"
+                  *ngIf="
+                    productDescription
+                      .get('detailedDescription')
+                      ?.hasError('maxlength')
+                  "
+                  >Max 500 characters</span
+                >
               </div>
             </div>
 
@@ -582,7 +555,15 @@
                   placeholder="Enter Additional Description"
                   formControlName="additionalDescription"
                 ></textarea>
-                <span class="text-danger" *ngIf="productDescription.get('additionalDescription')?.hasError('maxlength')">Max 500 characters</span>
+                <span
+                  class="text-danger"
+                  *ngIf="
+                    productDescription
+                      .get('additionalDescription')
+                      ?.hasError('maxlength')
+                  "
+                  >Max 500 characters</span
+                >
               </div>
             </div>
           </div>
@@ -614,7 +595,15 @@
                   placeholder="Enter Delivery Information"
                   formControlName="deliveryInfo"
                 ></textarea>
-                <span class="text-danger" *ngIf="deliveryAndReturns.get('deliveryInfo')?.hasError('maxlength')">Max 500 characters</span>
+                <span
+                  class="text-danger"
+                  *ngIf="
+                    deliveryAndReturns
+                      .get('deliveryInfo')
+                      ?.hasError('maxlength')
+                  "
+                  >Max 500 characters</span
+                >
               </div>
             </div>
 
@@ -626,7 +615,15 @@
                   placeholder="Enter Returns Policy"
                   formControlName="returnsPolicy"
                 ></textarea>
-                <span class="text-danger" *ngIf="deliveryAndReturns.get('returnsPolicy')?.hasError('maxlength')">Max 500 characters</span>
+                <span
+                  class="text-danger"
+                  *ngIf="
+                    deliveryAndReturns
+                      .get('returnsPolicy')
+                      ?.hasError('maxlength')
+                  "
+                  >Max 500 characters</span
+                >
               </div>
             </div>
           </div>
@@ -725,7 +722,9 @@
                   accept="video/mp4,video/webm,video/quicktime"
                   [disabled]="!!uploadedVideo"
                 />
-                <small class="text-muted d-block mt-1">MP4, WebM or MOV — max 1 video</small>
+                <small class="text-muted d-block mt-1"
+                  >MP4, WebM or MOV — max 1 video</small
+                >
               </div>
             </div>
             <div class="col-12" *ngIf="uploadedVideo">

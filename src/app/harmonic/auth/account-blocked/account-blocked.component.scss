@@ -1,0 +1,50 @@
+@import 'variables';
+
+// ── Icon circle ──────────────────────────────────────────────
+.ab-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background-color: rgba($theme-color, 0.08);
+  border: 2px solid rgba($theme-color, 0.2);
+
+  i {
+    font-size: 2rem;
+    color: $theme-color;
+  }
+}
+
+// ── Body copy ────────────────────────────────────────────────
+.ab-sub {
+  font-size: 0.88em;
+  color: $body-text-color;
+}
+
+// ── Divider ──────────────────────────────────────────────────
+.ab-divider {
+  height: 1px;
+  background-color: $border;
+}
+
+// ── Contact ──────────────────────────────────────────────────
+.ab-contact-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: $grey-3;
+}
+
+.ab-contact-email {
+  font-size: 0.95em;
+  font-weight: 500;
+  color: $heading-color;
+  transition: color .3s;
+
+  i { color: $theme-color; }
+
+  &:hover { color: $theme-color; }
+}

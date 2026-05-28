@@ -158,14 +158,23 @@ export class CartService {
   }
 
   // Subtotal (offer discount already applied, platform fee baked in) + GST + additional charges.
+  // GST is only applied to items where IsPriceInclusiveOfTax is false.
   computeCheckoutSummary(cartItems: any) {
     const subtotal = this.computeCartTotal(cartItems).total;
     const offerDiscount = this.computeOfferDiscount(cartItems);
-    const gst = Math.round((subtotal * ORDER_CHARGES.gstPercent) / 100);
+    const taxableSubtotal = (cartItems as any[]).reduce((total: number, cartItem: any) => {
+      if (cartItem.IsPriceInclusiveOfTax) return total;
+      const base = cartItem.DisplayPrice;
+      const offer = cartItem.Offer;
+      const price = (offer?.IsActive && base)
+        ? base * (1 - offer.DiscountPercentage / 100)
+        : base;
+      return total + (price || 0);
+    }, 0);
+    const gst = Math.round((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100);
     const gstPercent = ORDER_CHARGES.gstPercent;
-    const extra = subtotal > 0 ? ORDER_CHARGES.extraFlat : 0;
-    const grandTotal = subtotal + gst + extra;
-    return { subtotal, offerDiscount, gst, gstPercent, extra, grandTotal };
+    const grandTotal = subtotal + gst;
+    return { subtotal, offerDiscount, gst, gstPercent, grandTotal };
   }
 
   // quantity increment

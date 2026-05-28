@@ -45,15 +45,14 @@
           <a
             *ngIf="!(isProductInCart$(product._id) | async)"
             (click)="addToCart(product)"
-            class="add-cart-btn mr-10 cursor-pointer"
+            class="os-btn os-btn-black mr-10 cursor-pointer"
           >
-            <i class="fal fa-plus"></i>
             Add to Cart
           </a>
           <a
             *ngIf="isProductInCart$(product._id) | async"
             routerLink="/buyer/cart"
-            class="add-cart-btn mr-10 cursor-pointer"
+            class="os-btn os-btn-black mr-10 cursor-pointer"
           >
             View cart
           </a>

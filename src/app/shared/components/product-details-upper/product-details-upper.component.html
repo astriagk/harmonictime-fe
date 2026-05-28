@@ -6,7 +6,7 @@
         : 'col-xl-6 col-lg-6'
     "
   >
-    <div *ngIf="!style_2" class="product__modal-box d-flex">
+    <div *ngIf="!style_2" class="product__modal-box d-none d-md-flex">
       <div class="product__modal-nav mr-20">
         <nav>
           <div class="nav nav-tabs" id="product-details" role="tablist">
@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <div *ngIf="style_2" class="product__modal-box">
+    <div *ngIf="style_2" class="product__modal-box d-none d-md-block">
       <div class="mb-20">
         <div class="product__modal-img w-img">
           <img [src]="productService.activeImg" alt="product-img" />
@@ -69,6 +69,13 @@
         </div>
       </nav> -->
     </div>
+
+    <!-- Mobile only: swipeable carousel with dot/play-icon indicators -->
+    <app-product-media-mobile-carousel
+      class="d-block d-md-none"
+      [images]="product.Images"
+      (mediaSelected)="productService.handleImageActive($event.url, $event.isVideo)">
+    </app-product-media-mobile-carousel>
   </div>
 
   <div

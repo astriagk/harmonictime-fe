@@ -1,6 +1,8 @@
+import { environment } from 'src/environments/environment';
+
 export const companyDetails = {
   name: 'Harmonic Time',
-  email: 'harmonictime@astriagk.com',
+  email: environment.supportEmail,
   address: '22, 1st cross, BHK Layout, Bangalore - 560026',
   phone: '(+91) 88673 47448',
   description:

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
-import { ADMIN_USERS, adminUserAction } from 'src/app/config';
+import { ADMIN_USERS, ADMIN_USER_BY_ID, ADMIN_SELLERS, ADMIN_SELLER_BY_ID, adminUserAction, adminSellerAction } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
 
@@ -15,8 +15,66 @@ interface AdminUser {
   dateCreated: string;
 }
 
+interface AdminSeller {
+  _id: string;
+  email: string;
+  phone: string | null;
+  accountType?: string;
+  sellerVerificationStatus: 'Unverified' | 'Pending' | 'Approved' | 'Rejected';
+  dateCreated: string;
+  sellerVerifiedAt?: string;
+  sellerVerificationNote?: string;
+}
+
+interface SellerGst {
+  _id?: string;
+  GSTIN?: string;
+  LegalBusinessName?: string;
+  TradeName?: string;
+  BusinessType?: string;
+  RegisteredAddress?: string;
+  State?: string;
+  PinCode?: string;
+  IsVerified?: boolean;
+}
+
+interface SellerBankAccount {
+  _id?: string;
+  AccountHolderName?: string;
+  AccountNumber?: string;
+  IFSC?: string;
+  BankName?: string;
+  IsDefault?: boolean;
+  IsVerified?: boolean;
+  VerificationStatus?: string;
+}
+
+interface SellerProductStats {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+}
+
+interface SellerProfileData {
+  seller: AdminSeller;
+  gst?: SellerGst | null;
+  bankAccounts: SellerBankAccount[];
+  products: SellerProductStats;
+}
+
+interface AdminUserDetail extends AdminUser {
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  lastLogin?: string;
+}
+
+type PageView = 'customers' | 'sellers';
 type StatusFilter = 'all' | 'active' | 'blocked' | 'suspended';
+type SellerStatusFilter = 'all' | 'Unverified' | 'Pending' | 'Approved' | 'Rejected';
 type UserAction = 'block' | 'unblock' | 'suspend';
+type SellerVerifyAction = 'approve' | 'reject' | 'request-info';
 
 @Component({
   selector: 'app-users',
@@ -24,6 +82,9 @@ type UserAction = 'block' | 'unblock' | 'suspend';
   styleUrls: ['./users.component.scss'],
 })
 export class UsersComponent implements OnInit {
+  pageView: PageView = 'customers';
+
+  // --- customers ---
   users: AdminUser[] = [];
   paginatedUsers: AdminUser[] = [];
   paginate: any = {};
@@ -32,8 +93,11 @@ export class UsersComponent implements OnInit {
   loading = false;
   activeFilter: StatusFilter = 'all';
   actionInProgress: string | null = null;
-
   confirmAction: { user: AdminUser; action: UserAction } | null = null;
+
+  // --- user detail ---
+  selectedUser: AdminUserDetail | null = null;
+  userDetailLoading = false;
 
   readonly filters: { label: string; value: StatusFilter }[] = [
     { label: 'All', value: 'all' },
@@ -41,6 +105,31 @@ export class UsersComponent implements OnInit {
     { label: 'Blocked', value: 'blocked' },
     { label: 'Suspended', value: 'suspended' },
   ];
+
+  // --- sellers list ---
+  sellers: AdminSeller[] = [];
+  paginatedSellers: AdminSeller[] = [];
+  sellerPaginate: any = {};
+  sellerPageNo = 1;
+  sellersLoading = false;
+  sellerStatusFilter: SellerStatusFilter = 'all';
+
+  readonly sellerFilters: { label: string; value: SellerStatusFilter }[] = [
+    { label: 'All', value: 'all' },
+    { label: 'Unverified', value: 'Unverified' },
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Approved', value: 'Approved' },
+    { label: 'Rejected', value: 'Rejected' },
+  ];
+
+  // --- seller profile modal ---
+  sellerProfileData: SellerProfileData | null = null;
+  sellerProfileLoading = false;
+
+  // inline action state (within profile modal — no second modal needed)
+  sellerPendingAction: SellerVerifyAction | null = null;
+  sellerActionNote = '';
+  sellerActionInProgress = false;
 
   constructor(
     private genericService: GenericService,
@@ -59,12 +148,19 @@ export class UsersComponent implements OnInit {
     this.loadUsers();
   }
 
+  setView(view: PageView): void {
+    this.pageView = view;
+    if (view === 'sellers' && this.sellers.length === 0) {
+      this.loadSellers();
+    }
+  }
+
+  // --- customers ---
+
   loadUsers(): void {
     this.loading = true;
     const url =
-      this.activeFilter === 'all'
-        ? ADMIN_USERS
-        : `${ADMIN_USERS}?status=${this.activeFilter}`;
+      this.activeFilter === 'all' ? ADMIN_USERS : `${ADMIN_USERS}?status=${this.activeFilter}`;
 
     this.genericService
       .getObservableToken(url)
@@ -120,22 +216,188 @@ export class UsersComponent implements OnInit {
     this.confirmAction = null;
     this.actionInProgress = user._id;
 
+    const statusMap: Record<UserAction, AdminUser['status']> = {
+      block: 'blocked',
+      unblock: 'active',
+      suspend: 'suspended',
+    };
+
     this.genericService
       .putObservableToken(adminUserAction(user._id, action), {})
       .pipe(finalize(() => (this.actionInProgress = null)))
       .subscribe({
         next: () => {
           this.toastr.success(`User ${action}ed successfully`);
-          this.loadUsers();
+          const newStatus = statusMap[action];
+          this.users = this.users.map(u => u._id === user._id ? { ...u, status: newStatus } : u);
+          this.paginatedUsers = this.paginatedUsers.map(u => u._id === user._id ? { ...u, status: newStatus } : u);
         },
-        error: (err) => {
-          const msg = err?.error?.message ?? 'Action failed';
-          this.toastr.error(msg);
-        },
+        error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
       });
   }
 
   actionLabel(action: UserAction): string {
     return action.charAt(0).toUpperCase() + action.slice(1);
+  }
+
+  // --- user detail ---
+
+  openUserDetail(user: AdminUser): void {
+    this.selectedUser = { ...user };
+    this.userDetailLoading = true;
+
+    this.genericService
+      .getObservableToken(ADMIN_USER_BY_ID + user._id)
+      .pipe(finalize(() => (this.userDetailLoading = false)))
+      .subscribe({
+        next: (res) => { if (res?.data) this.selectedUser = res.data; },
+        error: () => this.toastr.error('Failed to load user details'),
+      });
+  }
+
+  closeUserDetail(): void {
+    this.selectedUser = null;
+  }
+
+  // --- sellers ---
+
+  loadSellers(): void {
+    this.sellersLoading = true;
+    const url =
+      this.sellerStatusFilter === 'all'
+        ? ADMIN_SELLERS
+        : `${ADMIN_SELLERS}?status=${this.sellerStatusFilter}`;
+
+    this.genericService
+      .getObservableToken(url)
+      .pipe(finalize(() => (this.sellersLoading = false)))
+      .subscribe({
+        next: (res) => {
+          this.sellers = res?.data ?? [];
+          this.sellerPageNo = 1;
+          this.updateSellerPagination();
+        },
+        error: () => this.toastr.error('Failed to load sellers'),
+      });
+  }
+
+  updateSellerPagination(): void {
+    if (!this.sellers.length) return;
+    this.sellerPaginate = this.productService.getPager(this.sellers.length, this.sellerPageNo, this.pageSize);
+    this.paginatedSellers = this.sellers.slice(this.sellerPaginate.startIndex, this.sellerPaginate.endIndex + 1);
+  }
+
+  setSellerPage(page: number): void {
+    this.sellerPageNo = page;
+    this.updateSellerPagination();
+  }
+
+  setSellerFilter(filter: SellerStatusFilter): void {
+    this.sellerStatusFilter = filter;
+    this.loadSellers();
+  }
+
+  openSellerProfile(listSeller: AdminSeller): void {
+    // Pre-populate with list data so the modal opens immediately with known status.
+    this.sellerProfileData = {
+      seller: listSeller,
+      gst: null,
+      bankAccounts: [],
+      products: { total: 0, approved: 0, pending: 0, rejected: 0 },
+    };
+    this.sellerPendingAction = null;
+    this.sellerActionNote = '';
+    this.sellerProfileLoading = true;
+
+    this.genericService
+      .getObservableToken(ADMIN_SELLER_BY_ID(listSeller._id))
+      .pipe(finalize(() => (this.sellerProfileLoading = false)))
+      .subscribe({
+        next: (res) => {
+          if (res?.data) {
+            // Undefined status = newly registered, nothing submitted yet → Unverified.
+            this.sellerProfileData = {
+              ...res.data,
+              seller: {
+                ...res.data.seller,
+                sellerVerificationStatus:
+                  res.data.seller?.sellerVerificationStatus ??
+                  listSeller.sellerVerificationStatus ??
+                  'Unverified',
+              },
+            };
+          }
+        },
+        error: () => {
+          this.toastr.error('Failed to load seller profile');
+          this.sellerProfileData = null;
+        },
+      });
+  }
+
+  closeSellerProfile(): void {
+    this.sellerProfileData = null;
+    this.sellerPendingAction = null;
+    this.sellerActionNote = '';
+  }
+
+  sellerActionsFor(status: string): SellerVerifyAction[] {
+    if (status === 'Pending') return ['approve', 'reject', 'request-info'];
+    if (status === 'Approved') return ['reject'];
+    if (status === 'Rejected') return ['approve', 'request-info'];
+    return ['request-info']; // Unverified — prompt seller to complete their account
+  }
+
+  armAction(action: SellerVerifyAction): void {
+    this.sellerPendingAction = action;
+    this.sellerActionNote = '';
+  }
+
+  cancelPendingAction(): void {
+    this.sellerPendingAction = null;
+    this.sellerActionNote = '';
+  }
+
+  executeSellerAction(): void {
+    if (!this.sellerPendingAction || !this.sellerProfileData) return;
+    const action = this.sellerPendingAction;
+
+    if ((action === 'reject' || action === 'request-info') && !this.sellerActionNote.trim()) {
+      this.toastr.warning('Please enter a note before submitting');
+      return;
+    }
+
+    this.sellerActionInProgress = true;
+    const body = this.sellerActionNote.trim() ? { note: this.sellerActionNote.trim() } : {};
+
+    this.genericService
+      .putObservableToken(adminSellerAction(this.sellerProfileData.seller._id, action), body)
+      .pipe(finalize(() => (this.sellerActionInProgress = false)))
+      .subscribe({
+        next: () => {
+          const label = action === 'request-info' ? 'Info requested' : `Seller ${action}d`;
+          this.toastr.success(label);
+          this.closeSellerProfile();
+          this.loadSellers();
+        },
+        error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
+      });
+  }
+
+  sellerActionLabel(action: SellerVerifyAction): string {
+    if (action === 'approve') return 'Approve';
+    if (action === 'reject') return 'Reject';
+    if (action === 'request-info') return 'Request Info';
+    return action;
+  }
+
+  needsNote(action: SellerVerifyAction): boolean {
+    return action === 'reject' || action === 'request-info';
+  }
+
+  sellerActionBtnClass(action: SellerVerifyAction): string {
+    if (action === 'approve') return 'os-btn os-btn-black';
+    if (action === 'reject') return 'os-btn os-btn-danger';
+    return 'os-btn';
   }
 }

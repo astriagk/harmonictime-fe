@@ -153,9 +153,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    font-size: 22px;
     pointer-events: none;
+
+    i {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: $theme-color;
+      color: $white;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 2px;
+    }
   }
 }
 

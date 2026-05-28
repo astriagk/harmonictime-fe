@@ -41,12 +41,12 @@
                 </td>
                 <td class="product-price">
                   <ng-container *ngIf="item.Offer?.IsActive && item.DisplayPrice; else regularPrice">
-                    <div class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR":'symbol':'1.0-0' }}</div>
+                    <div class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR" }}</div>
                     <small class="offer-badge">{{ item.Offer.DiscountPercentage }}% off</small>
-                    <div class="old-price">{{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</div>
+                    <div class="old-price">{{ item.DisplayPrice | currency: "INR" }}</div>
                   </ng-container>
                   <ng-template #regularPrice>
-                    <span class="amount">{{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</span>
+                    <span class="amount">{{ item.DisplayPrice | currency: "INR" }}</span>
                   </ng-template>
                 </td>
                 <td class="product-quantity">

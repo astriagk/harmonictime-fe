@@ -8,6 +8,7 @@ import { UsersComponent } from './users/users.component';
 import { RolesComponent } from './roles/roles.component';
 import { ApprovePaymentsComponent } from './approve-payments/approve-payments.component';
 import { AdminOffersComponent } from './offers/offers.component';
+import { AdminProductsComponent } from './products/products.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { AdminOffersComponent } from './offers/offers.component';
     RolesComponent,
     ApprovePaymentsComponent,
     AdminOffersComponent,
+    AdminProductsComponent,
   ],
   imports: [
     CommonModule,

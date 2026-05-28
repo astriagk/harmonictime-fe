@@ -8,6 +8,7 @@ import {
   loginUserFailure,
   loadUserSuccess,
   loadUser,
+  userBlocked,
 } from '../actions/user.actions';
 
 export interface UserState {
@@ -15,6 +16,8 @@ export interface UserState {
   loading: boolean;
   error: string | null;
   user: any;
+  blocked: boolean;
+  suspended: boolean;
 }
 
 export const initialState: UserState = {
@@ -22,6 +25,8 @@ export const initialState: UserState = {
   loading: false,
   error: null,
   user: null,
+  blocked: false,
+  suspended: false,
 };
 
 export const userReducer = createReducer(
@@ -75,10 +80,20 @@ export const userReducer = createReducer(
     user,
     loading: false,
     error: null,
+    blocked: false,
+    suspended: false,
   })),
   on(registerUserFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error,
+  })),
+
+  on(userBlocked, (state, { suspended }) => ({
+    ...state,
+    loading: false,
+    error: null,
+    blocked: !suspended,
+    suspended,
   }))
 );

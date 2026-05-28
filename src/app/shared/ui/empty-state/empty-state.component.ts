@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-empty-state',
@@ -10,4 +10,5 @@ export class EmptyStateComponent {
   // Optional CTA. When both are set, a primary button is rendered.
   @Input() actionLabel?: string;
   @Input() actionLink?: string | any[];
+  @Output() actionClick = new EventEmitter<void>();
 }

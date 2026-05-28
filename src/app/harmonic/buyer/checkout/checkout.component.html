@@ -489,15 +489,18 @@
                     <tr *ngFor="let item of cartItems" class="cart_item">
                       <td class="product-name">
                         {{ item.ProductName }}
+                        <div *ngIf="item.IsPriceInclusiveOfTax">
+                          <small class="product__tax-note">Incl. all taxes</small>
+                        </div>
                       </td>
                       <td class="product-total">
                         <ng-container *ngIf="item.Offer?.IsActive && item.DisplayPrice; else regularPrice">
-                          <span class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR":'symbol':'1.0-0' }}</span>
+                          <span class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR" }}</span>
                           <small class="offer-badge ml-5">{{ item.Offer.DiscountPercentage }}% off</small>
-                          <div><small class="old-price">MRP: {{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</small></div>
+                          <div><small class="old-price">MRP: {{ item.DisplayPrice | currency: "INR" }}</small></div>
                         </ng-container>
                         <ng-template #regularPrice>
-                          <span class="amount">{{ item.DisplayPrice | currency: "INR":'symbol':'1.0-0' }}</span>
+                          <span class="amount">{{ item.DisplayPrice | currency: "INR" }}</span>
                         </ng-template>
                       </td>
                     </tr>
@@ -521,7 +524,7 @@
                       </td>
                     </tr>
 
-                    <tr class="cart-subtotal">
+                    <tr *ngIf="cartService.computeCheckoutSummary(cartItems).gst > 0" class="cart-subtotal">
                       <th>GST ({{ cartService.computeCheckoutSummary(cartItems).gstPercent }}%)</th>
                       <td>
                         <span class="amount">{{
