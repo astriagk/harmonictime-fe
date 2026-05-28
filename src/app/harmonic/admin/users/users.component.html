@@ -1,100 +1,443 @@
 <app-breadcrumb-two title="Manage Users" subtitle="Admin"></app-breadcrumb-two>
 
 <section class="order-info container">
-  <header class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20">
-    <h2 class="order-info__title">Customers</h2>
+  <header
+    class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20"
+  >
+    <div class="d-flex align-items-center gap-20">
+      <h2 class="order-info__title mb-0">
+        {{ pageView === "customers" ? "Customers" : "Sellers" }}
+      </h2>
+      <ul class="nav nav-tabs admin-filter-tabs admin-view-tabs">
+        <li class="nav-item">
+          <a
+            class="nav-link cursor-pointer"
+            [class.active]="pageView === 'customers'"
+            (click)="setView('customers')"
+            >Customers</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link cursor-pointer"
+            [class.active]="pageView === 'sellers'"
+            (click)="setView('sellers')"
+            >Sellers</a
+          >
+        </li>
+      </ul>
+    </div>
 
-    <!-- Status filter tabs -->
-    <ul class="nav nav-tabs admin-filter-tabs">
+    <ul *ngIf="pageView === 'customers'" class="nav nav-tabs admin-filter-tabs">
       <li class="nav-item" *ngFor="let f of filters">
         <a
           class="nav-link cursor-pointer"
           [class.active]="activeFilter === f.value"
           (click)="setFilter(f.value)"
-        >{{ f.label }}</a>
+          >{{ f.label }}</a
+        >
+      </li>
+    </ul>
+
+    <ul *ngIf="pageView === 'sellers'" class="nav nav-tabs admin-filter-tabs">
+      <li class="nav-item" *ngFor="let f of sellerFilters">
+        <a
+          class="nav-link cursor-pointer"
+          [class.active]="sellerStatusFilter === f.value"
+          (click)="setSellerFilter(f.value)"
+          >{{ f.label }}</a
+        >
       </li>
     </ul>
   </header>
 
-  <!-- Loading skeleton -->
-  <div *ngIf="loading" class="order-list white-bg pt-40">
-    <app-skeleton type="table-row" [count]="8"></app-skeleton>
-  </div>
+  <!-- ==================== CUSTOMERS ==================== -->
+  <ng-container *ngIf="pageView === 'customers'">
+    <div *ngIf="loading" class="order-list white-bg pt-40">
+      <app-skeleton type="table-row" [count]="8"></app-skeleton>
+    </div>
 
-  <!-- Empty state -->
-  <app-empty-state
-    *ngIf="!loading && users.length === 0"
-    message="No Users Found"
-  ></app-empty-state>
+    <app-empty-state
+      *ngIf="!loading && users.length === 0"
+      message="No Users Found"
+    ></app-empty-state>
 
-  <!-- Table -->
-  <div *ngIf="!loading && users.length > 0" class="order-list white-bg table-responsive pt-40">
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Email</th>
-          <th scope="col">Phone</th>
-          <th scope="col">Status</th>
-          <th scope="col">Joined</th>
-          <th scope="col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of paginatedUsers; let i = index">
-          <td>{{ paginate.startIndex + i + 1 }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.phone || '—' }}</td>
-          <td>
-            <span class="admin-status-badge admin-status-badge--{{ user.status ?? 'active' }}">
-              {{ user.status ?? 'active' }}
-            </span>
-          </td>
-          <td>{{ user.dateCreated | date: 'mediumDate' }}</td>
-          <td (click)="$event.stopPropagation()">
-            <ng-container *ngFor="let action of actionsFor(user); let last = last">
+    <div
+      *ngIf="!loading && users.length > 0"
+      class="order-list white-bg table-responsive pt-40"
+    >
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of paginatedUsers; let i = index">
+            <td>{{ paginate.startIndex + i + 1 }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone || "—" }}</td>
+            <td>
+              <span
+                class="admin-status-badge admin-status-badge--{{
+                  user.status ?? 'active'
+                }}"
+              >
+                {{ user.status ?? "active" }}
+              </span>
+            </td>
+            <td>{{ user.dateCreated | date: "mediumDate" }}</td>
+            <td (click)="$event.stopPropagation()">
+              <a
+                class="admin-table__action-link cursor-pointer mr-15"
+                (click)="openUserDetail(user)"
+              >View</a>
+              <ng-container *ngFor="let action of actionsFor(user)">
+                <a
+                  class="admin-table__action-link cursor-pointer mr-15"
+                  [class.disabled]="actionInProgress === user._id"
+                  (click)="actionInProgress !== user._id && requestAction(user, action)"
+                >
+                  <i *ngIf="actionInProgress === user._id" class="fal fa-spinner fa-spin"></i>
+                  <ng-container *ngIf="actionInProgress !== user._id">{{ actionLabel(action) }}</ng-container>
+                </a>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      *ngIf="users.length > 0"
+      class="d-flex justify-content-end mt-20 pb-40"
+    >
+      <app-pagination
+        [data]="users"
+        [paginate]="paginate"
+        (setPage)="setPage($event)"
+      ></app-pagination>
+    </div>
+  </ng-container>
+
+  <!-- ==================== SELLERS ==================== -->
+  <ng-container *ngIf="pageView === 'sellers'">
+    <div *ngIf="sellersLoading" class="order-list white-bg pt-40">
+      <app-skeleton type="table-row" [count]="8"></app-skeleton>
+    </div>
+
+    <app-empty-state
+      *ngIf="!sellersLoading && sellers.length === 0"
+      message="No Sellers Found"
+    ></app-empty-state>
+
+    <div
+      *ngIf="!sellersLoading && sellers.length > 0"
+      class="order-list white-bg table-responsive pt-40"
+    >
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Verification</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let seller of paginatedSellers; let i = index">
+            <td>{{ sellerPaginate.startIndex + i + 1 }}</td>
+            <td>{{ seller.email }}</td>
+            <td>{{ seller.phone || "—" }}</td>
+            <td>
+              <span
+                class="admin-status-badge admin-status-badge--seller-{{
+                  seller.sellerVerificationStatus | lowercase
+                }}"
+              >
+                {{ seller.sellerVerificationStatus }}
+              </span>
+            </td>
+            <td>{{ seller.dateCreated | date: "mediumDate" }}</td>
+            <td>
               <a
                 class="admin-table__action-link cursor-pointer"
-                [class.mr-15]="!last"
-                [class.disabled]="actionInProgress === user._id"
-                (click)="actionInProgress !== user._id && requestAction(user, action)"
+                (click)="openSellerProfile(seller)"
+                >View</a
               >
-                <i *ngIf="actionInProgress === user._id" class="fal fa-spinner fa-spin"></i>
-                <ng-container *ngIf="actionInProgress !== user._id">{{ actionLabel(action) }}</ng-container>
-              </a>
-            </ng-container>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <!-- Pagination — bottom right -->
-  <div *ngIf="users.length > 0" class="d-flex justify-content-end mt-20 pb-40">
-    <app-pagination
-      [data]="users"
-      [paginate]="paginate"
-      (setPage)="setPage($event)"
-    ></app-pagination>
-  </div>
+    <div
+      *ngIf="sellers.length > 0"
+      class="d-flex justify-content-end mt-20 pb-40"
+    >
+      <app-pagination
+        [data]="sellers"
+        [paginate]="sellerPaginate"
+        (setPage)="setSellerPage($event)"
+      ></app-pagination>
+    </div>
+  </ng-container>
 </section>
 
-<!-- Confirm action modal -->
-<div *ngIf="confirmAction" class="modal fade show offer__modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="product__modal-inner text-center">
-        <h5 class="mb-15">{{ actionLabel(confirmAction.action) }} User?</h5>
-        <p class="mb-25">
-          <strong>{{ confirmAction.user.email }}</strong> will be
-          <strong>{{ confirmAction.action }}ed</strong>.
-        </p>
-        <div class="d-flex justify-content-center">
-          <button type="button" class="os-btn mr-10" (click)="cancelAction()">Cancel</button>
-          <button type="button" class="os-btn os-btn-black" (click)="executeAction()">Confirm</button>
+<!-- ==================== CUSTOMER CONFIRM MODAL ==================== -->
+<app-modal-shell
+  *ngIf="confirmAction"
+  [title]="actionLabel(confirmAction.action) + ' User?'"
+  (closed)="cancelAction()"
+>
+  <p class="mb-25 text-center">
+    <strong>{{ confirmAction.user.email }}</strong> will be
+    <strong>{{ confirmAction.action }}ed</strong>.
+  </p>
+  <div class="d-flex justify-content-center">
+    <button type="button" class="os-btn mr-10" (click)="cancelAction()">
+      Cancel
+    </button>
+    <button type="button" class="os-btn os-btn-black" (click)="executeAction()">
+      Confirm
+    </button>
+  </div>
+</app-modal-shell>
+
+<!-- ==================== USER DETAIL MODAL ==================== -->
+<app-modal-shell
+  *ngIf="selectedUser"
+  title="User Detail"
+  size="lg"
+  (closed)="closeUserDetail()"
+>
+  <div *ngIf="userDetailLoading" class="py-40 text-center">
+    <i class="fal fa-spinner fa-spin fa-2x"></i>
+  </div>
+
+  <ng-container *ngIf="!userDetailLoading && selectedUser">
+
+    <div class="row mb-20">
+        <div class="col-md-6">
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Email</small></div>
+            <div class="col-7">{{ selectedUser.email }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Phone</small></div>
+            <div class="col-7">{{ selectedUser.phone || '—' }}</div>
+          </div>
+          <div *ngIf="selectedUser.firstName || selectedUser.lastName" class="row mb-5">
+            <div class="col-5"><small class="text-muted">Name</small></div>
+            <div class="col-7">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Status</small></div>
+            <div class="col-7">
+              <span class="admin-status-badge admin-status-badge--{{ selectedUser.status ?? 'active' }}">
+                {{ selectedUser.status ?? 'active' }}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="selectedUser.role" class="row mb-5">
+            <div class="col-5"><small class="text-muted">Role</small></div>
+            <div class="col-7">{{ selectedUser.role }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Joined</small></div>
+            <div class="col-7">{{ selectedUser.dateCreated | date: 'mediumDate' }}</div>
+          </div>
+          <div *ngIf="selectedUser.lastLogin" class="row mb-5">
+            <div class="col-5"><small class="text-muted">Last Login</small></div>
+            <div class="col-7">{{ selectedUser.lastLogin | date: 'mediumDate' }}</div>
+          </div>
+        </div>
+      </div>
+
+  </ng-container>
+</app-modal-shell>
+
+
+<!-- ==================== SELLER PROFILE MODAL ==================== -->
+<app-modal-shell
+  *ngIf="sellerProfileData"
+  title="Seller Profile"
+  size="lg"
+  (closed)="closeSellerProfile()"
+>
+  <div *ngIf="sellerProfileLoading" class="py-40 text-center">
+    <i class="fal fa-spinner fa-spin fa-2x"></i>
+  </div>
+
+  <ng-container *ngIf="!sellerProfileLoading">
+
+    <!-- Account -->
+    <h4 class="mb-5">Account</h4>
+    <p class="text-muted mb-15">
+      {{ sellerProfileData.seller.email }}
+      <span class="admin-status-badge admin-status-badge--seller-{{ sellerProfileData.seller.sellerVerificationStatus | lowercase }} ml-10">
+        {{ sellerProfileData.seller.sellerVerificationStatus }}
+      </span>
+    </p>
+    <div class="row mb-20">
+      <div class="col-md-6">
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">Phone</small></div>
+          <div class="col-7">{{ sellerProfileData.seller.phone || '—' }}</div>
+        </div>
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">Account Type</small></div>
+          <div class="col-7">{{ sellerProfileData.seller.accountType || 'Seller' }}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div *ngIf="sellerProfileData.seller.sellerVerifiedAt" class="row mb-5">
+          <div class="col-5"><small class="text-muted">Verified On</small></div>
+          <div class="col-7">{{ sellerProfileData.seller.sellerVerifiedAt | date: 'mediumDate' }}</div>
+        </div>
+        <div *ngIf="sellerProfileData.seller.sellerVerificationNote" class="row mb-5">
+          <div class="col-5"><small class="text-muted">Note on file</small></div>
+          <div class="col-7 text-muted"><em>{{ sellerProfileData.seller.sellerVerificationNote }}</em></div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-<div *ngIf="confirmAction" class="modal-backdrop fade show"></div>
+
+    <!-- GST -->
+    <h4 class="mb-5">
+      GST Details
+      <span *ngIf="sellerProfileData.gst" class="admin-status-badge admin-status-badge--seller-{{ sellerProfileData.gst.IsVerified ? 'approved' : 'unverified' }} ml-10">
+        {{ sellerProfileData.gst.IsVerified ? 'Verified' : 'Unverified' }}
+      </span>
+    </h4>
+    <ng-container *ngIf="sellerProfileData.gst; else noGst">
+      <div class="row mb-20">
+        <div class="col-md-6">
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">GSTIN</small></div>
+            <div class="col-7">{{ sellerProfileData.gst.GSTIN || '—' }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Business Name</small></div>
+            <div class="col-7">{{ sellerProfileData.gst.LegalBusinessName || '—' }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Trade Name</small></div>
+            <div class="col-7">{{ sellerProfileData.gst.TradeName || '—' }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Business Type</small></div>
+            <div class="col-7">{{ sellerProfileData.gst.BusinessType || '—' }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">State</small></div>
+            <div class="col-7">{{ sellerProfileData.gst.State || '—' }}</div>
+          </div>
+          <div class="row mb-5">
+            <div class="col-5"><small class="text-muted">Address</small></div>
+            <div class="col-7">
+              {{ sellerProfileData.gst.RegisteredAddress || '—' }}<ng-container *ngIf="sellerProfileData.gst.PinCode">, {{ sellerProfileData.gst.PinCode }}</ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noGst>
+      <p class="text-muted mb-20">No GST details submitted yet.</p>
+    </ng-template>
+
+    <!-- Bank Accounts -->
+    <h4 class="mb-5">Bank Accounts</h4>
+    <ng-container *ngIf="sellerProfileData.bankAccounts?.length; else noBanks">
+      <div *ngFor="let bank of sellerProfileData.bankAccounts" class="row mb-5 align-items-center">
+        <div class="col-md-3">
+          {{ bank.BankName || '—' }}
+          <span *ngIf="bank.IsDefault" class="admin-status-badge ml-5">Default</span>
+        </div>
+        <div class="col-md-3">{{ bank.AccountHolderName || '—' }}</div>
+        <div class="col-md-3">{{ bank.AccountNumber || '—' }}<br><small class="text-muted">IFSC: {{ bank.IFSC || '—' }}</small></div>
+        <div class="col-md-3">
+          <span class="admin-status-badge admin-status-badge--seller-{{ bank.IsVerified ? 'approved' : 'unverified' }}">
+            {{ bank.IsVerified ? 'Verified' : (bank.VerificationStatus || 'Unverified') }}
+          </span>
+        </div>
+      </div>
+      <div class="mb-20"></div>
+    </ng-container>
+    <ng-template #noBanks>
+      <p class="text-muted mb-20">No bank accounts added yet.</p>
+    </ng-template>
+
+    <!-- Products -->
+    <h4 class="mb-5">Products</h4>
+    <p class="text-muted mb-20">
+      {{ sellerProfileData.products.total }} total &nbsp;&middot;&nbsp;
+      <span class="text-success">{{ sellerProfileData.products.approved }} approved</span> &nbsp;&middot;&nbsp;
+      <span class="text-warning">{{ sellerProfileData.products.pending }} pending</span> &nbsp;&middot;&nbsp;
+      <span class="text-danger">{{ sellerProfileData.products.rejected }} rejected</span>
+    </p>
+
+    <!-- Actions -->
+    <ng-container *ngIf="sellerActionsFor(sellerProfileData.seller.sellerVerificationStatus) as actions">
+
+      <!-- Step 1: action buttons -->
+      <ng-container *ngIf="!sellerPendingAction">
+        <hr>
+        <div class="d-flex justify-content-end">
+          <button
+            *ngFor="let action of actions"
+            type="button"
+            [class]="sellerActionBtnClass(action) + ' ml-10'"
+            (click)="armAction(action)"
+          >{{ sellerActionLabel(action) }}</button>
+        </div>
+      </ng-container>
+
+      <!-- Step 2: inline confirmation with optional note -->
+      <ng-container *ngIf="sellerPendingAction">
+        <hr>
+        <h4 class="mb-5">{{ sellerActionLabel(sellerPendingAction) }}</h4>
+        <p class="text-muted mb-20">{{ sellerProfileData.seller.email }}</p>
+
+        <div *ngIf="needsNote(sellerPendingAction)" class="checkout-form-list">
+          <label>
+            {{ sellerPendingAction === 'reject' ? 'Reason for rejection' : 'Information requested from seller' }}
+            <span class="required">*</span>
+          </label>
+          <textarea
+            [(ngModel)]="sellerActionNote"
+            [placeholder]="sellerPendingAction === 'reject'
+              ? 'e.g. GST certificate does not match business name provided.'
+              : 'e.g. Please upload a clearer copy of your GST registration certificate.'"
+          ></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="button" class="os-btn mr-5" [disabled]="sellerActionInProgress" (click)="cancelPendingAction()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            [class]="sellerActionBtnClass(sellerPendingAction)"
+            [disabled]="sellerActionInProgress"
+            (click)="executeSellerAction()"
+          >
+            {{ sellerActionInProgress ? 'Saving…' : 'Confirm ' + sellerActionLabel(sellerPendingAction) }}
+          </button>
+        </div>
+      </ng-container>
+
+    </ng-container>
+
+  </ng-container>
+</app-modal-shell>

@@ -8,4 +8,5 @@ export const environment = {
   companyLogoUrl:
     'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/email_logo/e3c6f4fc-2a25-4e74-b663-ac1d403cd98e-1779438937075',
   gstPercent: 18,
+  supportEmail: 'harmonictime@astriagk.com',
 };

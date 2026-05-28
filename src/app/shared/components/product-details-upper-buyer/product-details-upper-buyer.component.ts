@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { Product } from '../../types/product-d-t';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
+import { WishlistService } from '../../services/wishlist.service';
 import { GenericService } from '../../services/generic.service';
 import { Store } from '@ngrx/store';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
@@ -50,6 +51,7 @@ export class ProductDetailsUpperBuyerComponent
   constructor(
     public productService: ProductService,
     public cartService: CartService,
+    public wishlistService: WishlistService,
     public store: Store,
     private genericService: GenericService,
     private router: Router,
@@ -112,6 +114,16 @@ export class ProductDetailsUpperBuyerComponent
   // Thumbnail strip with the primary image first.
   get orderedImages(): any[] {
     return sortImagesPrimaryFirst(this.product?.Images);
+  }
+
+  isItemInWishlist(item: any): boolean {
+    return this.wishlistService
+      .getWishlistProducts()
+      .some((p: any) => p.ProductID === item._id || p._id === item._id);
+  }
+
+  addToWishlist(): void {
+    this.wishlistService.add_wishlist_product(this.product);
   }
 
   isItemInCart(item: any): boolean {

@@ -19,6 +19,7 @@ import { UserService } from '@shared/services/user.service';
 import { CartEffects } from './store/effects/cart.effects';
 import { OrdersEffects } from './store/effects/orders.effects';
 import { WishlistEffects } from './store/effects/wishlist.effects';
+import { GstEffects } from './store/effects/gst.effects';
 import { TitleStrategy } from '@angular/router';
 import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
 
@@ -43,6 +44,7 @@ import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
       CartEffects,
       OrdersEffects,
       WishlistEffects,
+      GstEffects,
     ]),
     StoreDevtoolsModule.instrument({
       maxAge: 25,

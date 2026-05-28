@@ -5,6 +5,10 @@ import { AuthLayoutComponent } from 'src/app/shared/layout/auth-layout/auth-layo
 import { LoginComponent } from './login/login.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { GstOnboardingComponent } from './gst-onboarding/gst-onboarding.component';
+import { VerifyEmailComponent } from './verify-email/verify-email.component';
+import { CheckEmailComponent } from './check-email/check-email.component';
+import { AccountBlockedComponent } from './account-blocked/account-blocked.component';
 
 const routes: Routes = [
   {
@@ -30,6 +34,26 @@ const routes: Routes = [
         path: 'reset-password',
         component: ResetPasswordComponent,
         title: 'Reset Password',
+      },
+      {
+        path: 'gst-onboarding',
+        component: GstOnboardingComponent,
+        title: 'GST Onboarding',
+      },
+      {
+        path: 'verify-email',
+        component: VerifyEmailComponent,
+        title: 'Verify Email',
+      },
+      {
+        path: 'check-email',
+        component: CheckEmailComponent,
+        title: 'Check Your Email',
+      },
+      {
+        path: 'account-blocked',
+        component: AccountBlockedComponent,
+        title: 'Account Blocked',
       },
     ],
   },

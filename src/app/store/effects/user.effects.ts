@@ -13,11 +13,13 @@ import {
   loadUser,
   loadUserSuccess,
   loadUserFailure,
+  userBlocked,
 } from '../actions/user.actions';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { UserService } from '@shared/services/user.service';
 import { CartService } from '@shared/services/cart.service';
 import { WishlistService } from '@shared/services/wishlist.service';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class UserEffects {
@@ -27,7 +29,8 @@ export class UserEffects {
     public userService: UserService,
     private cartService: CartService,
     private wishlistService: WishlistService,
-    private router: Router
+    private router: Router,
+    private store: Store
   ) {}
 
   registerUser$ = createEffect(() =>
@@ -35,17 +38,8 @@ export class UserEffects {
       ofType(registerUser),
       mergeMap((action) =>
         this.genericService.postObservable(action.url, action.payload).pipe(
-          map((result: any) => {
-            // Persist the token here so the loadUser effect (triggered next)
-            // can authenticate getUserData
-            if (result?.data?.token) {
-              localStorage.setItem('token', JSON.stringify(result.data.token));
-            }
-            return registerUserSuccess({ data: result.data });
-          }),
-          catchError((err) => {
-            return of(registerUserFailure({ error: err }));
-          })
+          map((result: any) => registerUserSuccess({ data: result.data })),
+          catchError((err) => of(registerUserFailure({ error: err })))
         )
       )
     )
@@ -57,10 +51,11 @@ export class UserEffects {
       mergeMap((action) =>
         this.genericService.postObservable(action.url, action.payload).pipe(
           map((result: any) => {
-            // Persist the token here so the loadUser effect (triggered next)
-            // can authenticate getUserData
             if (result?.data?.token) {
               localStorage.setItem('token', JSON.stringify(result.data.token));
+            }
+            if (result?.data?.refreshToken) {
+              localStorage.setItem('refreshToken', JSON.stringify(result.data.refreshToken));
             }
             return loginUserSuccess({ data: result.data });
           }),
@@ -74,24 +69,17 @@ export class UserEffects {
 
   loginSuccessLoadUser$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginUserSuccess), // Wait for login to succeed
-      map(() => loadUser()) // Dispatch loadUser action
-    )
-  );
-
-  registerSuccessLoadUser$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(registerUserSuccess), // Wait for login to succeed
-      map(() => loadUser()) // Dispatch loadUser action
+      ofType(loginUserSuccess),
+      map(() => loadUser({ skipNavigation: false }))
     )
   );
 
   loadUser$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadUser),
-      switchMap(() =>
+      switchMap((action) =>
         this.userService.getUserData().pipe(
-          map((user) => loadUserSuccess({ user })),
+          map((user) => loadUserSuccess({ user, skipNavigation: action.skipNavigation })),
           catchError((error) => of(loadUserFailure({ error })))
         )
       )
@@ -102,7 +90,18 @@ export class UserEffects {
     () =>
       this.actions$.pipe(
         ofType(loadUserFailure),
-        tap(() => this.router.navigate(['/not-found']))
+        tap((action) => {
+          const data = action.error?.error?.data;
+          if (data?.blocked) {
+            this.store.dispatch(userBlocked({ suspended: false }));
+            this.router.navigate(['/auth/account-blocked'], { queryParams: { reason: 'blocked' } });
+          } else if (data?.suspended) {
+            this.store.dispatch(userBlocked({ suspended: true }));
+            this.router.navigate(['/auth/account-blocked'], { queryParams: { reason: 'suspended' } });
+          } else {
+            this.router.navigate(['/not-found']);
+          }
+        })
       ),
     { dispatch: false }
   );
@@ -117,7 +116,15 @@ export class UserEffects {
             this.cartService.mergeGuestCart(userId);
             this.wishlistService.mergeGuestWishlist(userId);
           }
-          this.router.navigate(['/buyer/products']);
+          const onBlockedPage = this.router.url.startsWith('/auth/account-blocked');
+          if (action.skipNavigation && !onBlockedPage) return;
+          const pendingGst = localStorage.getItem('_pendingGstRedirect');
+          if (pendingGst) {
+            localStorage.removeItem('_pendingGstRedirect');
+            this.router.navigate(['/auth/gst-onboarding']);
+          } else {
+            this.router.navigate(['/buyer/products']);
+          }
         })
       ),
     { dispatch: false }

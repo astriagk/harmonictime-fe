@@ -30,6 +30,17 @@
   margin-top: 2px;
 }
 
+.product__tax-note {
+  font-size: 12px;
+  color: $theme-color;
+  font-weight: 500;
+  margin-bottom: 0;
+
+  i {
+    margin-right: 4px;
+  }
+}
+
 .shop {
   &__area {}
 
@@ -972,27 +983,39 @@
     &-tab-nav {
       & .nav-tabs {
         border: none;
+        flex-wrap: nowrap;
 
         & .nav-link {
-          padding: 0 50px;
-          border: 0;
+          padding: 10px 28px;
+          border: none;
+          border-bottom: 3px solid transparent;
           font-size: 14px;
-          color: #a3a3a3;
           font-weight: 500;
+          color: $body-text-color;
+          background: transparent;
+          white-space: nowrap;
+          @include border-radius(0);
+          @include transition(.3s);
+
+          &:hover {
+            color: $theme-color;
+          }
 
           &.active {
-            color: $black;
+            color: $heading-color;
+            background: transparent;
+            border-bottom: 3px solid $theme-color;
+            font-weight: 600;
           }
 
           @media #{$sm} {
-            padding: 0 25px;
+            padding: 10px 16px;
+            font-size: 13px;
           }
 
           @media #{$xs} {
-            padding: 0px;
-            text-align: left;
-            margin-bottom: 10px;
-            margin-right: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
           }
         }
       }
@@ -1481,13 +1504,18 @@
   &-nav {
     & .nav {
       display: block !important;
+      gap: 0;
 
       & .nav-item {
-        opacity: .5;
+        opacity: .65;
+        @include transition(.3s);
+
+        &:hover {
+          opacity: 1;
+        }
 
         &.active {
           opacity: 1;
-
         }
       }
     }
@@ -1499,12 +1527,19 @@
 
       & .nav-link {
         padding: 0;
-        border: none;
-        border: 2px solid transparent;
+        border: 2px solid $border;
         @include border-radius(0);
+        @include transition(.3s);
+        margin-bottom: 6px;
+        display: block;
+
+        &:hover:not(.active) {
+          border-color: $grey-3;
+        }
 
         &.active {
           border: 2px solid $theme-color;
+          box-shadow: 0 0 0 1px $theme-color;
         }
       }
     }
@@ -1514,6 +1549,7 @@
         & .nav-link {
           &.active {
             border: 2px solid $theme-2-color;
+            box-shadow: 0 0 0 1px $theme-2-color;
           }
         }
       }
@@ -1522,20 +1558,44 @@
 }
 
 
-.add-cart-btn {
-  display: inline-block;
-  height: 48px;
-  line-height: 44px;
-  text-align: center;
-  padding: 0 70px;
-  color: $white;
-  background: $black;
-  border: 2px solid $black;
-  font-size: 14px;
+.product__action-2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 
-  &:hover {
-    background: $white;
-    color: $black;
+  a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border: 2px solid $border;
+    color: $black-2;
+    font-size: 16px;
+    z-index: 1;
+    transition: color .3s, border-color .3s;
+
+    &::after {
+      position: absolute;
+      content: '';
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      background-color: $theme-color;
+      z-index: -1;
+      transition: height .3s;
+    }
+
+    &:hover, &.active {
+      color: $white;
+      border-color: $theme-color;
+
+      &::after {
+        height: 100%;
+      }
+    }
   }
 }
 
@@ -1999,6 +2059,28 @@ p.checkout-coupon input[type="text"] {
   width: 100%;
 }
 
+.checkout-form-list select {
+  background: #ffffff;
+  border: 1px solid #eaedff;
+  border-radius: 0;
+  height: 45px;
+  padding: 0 30px 0 10px;
+  width: 100%;
+  color: #6f7172;
+  font-family: $pop;
+  font-size: 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236f7172' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #bc8246;
+  }
+}
+
 .checkout-form-list textarea {
   background: #ffffff;
   border: 1px solid #eaedff;
@@ -2370,5 +2452,72 @@ html .ui-button.ui-state-disabled:active {
   &:hover::after,
   &.active::after {
     border-color: var(--swatch-accent, #fbaf5d) !important;
+  }
+}
+
+// Seller verification banner — rendered inside breadcrumb components
+.seller-verify-banner {
+  position: relative;
+  background-color: $heading-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 50px 10px 20px;
+  min-height: 42px;
+
+  &__body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__icon {
+    color: $theme-color;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    font-family: $pop;
+    font-size: 13px;
+    font-weight: 400;
+    color: $white;
+    line-height: 1.4;
+  }
+
+  &__link {
+    font-family: $pop;
+    font-size: 12px;
+    font-weight: 600;
+    color: $theme-color;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+    @include transition(.3s);
+
+    &:hover {
+      color: lighten($theme-color, 15%);
+    }
+  }
+
+  &__close {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px 6px;
+    cursor: pointer;
+    color: $grey-3;
+    font-size: 13px;
+    line-height: 1;
+    @include transition(.3s);
+
+    &:hover {
+      color: $white;
+    }
   }
 }

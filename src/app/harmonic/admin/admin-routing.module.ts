@@ -5,6 +5,7 @@ import { UsersComponent } from './users/users.component';
 import { RolesComponent } from './roles/roles.component';
 import { ApprovePaymentsComponent } from './approve-payments/approve-payments.component';
 import { AdminOffersComponent } from './offers/offers.component';
+import { AdminProductsComponent } from './products/products.component';
 
 const routes: Routes = [
   {
@@ -30,6 +31,11 @@ const routes: Routes = [
         path: 'offers',
         component: AdminOffersComponent,
         title: 'Offers',
+      },
+      {
+        path: 'products',
+        component: AdminProductsComponent,
+        title: 'Product Moderation',
       },
     ],
   },

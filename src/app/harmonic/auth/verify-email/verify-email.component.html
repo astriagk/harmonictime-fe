@@ -1,0 +1,32 @@
+<section class="login-area pt-100 pb-100">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 offset-lg-3">
+        <div class="basic-login text-center">
+
+          <!-- Verifying -->
+          <ng-container *ngIf="state === 'verifying'">
+            <h3 class="mb-30">Verifying your email…</h3>
+            <p>Please wait while we confirm your email address.</p>
+          </ng-container>
+
+          <!-- Success -->
+          <ng-container *ngIf="state === 'success'">
+            <i class="fal fa-check-circle mb-20" style="font-size:3rem;color:#4caf50;display:block;"></i>
+            <h3 class="mb-20">Email verified!</h3>
+            <p>Your account is now active. Redirecting you to the store…</p>
+          </ng-container>
+
+          <!-- Invalid / already used -->
+          <ng-container *ngIf="state === 'error'">
+            <i class="fal fa-times-circle mb-20" style="font-size:3rem;color:#e53935;display:block;"></i>
+            <h3 class="mb-20">Invalid link</h3>
+            <p class="mb-30">This verification link is invalid or has already been used.</p>
+            <a routerLink="/auth/login" class="os-btn w-100">Back to Login</a>
+          </ng-container>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

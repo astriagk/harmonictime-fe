@@ -14,8 +14,10 @@ import {
   GET_ADDRESSES_BY_USER,
   GET_WALLET,
   GET_WALLET_ITEMS,
+  GST_ONBOARDING,
   ORDER_CHARGES,
   UPDATE_ADDRESS,
+  UPDATE_USER,
   WITHDRAWALS,
   WITHDRAWAL_BY_ID,
 } from '@config/index';
@@ -103,6 +105,12 @@ export class AccountComponent {
   public savingBankAccount = false;
   public deletingBankId: string | null = null;
 
+  // GST details (business accounts only).
+  public gstDetails: any = null;
+  public gstLoading = false;
+  public isGstModalOpen = false;
+  public savingGst = false;
+
   // Generic confirmation modal — set pendingAction to the fn to run on confirm.
   public confirmModalOpen = false;
   public confirmModalMessage = '';
@@ -125,6 +133,12 @@ export class AccountComponent {
   // Profile picture upload
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
   public avatarUploading = false;
+
+  // Edit profile modal (email + phone)
+  public isProfileModalOpen = false;
+  public profileEmail = '';
+  public profilePhone = '';
+  public savingProfile = false;
 
   // Invoice modal state — manual modal pattern (see seller/orders).
   @ViewChild('invoiceContent') invoiceContent!: ElementRef<HTMLElement>;
@@ -418,6 +432,54 @@ export class AccountComponent {
     }
   }
 
+  // --- GST details -----------------------------------------------------------
+
+  loadGstDetails(): void {
+    this.gstLoading = true;
+    this.genericService.getObservableToken(GST_ONBOARDING).subscribe({
+      next: (res) => {
+        this.gstDetails = res?.data ?? null;
+        this.gstLoading = false;
+      },
+      error: () => {
+        this.gstDetails = null;
+        this.gstLoading = false;
+      },
+    });
+  }
+
+  openGstModal(): void {
+    this.isGstModalOpen = true;
+  }
+
+  closeGstModal(): void {
+    this.isGstModalOpen = false;
+    this.savingGst = false;
+  }
+
+  async onGstSave(payload: any): Promise<void> {
+    this.savingGst = true;
+    try {
+      if (this.gstDetails?._id) {
+        await firstValueFrom(
+          this.genericService.putObservableToken(`${GST_ONBOARDING}/${this.gstDetails._id}`, payload),
+        );
+        this.toastrService.success('GST details updated');
+      } else {
+        await firstValueFrom(
+          this.genericService.postObservableToken(GST_ONBOARDING, payload),
+        );
+        this.toastrService.success('GST details submitted. Pending admin verification.');
+      }
+      this.closeGstModal();
+      this.loadGstDetails();
+    } catch (error: any) {
+      const message = error?.error?.message ?? 'Failed to save GST details. Please try again.';
+      this.toastrService.error(message);
+      this.savingGst = false;
+    }
+  }
+
   openConfirm(message: string, action: () => void): void {
     this.confirmModalMessage = message;
     this.pendingAction = action;
@@ -671,11 +733,6 @@ export class AccountComponent {
     }
   }
 
-  // Flat platform charge added at checkout.
-  get platformCharges(): number {
-    return this.selectedOrder ? ORDER_CHARGES.extraFlat : 0;
-  }
-
   // GST applied on the platform charges.
   get gstPercent(): number {
     return ORDER_CHARGES.gstPercent;
@@ -826,6 +883,46 @@ export class AccountComponent {
     this.closeReviewModal();
   }
 
+  // --- Edit profile (email / phone) ------------------------------------------
+
+  openProfileModal(): void {
+    this.profileEmail = this.userData?.email ?? '';
+    this.profilePhone = this.userData?.phone ?? '';
+    this.isProfileModalOpen = true;
+  }
+
+  closeProfileModal(): void {
+    this.isProfileModalOpen = false;
+    this.savingProfile = false;
+  }
+
+  saveProfile(): void {
+    const userId = this.userData?._id;
+    if (!userId) return;
+
+    const payload: any = {};
+    if (this.profileEmail.trim()) payload.email = this.profileEmail.trim();
+    if (this.profilePhone.trim()) payload.phone = this.profilePhone.trim();
+    if (!Object.keys(payload).length) {
+      this.closeProfileModal();
+      return;
+    }
+
+    this.savingProfile = true;
+    this.genericService.putObservableToken(UPDATE_USER(userId), payload).subscribe({
+      next: () => {
+        this.userData = { ...this.userData, ...payload };
+        this.toastrService.success('Profile updated');
+        this.closeProfileModal();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.savingProfile = false;
+        this.toastrService.error(err?.error?.message ?? 'Failed to update profile');
+      },
+    });
+  }
+
   ngOnInit(): void {
     this.preloadInvoiceLogo();
     this.store.select(selectUserData).subscribe((state) => {
@@ -840,6 +937,9 @@ export class AccountComponent {
         this.loadWalletItems();
         this.loadWithdrawals();
         this.loadBankAccounts();
+        if (this.userData?.accountType === 'business') {
+          this.loadGstDetails();
+        }
       }
     });
     this.store.select(selectCartItems).subscribe((state) => {

@@ -5,6 +5,10 @@ const baseUrl = environment.apiBaseUrl;
 // auth
 export const REGISTER_USER = `${baseUrl}/auth/register`;
 export const LOGIN_USER = `${baseUrl}/auth/login`;
+export const VERIFY_TOKEN = `${baseUrl}/auth/verify-token`;
+export const CONFIRM_EMAIL = `${baseUrl}/auth/confirm-email`;
+export const RESEND_VERIFICATION = `${baseUrl}/auth/resend-verification`;
+export const UPDATE_UNVERIFIED_EMAIL = `${baseUrl}/auth/update-unverified-email`;
 export const USER = `${baseUrl}/users/profile`;
 // password reset — request an OTP by email, then submit the OTP + new password
 export const VERIFY_EMAIL = `${baseUrl}/auth/verify-email`;
@@ -107,6 +111,8 @@ export const VERIFY_PAYMENT_ORDER = `${baseUrl}/payments/verify`;
 
 // contact / help — stores the message and emails the team
 export const POST_CONTACT = `${baseUrl}/contact`;
+import { companyDetails } from 'src/app/shared/constants/companyDetails';
+export const SUPPORT_EMAIL = companyDetails.email;
 
 // site content — CMS-managed blocks (hero slider, etc.) keyed by `type`
 export const GET_SITE_CONTENT = `${baseUrl}/site-content`;
@@ -161,6 +167,20 @@ export const ADMIN_WITHDRAWALS = `${baseUrl}/admin/withdrawals`;
 export const adminWithdrawalAction = (id: string, action: 'pay' | 'reject') =>
   `${baseUrl}/admin/withdrawals/${id}/${action}`;
 
+// admin — seller verification
+export const ADMIN_SELLERS = `${baseUrl}/admin/sellers`;
+export const ADMIN_SELLER_BY_ID = (id: string) => `${baseUrl}/admin/sellers/${id}`;
+export const adminSellerAction = (id: string, action: 'approve' | 'reject' | 'request-info') =>
+  `${baseUrl}/admin/sellers/${id}/${action}`;
+
+// admin — product moderation
+export const ADMIN_PRODUCTS = `${baseUrl}/admin/products`;
+export const adminProductAction = (id: string, action: 'approve' | 'reject') =>
+  `${baseUrl}/admin/products/${id}/${action}`;
+
+// GST onboarding
+export const GST_ONBOARDING = `${baseUrl}/gst`;
+
 // chat
 export const CHAT_THREADS = `${baseUrl}/chat/threads`;
 export const CHAT_THREAD_MSG = (id: string) => `${baseUrl}/chat/threads/${id}/messages`;
@@ -176,7 +196,6 @@ export const OFFER_STATUS = (id: string) => `${baseUrl}/offers/${id}/status`; //
 export const ORDER_CHARGES = {
   gstPercent: environment.gstPercent, // % — configured per environment
   platformPercent: 2, // % baked into every displayed price (see withPlatformMarkup)
-  extraFlat: 50, // flat amount in INR
 };
 
 // The platform fee is baked directly into the price shown to buyers (lists,

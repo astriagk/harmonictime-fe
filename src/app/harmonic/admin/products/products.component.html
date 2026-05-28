@@ -1,0 +1,237 @@
+<app-breadcrumb-two title="Product Moderation" subtitle="Admin"></app-breadcrumb-two>
+
+<section class="order-info container">
+  <header class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20">
+    <h2 class="order-info__title mb-0">Products</h2>
+    <ul class="nav nav-tabs admin-filter-tabs">
+      <li class="nav-item" *ngFor="let f of filters">
+        <a class="nav-link cursor-pointer" [class.active]="statusFilter === f.value" (click)="setFilter(f.value)">
+          {{ f.label }}
+        </a>
+      </li>
+    </ul>
+  </header>
+
+  <div *ngIf="loading" class="order-list white-bg pt-40">
+    <app-skeleton type="table-row" [count]="8"></app-skeleton>
+  </div>
+
+  <app-empty-state *ngIf="!loading && products.length === 0" message="No Products Found"></app-empty-state>
+
+  <div *ngIf="!loading && products.length > 0" class="order-list white-bg table-responsive pt-40">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Brand</th>
+          <th>Price</th>
+          <th>GST Incl.</th>
+          <th>Status</th>
+          <th>Listed</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of paginated; let i = index">
+          <td>{{ paginate.startIndex + i + 1 }}</td>
+          <td>
+            <img
+              *ngIf="primaryImage(p)"
+              [src]="primaryImage(p)"
+              class="admin-product-thumb-sm"
+              alt="product"
+            />
+            <span *ngIf="!primaryImage(p)" class="text-muted">—</span>
+          </td>
+          <td>{{ p.ProductName }}</td>
+          <td>{{ p.Details?.BrandName || '—' }}</td>
+          <td>₹{{ p.Price | number }}</td>
+          <td>
+            <span class="admin-status-badge" [class.admin-status-badge--active]="p.IsPriceInclusiveOfTax" [class.admin-status-badge--pending]="!p.IsPriceInclusiveOfTax">
+              {{ p.IsPriceInclusiveOfTax ? 'Yes' : 'No' }}
+            </span>
+          </td>
+          <td>
+            <span class="admin-status-badge {{ badgeClass(p.ApprovalStatus) }}">
+              {{ p.ApprovalStatus }}
+            </span>
+          </td>
+          <td>{{ p.DateListed | date: 'mediumDate' }}</td>
+          <td>
+            <a class="admin-table__action-link cursor-pointer" (click)="openProduct(p)">Review</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="products.length > 0" class="d-flex justify-content-end mt-20 pb-40">
+    <app-pagination [data]="products" [paginate]="paginate" (setPage)="setPage($event)"></app-pagination>
+  </div>
+</section>
+
+<!-- ==================== PRODUCT REVIEW MODAL ==================== -->
+<app-modal-shell *ngIf="selectedProduct" title="Product Review" size="lg" (closed)="closeProduct()">
+
+  <!-- Images & Videos -->
+  <div class="d-flex gap-10 flex-wrap mb-20">
+    <ng-container *ngFor="let media of allMedia(selectedProduct)">
+      <img
+        *ngIf="media.mediaType !== 'video'"
+        [src]="media.ImageURL"
+        class="admin-product-thumb"
+        alt="Product image"
+      />
+      <video
+        *ngIf="media.mediaType === 'video'"
+        [src]="media.ImageURL"
+        controls
+        preload="metadata"
+        class="admin-product-thumb admin-product-thumb--video"
+      ></video>
+    </ng-container>
+    <p *ngIf="!allMedia(selectedProduct).length" class="text-muted">No images uploaded.</p>
+  </div>
+
+  <!-- Title + status -->
+  <h4 class="mb-5">
+    {{ selectedProduct.ProductName }}
+    <span class="admin-status-badge {{ badgeClass(selectedProduct.ApprovalStatus) }} ml-10">
+      {{ selectedProduct.ApprovalStatus }}
+    </span>
+  </h4>
+  <p *ngIf="selectedProduct.Description?.Title" class="text-muted mb-15">
+    {{ selectedProduct.Description?.Title }}
+  </p>
+
+  <!-- Core fields -->
+  <div class="row mb-20">
+    <div class="col-md-6">
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Price</small></div>
+        <div class="col-7">₹{{ selectedProduct.Price | number }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">GST Inclusive</small></div>
+        <div class="col-7">{{ selectedProduct.IsPriceInclusiveOfTax ? 'Yes (18% included)' : 'No (GST on top)' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Brand</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.BrandName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Collection</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.CollectionName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Category</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.CategoryName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Recipient</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.RecipientName || '—' }}</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Movement</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.MovementName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Strap</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.StrapMaterialName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Case</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.CaseMaterialName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Dial Color</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.DialColorName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Diameter</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.Diameter || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Water Resistant</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.WaterResistant || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Guarantee</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.Guarantee || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">MPN</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.ManufacturerProductNumber || '—' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <ng-container *ngIf="selectedProduct.Description?.Content">
+    <h6 class="mb-5">Description</h6>
+    <p class="text-muted mb-15" style="font-size: 13px">{{ selectedProduct.Description?.Content }}</p>
+  </ng-container>
+
+  <!-- Delivery & Returns -->
+  <ng-container *ngIf="selectedProduct.DeliveryAndReturns?.DeliveryInformation || selectedProduct.DeliveryAndReturns?.ReturnsPolicy">
+    <h6 class="mb-5">Delivery &amp; Returns</h6>
+    <div class="row mb-20">
+      <div class="col-md-6" *ngIf="selectedProduct.DeliveryAndReturns?.DeliveryInformation">
+        <small class="text-muted d-block mb-3">Delivery</small>
+        <p style="font-size: 13px">{{ selectedProduct.DeliveryAndReturns?.DeliveryInformation }}</p>
+      </div>
+      <div class="col-md-6" *ngIf="selectedProduct.DeliveryAndReturns?.ReturnsPolicy">
+        <small class="text-muted d-block mb-3">Returns</small>
+        <p style="font-size: 13px">{{ selectedProduct.DeliveryAndReturns?.ReturnsPolicy }}</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Existing rejection note -->
+  <div *ngIf="selectedProduct.ApprovalNote" class="mb-20">
+    <small class="text-muted">Previous rejection note</small>
+    <p class="text-danger mb-0" style="font-size: 13px"><em>{{ selectedProduct.ApprovalNote }}</em></p>
+  </div>
+
+  <!-- Actions -->
+  <ng-container *ngIf="actionsFor(selectedProduct.ApprovalStatus) as actions">
+
+    <ng-container *ngIf="!pendingAction">
+      <hr>
+      <div class="d-flex justify-content-end">
+        <button
+          *ngFor="let action of actions"
+          type="button"
+          [class]="actionBtnClass(action) + ' ml-10'"
+          (click)="armAction(action)"
+        >{{ actionLabel(action) }}</button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="pendingAction">
+      <hr>
+      <h4 class="mb-5">{{ actionLabel(pendingAction) }} Product</h4>
+      <p class="text-muted mb-20">{{ selectedProduct.ProductName }}</p>
+
+      <div *ngIf="pendingAction === 'reject'" class="checkout-form-list mb-20">
+        <label>Reason for rejection <span class="required">*</span></label>
+        <textarea
+          [(ngModel)]="actionNote"
+          placeholder="e.g. Watch images are too dark. Please upload clear, well-lit photos."
+        ></textarea>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button type="button" class="os-btn mr-5" [disabled]="actionInProgress" (click)="cancelAction()">Cancel</button>
+        <button type="button" [class]="actionBtnClass(pendingAction)" [disabled]="actionInProgress" (click)="executeAction()">
+          {{ actionInProgress ? 'Saving…' : 'Confirm ' + actionLabel(pendingAction) }}
+        </button>
+      </div>
+    </ng-container>
+
+  </ng-container>
+</app-modal-shell>

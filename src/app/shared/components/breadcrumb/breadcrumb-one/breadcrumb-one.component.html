@@ -22,3 +22,14 @@
     </div>
   </div>
 </section>
+
+<div class="seller-verify-banner" *ngIf="showVerificationBanner">
+  <div class="seller-verify-banner__body">
+    <i class="fas fa-triangle-exclamation seller-verify-banner__icon"></i>
+    <span class="seller-verify-banner__text">{{ sellerVerificationNote }}</span>
+    <a routerLink="/buyer/account" class="seller-verify-banner__link">Update now</a>
+  </div>
+  <button class="seller-verify-banner__close" (click)="bannerDismissed = true" aria-label="Dismiss">
+    <i class="fas fa-xmark"></i>
+  </button>
+</div>

@@ -10,7 +10,6 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
 import { REGISTER_USER } from 'src/app/config';
-import { GenericService } from 'src/app/shared/services/generic.service';
 import { registerUser } from 'src/app/store/actions/user.actions';
 import { AppState } from 'src/app/store/app.state';
 import {
@@ -37,7 +36,6 @@ export class RegisterComponent implements OnDestroy {
 
   constructor(
     private toastrService: ToastrService,
-    public genericService: GenericService,
     private store: Store<AppState>,
     private router: Router
   ) {}
@@ -46,6 +44,10 @@ export class RegisterComponent implements OnDestroy {
     this.registerForm = new FormGroup(
       {
         email: new FormControl(null, [Validators.required, Validators.email]),
+        phone: new FormControl(null, [
+          Validators.pattern('^\\+?[0-9]{7,15}$'),
+        ]),
+        accountType: new FormControl('individual', [Validators.required]),
         password: new FormControl(null, [
           Validators.required,
           Validators.pattern(
@@ -64,15 +66,11 @@ export class RegisterComponent implements OnDestroy {
     return password === confirmPassword ? null : { passwordsMismatch: true };
   }
 
-  get email() {
-    return this.registerForm.get('email');
-  }
-  get password() {
-    return this.registerForm.get('password');
-  }
-  get confirmPassword() {
-    return this.registerForm.get('confirmPassword');
-  }
+  get email() { return this.registerForm.get('email'); }
+  get phone() { return this.registerForm.get('phone'); }
+  get accountType() { return this.registerForm.get('accountType'); }
+  get password() { return this.registerForm.get('password'); }
+  get confirmPassword() { return this.registerForm.get('confirmPassword'); }
 
   togglePasswordVisibility(field: string) {
     if (field === 'password') {
@@ -85,21 +83,23 @@ export class RegisterComponent implements OnDestroy {
   onSubmit() {
     const url = REGISTER_USER;
     this.formSubmitted = true;
+    this.registerForm.markAllAsTouched();
     if (this.registerForm.valid) {
       const formValue = this.registerForm.value;
-      const payload = {
+      const payload: any = {
         email: formValue.email,
         password: formValue.password,
+        accountType: formValue.accountType,
         acceptedTerms: true,
       };
-      // Drop any subscriptions from a previous submit so toasts don't stack
+      if (formValue.phone) payload.phone = formValue.phone;
+
       this.userDataSub?.unsubscribe();
       this.userErrorSub?.unsubscribe();
 
       this.isSubmitting = true;
       this.store.dispatch(registerUser({ url, payload }));
 
-      // Surface the API message (e.g. "Email already registered") as a toast
       this.userErrorSub = this.store
         .select(selectUserError)
         .pipe(
@@ -114,16 +114,18 @@ export class RegisterComponent implements OnDestroy {
       this.userDataSub = this.store
         .select(selectUserData)
         .pipe(
-          filter((state: any) => !!state?.data?.token),
+          filter((state: any) => !!state?.data?.userId),
           take(1)
         )
-        .subscribe((state: any) => {
-          localStorage.setItem('token', JSON.stringify(state?.data?.token));
+        .subscribe(() => {
           this.isSubmitting = false;
-          this.toastrService.success('Registration successful!');
+          const email = this.registerForm.value.email;
           this.registerForm.reset();
-          this.formSubmitted = false; // Reset the form submission state
-          this.router.navigate(['/buyer/products']);
+          this.registerForm.get('accountType')?.setValue('individual');
+          this.formSubmitted = false;
+          this.router.navigate(['/auth/check-email'], {
+            queryParams: { reason: 'pending', email },
+          });
         });
     } else if (this.registerForm.hasError('passwordsMismatch')) {
       this.toastrService.error('Passwords do not match.');

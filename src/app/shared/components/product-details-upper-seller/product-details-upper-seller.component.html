@@ -6,7 +6,7 @@
         : 'col-xl-6 col-lg-6'
     "
   >
-    <div *ngIf="!style_2" class="product__modal-box d-flex">
+    <div *ngIf="!style_2" class="product__modal-box d-none d-md-flex">
       <div class="product__modal-nav mr-20">
         <nav>
           <div class="nav nav-tabs" id="product-details" role="tablist">
@@ -71,7 +71,7 @@
       </div>
     </div>
 
-    <div *ngIf="style_2" class="product__modal-box">
+    <div *ngIf="style_2" class="product__modal-box d-none d-md-block">
       <div class="mb-20">
         <ng-container
           *ngIf="!productService.activeIsVideo; else activeVideoSeller2"
@@ -87,6 +87,14 @@
         </ng-template>
       </div>
     </div>
+
+    <!-- Mobile only: swipeable carousel with dot/play-icon indicators -->
+    <app-product-media-mobile-carousel
+      class="d-block d-md-none"
+      [images]="product.Images"
+      (mediaSelected)="selectMedia($event.url, $event.isVideo)"
+    >
+    </app-product-media-mobile-carousel>
   </div>
 
   <div
@@ -107,15 +115,23 @@
           product.ProductName
         }}</a>
       </h5>
-      <div class="product__price-2 mb-25">
-        <span>{{ product.Price | currency: "INR" }}</span>
+      <div class="mb-25">
+        <div class="product__price-2">
+          <span>{{ product.Price | currency: "INR" }}</span>
+        </div>
+        <p
+          *ngIf="product.IsPriceInclusiveOfTax"
+          class="product__tax-note mt-5 mb-0"
+        >
+          <i class="fas fa-check-circle"></i> Price inclusive of all taxes
+        </p>
       </div>
       <div class="product__modal-des mb-30" *ngIf="product.Description.Content">
         <p>{{ product.Description.Content }}</p>
       </div>
       <div class="product__modal-form mb-30">
         <div class="product__tag mb-25">
-          <span>Manufacturer Product Number :</span>
+          <span>Product Number :</span>
           <span
             ><a class="cursor-pointer">{{
               product.Details.ManufacturerProductNumber | dash

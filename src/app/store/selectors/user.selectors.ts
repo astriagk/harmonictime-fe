@@ -19,3 +19,8 @@ export const selectUserError = createSelector(
   selectUserState,
   (state: UserState) => state.error
 );
+
+export const selectIsAccountRestricted = createSelector(
+  selectUserState,
+  (state: UserState) => ({ blocked: state.blocked, suspended: state.suspended })
+);

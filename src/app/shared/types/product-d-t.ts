@@ -113,12 +113,15 @@ export interface Product {
   Details: Details;
   Images: Image[];
   DeliveryAndReturns: DeliveryAndReturns;
+  IsPriceInclusiveOfTax?: boolean;
   DisplayPrice?: number;
   Quantity?: number;
   SoldCount?: number;
   IsSold?: boolean;
   RemainingQuantity?: number;
   Status?: string;
+  ApprovalStatus?: string;
+  ApprovalNote?: string | null;
 }
 
 export interface Description {
@@ -162,6 +165,8 @@ export interface Image {
   ImageURL: string;
   IsPrimary: boolean;
   AltText: string;
+  key?: string;
+  mediaType?: string;
 }
 
 export interface DeliveryAndReturns {

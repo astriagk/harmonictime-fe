@@ -6,7 +6,7 @@
         : 'col-xl-6 col-lg-6'
     "
   >
-    <div *ngIf="!style_2" class="product__modal-box d-flex">
+    <div *ngIf="!style_2" class="product__modal-box d-none d-md-flex">
       <div class="product__modal-nav mr-20">
         <nav>
           <div class="nav nav-tabs" id="product-details" role="tablist">
@@ -68,14 +68,16 @@
             <video [src]="productService.activeImg" controls></video>
             <div *ngIf="product.Offer?.IsActive" class="product__sale">
               <span class="new">Sale</span>
-              <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
+              <span class="percent"
+                >-{{ product.Offer?.DiscountPercentage }}%</span
+              >
             </div>
           </div>
         </ng-template>
       </div>
     </div>
 
-    <div *ngIf="style_2" class="product__modal-box">
+    <div *ngIf="style_2" class="product__modal-box d-none d-md-block">
       <div class="mb-20">
         <ng-container
           *ngIf="!productService.activeIsVideo; else activeVideoBuyer2"
@@ -95,7 +97,9 @@
             <video [src]="productService.activeImg" controls></video>
             <div *ngIf="product.Offer?.IsActive" class="product__sale">
               <span class="new">Sale</span>
-              <span class="percent">-{{ product.Offer?.DiscountPercentage }}%</span>
+              <span class="percent"
+                >-{{ product.Offer?.DiscountPercentage }}%</span
+              >
             </div>
           </div>
         </ng-template>
@@ -141,6 +145,14 @@
         </div>
       </nav>
     </div>
+
+    <!-- Mobile only: swipeable carousel with dot/play-icon indicators -->
+    <app-product-media-mobile-carousel
+      class="d-block d-md-none"
+      [images]="product.Images"
+      (mediaSelected)="selectMedia($event.url, $event.isVideo)"
+    >
+    </app-product-media-mobile-carousel>
   </div>
 
   <div
@@ -161,25 +173,33 @@
           product.ProductName
         }}</a>
       </h5>
-      <div class="product__price-2 mb-25">
-        <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
-          {{
-            product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100)
-              | currency: "INR"
-          }}
-        </span>
-        <span
-          [class.old-price]="product.Offer?.IsActive && product.DisplayPrice"
+      <div class="mb-25">
+        <div class="product__price-2">
+          <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
+            {{
+              product.DisplayPrice *
+                (1 - product.Offer.DiscountPercentage / 100) | currency: "INR"
+            }}
+          </span>
+          <span
+            [class.old-price]="product.Offer?.IsActive && product.DisplayPrice"
+          >
+            {{ product.DisplayPrice | currency: "INR" }}
+          </span>
+        </div>
+        <p
+          *ngIf="product.IsPriceInclusiveOfTax"
+          class="product__tax-note mt-5 mb-0"
         >
-          {{ product.DisplayPrice | currency: "INR" }}
-        </span>
+          <i class="fas fa-check-circle"></i> Price inclusive of all taxes
+        </p>
       </div>
       <div class="product__modal-des mb-25" *ngIf="product.Description.Content">
         <p>{{ product.Description.Content }}</p>
       </div>
       <div class="product__modal-form mb-25">
         <div class="product__tag mb-25">
-          <span>Manufacturer Product Number :</span>
+          <span>Product Number :</span>
           <span
             ><a class="cursor-pointer">{{
               product.Details.ManufacturerProductNumber | dash
@@ -220,28 +240,47 @@
         >
       </div>
 
-      <div class="pro-cart-btn">
+      <div class="add-cart-list d-flex align-items-center mb-20">
         <a
           *ngIf="!isItemInCart(product)"
           (click)="addToCart()"
-          class="os-btn os-btn-black mb-20 cursor-pointer"
+          class="os-btn os-btn-black mr-10 cursor-pointer"
         >
-          + Add to Cart
+          Add to Cart
         </a>
         <a
           *ngIf="isItemInCart(product)"
           routerLink="/buyer/cart"
-          class="os-btn os-btn-black mb-20 cursor-pointer"
+          class="os-btn os-btn-black mr-10 cursor-pointer"
         >
-          Go to Cart
+          View Cart
         </a>
-        <a
-          *ngIf="product.UserID !== userId"
-          (click)="openChat()"
-          class="os-btn mb-20 cursor-pointer ml-10"
-        >
-          Chat with Seller
-        </a>
+        <div class="product__action-2 transition-3">
+          <a
+            (click)="addToWishlist()"
+            class="cursor-pointer"
+            [class.active]="isItemInWishlist(product)"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Add to Wishlist"
+          >
+            <i
+              [ngClass]="
+                isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'
+              "
+            ></i>
+          </a>
+          <a
+            *ngIf="product.UserID !== userId"
+            (click)="openChat()"
+            class="cursor-pointer"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Chat with Seller"
+          >
+            <i class="fal fa-comment-alt"></i>
+          </a>
+        </div>
       </div>
     </div>
   </div>

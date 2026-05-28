@@ -142,6 +142,20 @@
                 <i class="fa fa-money-check"></i> Bank Account
               </button>
 
+              <button
+                *ngIf="userData?.accountType === 'business'"
+                class="nav-link"
+                id="nav-gst-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-gst"
+                type="button"
+                role="tab"
+                aria-controls="nav-gst"
+                aria-selected="false"
+              >
+                <i class="fa fa-file-invoice"></i> GST Details
+              </button>
+
               <!-- <button
                 class="nav-link"
                 id="nav-password-tab"
@@ -176,14 +190,13 @@
                   class="profile__info-top d-flex justify-content-between align-items-center"
                 >
                   <h3 class="profile__info-title">Profile Information</h3>
-                  <!-- <button
-                    class="profile__info-btn"
+                  <button
                     type="button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#profile_edit_modal"
+                    class="os-btn os-btn-black"
+                    (click)="openProfileModal()"
                   >
                     <i class="fa-regular fa-pen-to-square"></i> Edit Profile
-                  </button> -->
+                  </button>
                 </div>
 
                 <div class="profile__info-wrapper white-bg">
@@ -516,11 +529,11 @@
                     <table class="table">
                       <thead>
                         <tr>
-                          <th style="width: 200px">Product</th>
-                          <th style="width: 120px">Sale Date</th>
-                          <th style="width: 140px">Earnings Breakdown</th>
+                          <th style="width: 180px">Product</th>
+                          <th style="width: 100px">Sale Date</th>
+                          <th style="width: 210px">Earnings Breakdown</th>
                           <th style="width: 100px">You Receive</th>
-                          <th style="width: 100px">Status</th>
+                          <th style="width: 90px">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -593,11 +606,21 @@
                                   }}</span
                                 >
                               </div>
+                              <ng-container *ngIf="item.GSTAmount > 0">
+                                <div class="wallet__breakdown-row wallet__breakdown-row--deduct">
+                                  <span>GST ({{ item.GSTRate }}%)</span>
+                                  <span>− {{ item.GSTAmount | currency: "INR" }}</span>
+                                </div>
+                                <div class="wallet__breakdown-row wallet__breakdown-row--sub">
+                                  <span>After GST</span>
+                                  <span>{{ item.NetAmountAfterGST | currency: "INR" }}</span>
+                                </div>
+                              </ng-container>
                             </div>
                           </td>
                           <td class="order__title pr-2 pl-2">
                             <strong>{{
-                              item.NetAmount | currency: "INR"
+                              (item.GSTAmount > 0 ? item.NetAmountAfterGST : item.NetAmount) | currency: "INR"
                             }}</strong>
                           </td>
                           <td class="order__title pr-2 pl-2">
@@ -949,6 +972,81 @@
                 </div>
               </div>
             </div>
+            <!-- GST Details tab pane -->
+            <div
+              *ngIf="userData?.accountType === 'business'"
+              class="tab-pane fade"
+              id="nav-gst"
+              role="tabpanel"
+              aria-labelledby="nav-gst-tab"
+            >
+              <div class="order__info">
+                <div class="order__info-top d-flex justify-content-between align-items-center">
+                  <h3 class="order__info-title">GST Details</h3>
+                  <button type="button" class="os-btn os-btn-black" (click)="openGstModal()">
+                    <i class="fa" [ngClass]="gstDetails ? 'fa-pen-to-square' : 'fa-plus'"></i>
+                    {{ gstDetails ? 'Edit GST Details' : 'Add GST Details' }}
+                  </button>
+                </div>
+
+                <!-- Loading -->
+                <div *ngIf="gstLoading" class="white-bg">
+                  <app-skeleton type="profile-row" [count]="3"></app-skeleton>
+                </div>
+
+                <!-- Empty state -->
+                <app-empty-state
+                  *ngIf="!gstLoading && !gstDetails"
+                  message="No GST Details Found"
+                ></app-empty-state>
+
+                <!-- GST card -->
+                <div *ngIf="!gstLoading && gstDetails" class="row mt-20">
+                  <div class="col-12">
+                    <div class="account-card white-bg">
+                      <div class="account-card__head d-flex justify-content-between align-items-center">
+                        <h4 class="account-card__label">
+                          <i class="fa fa-file-invoice"></i> {{ gstDetails.LegalBusinessName }}
+                        </h4>
+                        <span
+                          class="verify-badge"
+                          [ngClass]="{
+                            'verify-badge--verified': gstDetails.IsVerified,
+                            'verify-badge--unverified': !gstDetails.IsVerified
+                          }"
+                        >
+                          <i class="fa fa-circle"></i>
+                          {{ gstDetails.IsVerified ? 'Verified' : 'Pending Verification' }}
+                        </span>
+                      </div>
+                      <div class="account-card__body">
+                        <div class="account-card__row">
+                          <span>GSTIN</span>
+                          <strong>{{ gstDetails.GSTIN }}</strong>
+                        </div>
+                        <div class="account-card__row" *ngIf="gstDetails.TradeName">
+                          <span>Trade Name</span>
+                          <strong>{{ gstDetails.TradeName }}</strong>
+                        </div>
+                        <div class="account-card__row" *ngIf="gstDetails.BusinessType">
+                          <span>Business Type</span>
+                          <strong>{{ gstDetails.BusinessType }}</strong>
+                        </div>
+                        <div class="account-card__row" *ngIf="gstDetails.RegisteredAddress">
+                          <span>Registered Address</span>
+                          <strong>{{ gstDetails.RegisteredAddress }}</strong>
+                        </div>
+                        <div class="account-card__row" *ngIf="gstDetails.State || gstDetails.PinCode">
+                          <span>State / PIN</span>
+                          <strong>{{ gstDetails.State }}{{ gstDetails.State && gstDetails.PinCode ? ' — ' : '' }}{{ gstDetails.PinCode }}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1422,6 +1520,38 @@
 </div>
 <div *ngIf="verifyConfirmAccount" class="modal-backdrop fade show"></div>
 
+<!-- GST details add/edit modal -->
+<div
+  *ngIf="isGstModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeGstModal()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">
+            {{ gstDetails ? 'Edit GST Details' : 'Add GST Details' }}
+          </h3>
+          <app-gst-form
+            [gst]="gstDetails"
+            [saving]="savingGst"
+            (save)="onGstSave($event)"
+            (cancel)="closeGstModal()"
+          ></app-gst-form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isGstModalOpen" class="modal-backdrop fade show"></div>
+
 <!-- Seller review modal -->
 <div
   *ngIf="isReviewModalOpen"
@@ -1450,3 +1580,41 @@
   </div>
 </div>
 <div *ngIf="isReviewModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Edit profile modal -->
+<div *ngIf="isProfileModalOpen" class="modal fade show invoice-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeProfileModal()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">Edit Profile</h3>
+
+          <div class="checkout-form-list">
+            <label>Email Address</label>
+            <input type="email" [(ngModel)]="profileEmail" placeholder="Enter email address" />
+          </div>
+
+          <div class="checkout-form-list">
+            <label>Phone Number</label>
+            <input type="text" [(ngModel)]="profilePhone" placeholder="e.g. +919876543210" />
+          </div>
+
+          <div class="d-flex justify-content-end mt-10">
+            <button type="button" class="os-btn mr-5" (click)="closeProfileModal()" [disabled]="savingProfile">
+              Cancel
+            </button>
+            <button type="button" class="os-btn os-btn-black" (click)="saveProfile()" [disabled]="savingProfile">
+              {{ savingProfile ? 'Saving…' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isProfileModalOpen" class="modal-backdrop fade show"></div>

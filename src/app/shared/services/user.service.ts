@@ -2,12 +2,12 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
+  loadUser,
   loadUserSuccess,
-  loginUserSuccess,
   loginUserFailure,
 } from 'src/app/store/actions/user.actions';
 import { GenericService } from './generic.service';
-import { UPDATE_USER, UPLOAD_SINGLE, USER } from '@config/index';
+import { UPDATE_USER, UPLOAD_SINGLE, USER, VERIFY_TOKEN } from '@config/index';
 import { BehaviorSubject, Observable, map, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { ChatService } from './chat.service';
@@ -16,18 +16,45 @@ import { ChatService } from './chat.service';
   providedIn: 'root',
 })
 export class UserService {
-  private userDataSubject = new BehaviorSubject<any>(null); // Initial value is null
+  private userDataSubject = new BehaviorSubject<any>(null);
   constructor(
     private store: Store,
     private genericService: GenericService,
     private chatService: ChatService,
+    private router: Router,
   ) {}
 
-  loadUserFromLocalStorage() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.store.dispatch(loginUserSuccess({ data: { data: { token } } }));
-    }
+  verifyAndRestoreSession() {
+    const rawToken = localStorage.getItem('token');
+    if (!rawToken) return;
+
+    const token = JSON.parse(rawToken);
+    const rawRefresh = localStorage.getItem('refreshToken');
+    const payload: any = { token };
+    if (rawRefresh) payload.refreshToken = JSON.parse(rawRefresh);
+
+    this.genericService.postObservable(VERIFY_TOKEN, payload).subscribe({
+      next: (res: any) => {
+        const d = res?.data;
+        if (d?.refreshed && d?.newToken) {
+          localStorage.setItem('token', JSON.stringify(d.newToken));
+        }
+        if (d?.valid || d?.refreshed) {
+          this.store.dispatch(loadUser({ skipNavigation: true }));
+        } else {
+          this.logout();
+          this.router.navigate(['/auth/login']);
+        }
+      },
+      error: (err: any) => {
+        if (err?.status === 401) {
+          this.logout();
+          this.router.navigate(['/auth/login']);
+        } else {
+          this.router.navigate(['/not-found']);
+        }
+      },
+    });
   }
 
   logout() {
