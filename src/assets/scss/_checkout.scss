@@ -133,3 +133,26 @@
     transform: rotate(180deg);
   }
 }
+
+// Inputs inside coupon login/register panels must not carry extra bottom
+// margin — checkout-form-list already provides the field spacing, and any
+// input margin would push the error text away from the input just like
+// the billing details fields.
+.coupon-info .checkout-form-list input[type="text"],
+.coupon-info .checkout-form-list input[type="email"],
+.coupon-info .checkout-form-list input[type="password"] {
+  margin-bottom: 0;
+}
+
+// .coupon-accordion span blanket-styles every span grey with pointer cursor,
+// which overrides .text-danger error messages. Re-assert the correct styles.
+.coupon-accordion .text-danger {
+  color: #dc3545;
+  font-weight: 400;
+  cursor: default;
+}
+
+// Align the terms checkbox vertically with its label text.
+.coupon-accordion .login-action input[type="checkbox"] {
+  vertical-align: middle;
+}

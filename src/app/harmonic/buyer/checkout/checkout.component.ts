@@ -162,10 +162,11 @@ export class CheckoutComponent implements OnDestroy {
         password: new FormControl(null, [
           Validators.required,
           Validators.pattern(
-            '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$',
+            '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{6,}$',
           ),
         ]),
         confirmPassword: new FormControl(null, [Validators.required]),
+        acceptedTerms: new FormControl(true, [Validators.requiredTrue]),
       },
       { validators: this.passwordsMatchValidator },
     );
@@ -311,6 +312,9 @@ export class CheckoutComponent implements OnDestroy {
   get registerConfirmPassword() {
     return this.registerForm.get('confirmPassword');
   }
+  get registerAcceptedTerms() {
+    return this.registerForm.get('acceptedTerms');
+  }
 
   toggleLoginPassword() {
     this.showLoginPassword = !this.showLoginPassword;
@@ -375,22 +379,41 @@ export class CheckoutComponent implements OnDestroy {
       const payload = {
         email: formValue.email,
         password: formValue.password,
+        accountType: 'individual',
+        acceptedTerms: true,
+        redirectAfterVerification: '/buyer/checkout',
       };
       // Drop any subscription from a previous submit so toasts don't stack
       this.authDataSub?.unsubscribe();
+      this.authErrorSub?.unsubscribe();
+
       this.store.dispatch(registerUser({ url: REGISTER_USER, payload }));
+
+      this.authErrorSub = this.store
+        .select(selectUserError)
+        .pipe(
+          filter((error: any) => !!error),
+          take(1),
+        )
+        .subscribe(() => {
+          this.toastrService.error('Registration failed. Please try again.');
+        });
+
       this.authDataSub = this.store
         .select(selectUserData)
         .pipe(
-          filter((state: any) => !!state?.data?.token),
+          filter((state: any) => !!state?.data?.userId),
           take(1),
         )
-        .subscribe((state: any) => {
-          localStorage.setItem('token', JSON.stringify(state?.data?.token));
-          this.toastrService.success('Registration successful!');
+        .subscribe(() => {
+          const email = this.registerForm.value.email;
           this.registerForm.reset();
+          this.registerForm.get('acceptedTerms')?.setValue(true);
           this.registerSubmitted = false;
           this.isOpenRegister = false;
+          this.router.navigate(['/auth/check-email'], {
+            queryParams: { reason: 'pending', email },
+          });
         });
     } else if (this.registerForm.hasError('passwordsMismatch')) {
       this.toastrService.error('Passwords do not match.');

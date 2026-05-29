@@ -30,7 +30,7 @@ export class UserEffects {
     private cartService: CartService,
     private wishlistService: WishlistService,
     private router: Router,
-    private store: Store
+    private store: Store,
   ) {}
 
   registerUser$ = createEffect(() =>
@@ -39,10 +39,10 @@ export class UserEffects {
       mergeMap((action) =>
         this.genericService.postObservable(action.url, action.payload).pipe(
           map((result: any) => registerUserSuccess({ data: result.data })),
-          catchError((err) => of(registerUserFailure({ error: err })))
-        )
-      )
-    )
+          catchError((err) => of(registerUserFailure({ error: err }))),
+        ),
+      ),
+    ),
   );
 
   loginUser$ = createEffect(() =>
@@ -55,23 +55,26 @@ export class UserEffects {
               localStorage.setItem('token', JSON.stringify(result.data.token));
             }
             if (result?.data?.refreshToken) {
-              localStorage.setItem('refreshToken', JSON.stringify(result.data.refreshToken));
+              localStorage.setItem(
+                'refreshToken',
+                JSON.stringify(result.data.refreshToken),
+              );
             }
             return loginUserSuccess({ data: result.data });
           }),
           catchError((err) => {
             return of(loginUserFailure({ error: err }));
-          })
-        )
-      )
-    )
+          }),
+        ),
+      ),
+    ),
   );
 
   loginSuccessLoadUser$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loginUserSuccess),
-      map(() => loadUser({ skipNavigation: false }))
-    )
+      map(() => loadUser({ skipNavigation: false })),
+    ),
   );
 
   loadUser$ = createEffect(() =>
@@ -79,11 +82,13 @@ export class UserEffects {
       ofType(loadUser),
       switchMap((action) =>
         this.userService.getUserData().pipe(
-          map((user) => loadUserSuccess({ user, skipNavigation: action.skipNavigation })),
-          catchError((error) => of(loadUserFailure({ error })))
-        )
-      )
-    )
+          map((user) =>
+            loadUserSuccess({ user, skipNavigation: action.skipNavigation }),
+          ),
+          catchError((error) => of(loadUserFailure({ error }))),
+        ),
+      ),
+    ),
   );
 
   loadUserFailure$ = createEffect(
@@ -94,16 +99,20 @@ export class UserEffects {
           const data = action.error?.error?.data;
           if (data?.blocked) {
             this.store.dispatch(userBlocked({ suspended: false }));
-            this.router.navigate(['/auth/account-blocked'], { queryParams: { reason: 'blocked' } });
+            this.router.navigate(['/auth/account-blocked'], {
+              queryParams: { reason: 'blocked' },
+            });
           } else if (data?.suspended) {
             this.store.dispatch(userBlocked({ suspended: true }));
-            this.router.navigate(['/auth/account-blocked'], { queryParams: { reason: 'suspended' } });
+            this.router.navigate(['/auth/account-blocked'], {
+              queryParams: { reason: 'suspended' },
+            });
           } else {
             this.router.navigate(['/not-found']);
           }
-        })
+        }),
       ),
-    { dispatch: false }
+    { dispatch: false },
   );
 
   mergeGuestCartOnLogin$ = createEffect(
@@ -116,17 +125,24 @@ export class UserEffects {
             this.cartService.mergeGuestCart(userId);
             this.wishlistService.mergeGuestWishlist(userId);
           }
-          const onBlockedPage = this.router.url.startsWith('/auth/account-blocked');
-          if (action.skipNavigation && !onBlockedPage) return;
+          const onBlockedPage = this.router.url.startsWith(
+            '/auth/account-blocked',
+          );
+          const onCheckout = this.router.url.startsWith('/buyer/checkout');
+          if ((action.skipNavigation && !onBlockedPage) || onCheckout) return;
           const pendingGst = localStorage.getItem('_pendingGstRedirect');
+          const pendingRedirect = localStorage.getItem('_pendingRedirect');
           if (pendingGst) {
             localStorage.removeItem('_pendingGstRedirect');
             this.router.navigate(['/auth/gst-onboarding']);
+          } else if (pendingRedirect) {
+            localStorage.removeItem('_pendingRedirect');
+            this.router.navigate([pendingRedirect]);
           } else {
             this.router.navigate(['/buyer/products']);
           }
-        })
+        }),
       ),
-    { dispatch: false }
+    { dispatch: false },
   );
 }
