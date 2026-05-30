@@ -309,8 +309,11 @@
   }
 
   &--verified {
-    color: $theme-2-color;
-    border-color: $theme-2-color;
+    color: darken($theme-color, 8%);
+    border-color: $theme-color;
+    background-color: rgba($theme-color, 0.08);
+
+    i { font-size: 11px; }
   }
 
   &--failed {

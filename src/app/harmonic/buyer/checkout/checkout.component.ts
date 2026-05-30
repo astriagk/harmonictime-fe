@@ -628,6 +628,7 @@ export class CheckoutComponent implements OnDestroy {
     checkoutId: string,
     cartItems: any[],
   ) {
+    this.isLoading = true;
     try {
       const checkoutItemOrder = {
         CheckoutID: checkoutId,

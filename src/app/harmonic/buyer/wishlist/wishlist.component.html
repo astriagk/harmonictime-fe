@@ -30,12 +30,12 @@
             <tbody>
               <tr *ngFor="let item of wishlistService.getWishlistProducts()">
                 <td class="product-thumbnail">
-                  <a [routerLink]="['/buyer/product-details', item._id]">
+                  <a [routerLink]="['/buyer/product-details', item.ProductID]">
                     <img [src]="item?.Images | primaryImage" alt="product-img" />
                   </a>
                 </td>
                 <td class="product-name">
-                  <a [routerLink]="['/buyer/product-details', item._id]">{{
+                  <a [routerLink]="['/buyer/product-details', item.ProductID]">{{
                     item.ProductName
                   }}</a>
                 </td>

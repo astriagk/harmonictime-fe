@@ -8,7 +8,7 @@
       <i class="fas fa-comment-dots chat-empty-state__icon"></i>
       <h3 class="chat-empty-state__title">No Conversations Yet</h3>
       <p class="chat-empty-state__text">Buyers will reach out here when they have questions about your products.</p>
-      <a routerLink="/seller/product-list" class="os-btn os-btn-black mt-20">View Products</a>
+      <a routerLink="/buyer/products" class="os-btn os-btn-black mt-20">View Products</a>
     </div>
 
     <div *ngIf="loading || threads.length > 0" class="chat-page-layout" [class.chat-page-layout--show-chat]="mobileShowChat">

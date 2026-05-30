@@ -47,11 +47,11 @@ export class ForgotPasswordComponent {
           'We have emailed you an OTP to reset your password.'
         );
       },
-      error: () => {
+      error: (err) => {
         this.isSubmitting = false;
-        this.toastrService.error(
-          'Could not send the reset email. Please try again.'
-        );
+        const message =
+          err?.error?.message || 'Could not send the reset email. Please try again.';
+        this.toastrService.error(message);
       },
     });
   }

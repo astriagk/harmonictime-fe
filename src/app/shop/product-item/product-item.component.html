@@ -12,16 +12,12 @@
       <a
         (click)="addToWishlist(product)"
         class="cursor-pointer"
-        [class.active]="isItemInWishlist(product)"
+        [class.active]="inWishlist$ | async"
         data-bs-toggle="tooltip"
         data-placement="top"
         title="Add to Wishlist"
       >
-        <i
-          [ngClass]="
-            isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'
-          "
-        ></i>
+        <i [ngClass]="(inWishlist$ | async) ? 'fas fa-heart' : 'fal fa-heart'"></i>
       </a>
       <!-- <a
         (click)="addToCompare(product)"
@@ -71,14 +67,14 @@
     </div>
     <div class="add-cart p-absolute transition-3">
       <a
-        *ngIf="!(isProductInCart$(product._id) | async)"
+        *ngIf="!(inCart$ | async)"
         (click)="addToCart(product)"
         class="cursor-pointer"
       >
         + Add to Cart
       </a>
       <a
-        *ngIf="isProductInCart$(product._id) | async"
+        *ngIf="inCart$ | async"
         routerLink="/buyer/cart"
         class="cursor-pointer"
       >

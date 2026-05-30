@@ -13,6 +13,7 @@ export interface Product {
   BuyerCommissionAmount?: number;
   DisplayPrice?: number;
   ImageURL: string;
+  IsPriceInclusiveOfTax?: boolean;
 }
 
 export interface Shipment {
@@ -37,6 +38,8 @@ export interface ShippingAddress {
 
 export interface Order {
   _id: string;
+  OrderID?: string | null;
+  OrderItems?: { ProductID: string; OrderItemID: string }[] | null;
   TotalAmount: number;
   PaymentStatus: string;
   CheckoutDate: string;
