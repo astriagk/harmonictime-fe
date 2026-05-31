@@ -54,6 +54,7 @@ export const userReducer = createReducer(
   // Register Actions
   on(registerUser, (state) => ({
     ...state,
+    data: [],
     loading: true,
     error: null,
   })),

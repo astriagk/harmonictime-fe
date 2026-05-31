@@ -20,44 +20,35 @@
                 with your order.
               </p>
               <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-                <p class="form-row-first">
+                <div class="checkout-form-list">
                   <label>Email <span class="required">*</span></label>
                   <input type="text" formControlName="email" />
                   <span
-                    *ngIf="
-                      loginEmail?.invalid &&
-                      (loginEmail?.touched || loginSubmitted)
-                    "
+                    *ngIf="loginEmail?.invalid && (loginEmail?.touched || loginSubmitted)"
                     class="text-danger"
-                  >
-                    A valid email is required
-                  </span>
-                </p>
-                <p class="form-row-last">
+                  >A valid email is required</span>
+                </div>
+                <div class="checkout-form-list">
                   <label>Password <span class="required">*</span></label>
-                  <input
-                    [type]="showLoginPassword ? 'text' : 'password'"
-                    formControlName="password"
-                  />
+                  <div class="auth-input">
+                    <input
+                      [type]="showLoginPassword ? 'text' : 'password'"
+                      formControlName="password"
+                    />
+                    <i
+                      class="fal"
+                      [ngClass]="showLoginPassword ? 'fa-eye-slash' : 'fa-eye'"
+                      (click)="toggleLoginPassword()"
+                    ></i>
+                  </div>
                   <span
-                    *ngIf="
-                      loginPassword?.invalid &&
-                      (loginPassword?.touched || loginSubmitted)
-                    "
+                    *ngIf="loginPassword?.invalid && (loginPassword?.touched || loginSubmitted)"
                     class="text-danger"
-                  >
-                    Password is required
-                  </span>
-                </p>
-                <p class="form-row">
-                  <button class="os-btn os-btn-black" type="submit">
-                    Login
-                  </button>
-                  <label>
-                    <input type="checkbox" (change)="toggleLoginPassword()" />
-                    Show password
-                  </label>
-                </p>
+                  >Password is required</span>
+                </div>
+                <div class="checkout-form-list">
+                  <button class="os-btn os-btn-black" type="submit">Login</button>
+                </div>
               </form>
             </div>
           </div>
@@ -81,66 +72,65 @@
                 Create an account to track your orders and check out faster.
               </p>
               <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
-                <p class="form-row-first">
+                <div class="checkout-form-list">
                   <label>Email <span class="required">*</span></label>
                   <input type="text" formControlName="email" />
                   <span
-                    *ngIf="
-                      registerEmail?.invalid &&
-                      (registerEmail?.touched || registerSubmitted)
-                    "
+                    *ngIf="registerEmail?.invalid && (registerEmail?.touched || registerSubmitted)"
                     class="text-danger"
-                  >
-                    A valid email is required
-                  </span>
-                </p>
-                <p class="form-row-first">
+                  >A valid email is required</span>
+                </div>
+                <div class="checkout-form-list">
                   <label>Password <span class="required">*</span></label>
-                  <input
-                    [type]="showRegisterPassword ? 'text' : 'password'"
-                    formControlName="password"
-                  />
-                  <span
-                    *ngIf="
-                      registerPassword?.invalid &&
-                      (registerPassword?.touched || registerSubmitted)
-                    "
-                    class="text-danger"
-                  >
-                    Password must be at least 6 characters and include
-                    uppercase, lowercase, a number and a special character
-                  </span>
-                </p>
-                <p class="form-row-last">
-                  <label
-                    >Confirm Password <span class="required">*</span></label
-                  >
-                  <input
-                    [type]="showRegisterConfirmPassword ? 'text' : 'password'"
-                    formControlName="confirmPassword"
-                  />
-                  <span
-                    *ngIf="
-                      registerForm.hasError('passwordsMismatch') &&
-                      (registerConfirmPassword?.dirty || registerSubmitted)
-                    "
-                    class="text-danger"
-                  >
-                    Passwords do not match
-                  </span>
-                </p>
-                <p class="form-row">
-                  <button class="os-btn os-btn-black" type="submit">
-                    Register
-                  </button>
-                  <label>
+                  <div class="auth-input">
                     <input
-                      type="checkbox"
-                      (change)="toggleRegisterPassword('password')"
+                      [type]="showRegisterPassword ? 'text' : 'password'"
+                      formControlName="password"
                     />
-                    Show password
+                    <i
+                      class="fal"
+                      [ngClass]="showRegisterPassword ? 'fa-eye-slash' : 'fa-eye'"
+                      (click)="toggleRegisterPassword('password')"
+                    ></i>
+                  </div>
+                  <span
+                    *ngIf="registerPassword?.invalid && (registerPassword?.touched || registerSubmitted)"
+                    class="text-danger"
+                  >Password must be at least 6 characters and include uppercase, lowercase, a number and a special character</span>
+                </div>
+                <div class="checkout-form-list">
+                  <label>Confirm Password <span class="required">*</span></label>
+                  <div class="auth-input">
+                    <input
+                      [type]="showRegisterConfirmPassword ? 'text' : 'password'"
+                      formControlName="confirmPassword"
+                    />
+                    <i
+                      class="fal"
+                      [ngClass]="showRegisterConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"
+                      (click)="toggleRegisterPassword('confirmPassword')"
+                    ></i>
+                  </div>
+                  <span
+                    *ngIf="registerForm.hasError('passwordsMismatch') && (registerConfirmPassword?.dirty || registerSubmitted)"
+                    class="text-danger"
+                  >Passwords do not match</span>
+                </div>
+                <div class="login-action mb-30">
+                  <input
+                    id="checkoutAgreeTerms"
+                    type="checkbox"
+                    formControlName="acceptedTerms"
+                    (click)="$event.preventDefault()"
+                  />
+                  <label for="checkoutAgreeTerms">
+                    I agree to the
+                    <a href="/pages/policy/terms" target="_blank">Terms &amp; Conditions</a>
                   </label>
-                </p>
+                </div>
+                <div class="checkout-form-list">
+                  <button class="os-btn os-btn-black" type="submit">Register</button>
+                </div>
               </form>
             </div>
           </div>

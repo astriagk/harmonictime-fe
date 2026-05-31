@@ -13,6 +13,8 @@ export const USER = `${baseUrl}/users/profile`;
 // password reset — request an OTP by email, then submit the OTP + new password
 export const VERIFY_EMAIL = `${baseUrl}/auth/verify-email`;
 export const RESET_PASSWORD = `${baseUrl}/auth/reset-password`;
+export const SEND_MOBILE_OTP = `${baseUrl}/auth/send-mobile-otp`;
+export const VERIFY_MOBILE_OTP = `${baseUrl}/auth/verify-mobile-otp`;
 
 // catalog lookups
 export const GET_BRANDS = `${baseUrl}/brands`;

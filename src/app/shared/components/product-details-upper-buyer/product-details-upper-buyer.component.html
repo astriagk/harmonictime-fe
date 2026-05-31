@@ -259,16 +259,12 @@
           <a
             (click)="addToWishlist()"
             class="cursor-pointer"
-            [class.active]="isItemInWishlist(product)"
+            [class.active]="inWishlist$ | async"
             data-bs-toggle="tooltip"
             data-bs-placement="top"
             title="Add to Wishlist"
           >
-            <i
-              [ngClass]="
-                isItemInWishlist(product) ? 'fas fa-heart' : 'fal fa-heart'
-              "
-            ></i>
+            <i [ngClass]="(inWishlist$ | async) ? 'fas fa-heart' : 'fal fa-heart'"></i>
           </a>
           <a
             *ngIf="product.UserID !== userId"
