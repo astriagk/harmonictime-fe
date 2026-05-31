@@ -224,7 +224,21 @@
                     </div>
                     <div class="profile__info-item" *ngIf="displayPhone">
                       <p>Phone</p>
-                      <h4>{{ displayPhone }}</h4>
+                      <h4 class="d-flex align-items-center" style="gap: 10px">
+                        {{ displayPhone }}
+                        <span *ngIf="phoneVerified" class="verify-badge verify-badge--verified">
+                          <i class="fas fa-check-circle"></i> Verified
+                        </span>
+                        <button
+                          *ngIf="!phoneVerified"
+                          type="button"
+                          class="os-btn"
+                          style="height: 28px; line-height: 24px; padding: 0 12px; font-size: 11px;"
+                          (click)="openOtpModal()"
+                        >
+                          Verify
+                        </button>
+                      </h4>
                     </div>
                     <div
                       class="profile__info-item"
@@ -1190,7 +1204,7 @@
               <div class="invoice__meta-row">
                 <h6 class="invoice__label">INVOICE #</h6>
                 <span class="invoice__text invoice__number">
-                  {{ selectedOrder._id | uppercase }}
+                  {{ (selectedOrder.OrderID || selectedOrder._id) | uppercase }}
                 </span>
               </div>
             </div>
@@ -1231,9 +1245,8 @@
                     <ng-template #noOffer>—</ng-template>
                   </td>
                   <td class="text-end">
-                    <strong>{{
-                      product.DisplayPrice | currency: "INR"
-                    }}</strong>
+                    <strong>{{ product.DisplayPrice | currency: "INR" }}</strong>
+                    <small *ngIf="product.IsPriceInclusiveOfTax" class="d-block text-muted" style="font-size:10px">incl. GST</small>
                   </td>
                 </tr>
               </tbody>
@@ -1248,7 +1261,7 @@
 
               <div class="invoice__totals-row" *ngIf="gstAmount > 0">
                 <span>GST ({{ gstPercent }}%)</span>
-                <span>{{ gstAmount | currency: "INR" }}</span>
+                <span>+ {{ gstAmount | currency: "INR" }}</span>
               </div>
               <div class="invoice__totals-row invoice__totals-row--grand">
                 <span>Total Amount Paid</span>
@@ -1581,6 +1594,78 @@
 </div>
 <div *ngIf="isReviewModalOpen" class="modal-backdrop fade show"></div>
 
+<!-- Mobile OTP verification modal -->
+<div *ngIf="isOtpModalOpen" class="modal fade show invoice-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeOtpModal()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h3 class="order__info-title address-modal__title">Verify Mobile Number</h3>
+
+          <p class="mb-20">
+            Enter the 6-digit OTP sent to <strong>+91 {{ otpPhone }}</strong>.
+          </p>
+
+          <div *ngIf="sendingOtp" class="text-center mb-20">
+            <i class="fas fa-spinner fa-spin mr-5"></i> Sending OTP…
+          </div>
+
+          <ng-container *ngIf="otpSent">
+            <div class="checkout-form-list mb-5">
+              <label>OTP</label>
+              <input
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                [(ngModel)]="otpValue"
+                (ngModelChange)="otpError = ''"
+                placeholder="Enter 6-digit OTP"
+              />
+              <span *ngIf="otpError" class="text-danger d-block mt-5" style="font-size: 13px;">
+                {{ otpError }}
+              </span>
+            </div>
+
+            <div class="text-end mb-20">
+              <span class="profile__otp-resend">
+                <ng-container *ngIf="resendCooldown > 0">
+                  Resend in <strong>{{ resendCooldown * 1000 | date:'mm:ss':'UTC' }}</strong>
+                </ng-container>
+                <a *ngIf="resendCooldown === 0" class="cursor-pointer" (click)="sendOtp()">
+                  Resend OTP
+                </a>
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-end mt-10">
+              <div class="d-flex align-items-center" style="gap: 8px">
+                <button type="button" class="os-btn" (click)="closeOtpModal()" [disabled]="verifyingOtp">
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="os-btn os-btn-black"
+                  [disabled]="verifyingOtp || !otpValue.trim()"
+                  (click)="verifyOtp()"
+                >
+                  <i *ngIf="verifyingOtp" class="fas fa-spinner fa-spin mr-5"></i>
+                  {{ verifyingOtp ? 'Verifying…' : 'Verify' }}
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isOtpModalOpen" class="modal-backdrop fade show"></div>
+
 <!-- Edit profile modal -->
 <div *ngIf="isProfileModalOpen" class="modal fade show invoice-modal" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -1593,11 +1678,6 @@
         </div>
         <div class="product__modal-inner p-30">
           <h3 class="order__info-title address-modal__title">Edit Profile</h3>
-
-          <div class="checkout-form-list">
-            <label>Email Address</label>
-            <input type="email" [(ngModel)]="profileEmail" placeholder="Enter email address" />
-          </div>
 
           <div class="checkout-form-list">
             <label>Phone Number</label>

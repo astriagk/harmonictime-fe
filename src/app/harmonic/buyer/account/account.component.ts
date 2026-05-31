@@ -16,8 +16,10 @@ import {
   GET_WALLET_ITEMS,
   GST_ONBOARDING,
   ORDER_CHARGES,
+  SEND_MOBILE_OTP,
   UPDATE_ADDRESS,
   UPDATE_USER,
+  VERIFY_MOBILE_OTP,
   WITHDRAWALS,
   WITHDRAWAL_BY_ID,
 } from '@config/index';
@@ -29,6 +31,7 @@ import { GenericService } from '@shared/services/generic.service';
 import { UserService } from '@shared/services/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { loadOrders } from 'src/app/store/actions/orders.actions';
+import { loadUser } from 'src/app/store/actions/user.actions';
 import { Order } from 'src/app/store/models/orders.models';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
 import {
@@ -134,11 +137,21 @@ export class AccountComponent {
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
   public avatarUploading = false;
 
-  // Edit profile modal (email + phone)
+  // Edit profile modal (phone only)
   public isProfileModalOpen = false;
-  public profileEmail = '';
   public profilePhone = '';
   public savingProfile = false;
+
+  // Mobile OTP verification
+  public isOtpModalOpen = false;
+  public otpPhone = '';
+  public otpValue = '';
+  public sendingOtp = false;
+  public verifyingOtp = false;
+  public otpSent = false;
+  public otpError = '';
+  public resendCooldown = 0;
+  private resendTimer: any = null;
 
   // Invoice modal state — manual modal pattern (see seller/orders).
   @ViewChild('invoiceContent') invoiceContent!: ElementRef<HTMLElement>;
@@ -715,6 +728,12 @@ export class AccountComponent {
     return u?.phone || u?.Phone || this.clientAddress?.Phone || '';
   }
 
+  // isPhoneVerified may arrive as boolean true or string "true"/"false"
+  get phoneVerified(): boolean {
+    const v = this.userData?.isPhoneVerified;
+    return v === true || v === 'true';
+  }
+
   // Preload the same-origin brand logo as a base64 data URL so it survives the
   // html2canvas capture used to build the invoice PDF (cross-origin images are
   // dropped). Failure is non-fatal — the invoice falls back to the brand name.
@@ -738,9 +757,16 @@ export class AccountComponent {
     return ORDER_CHARGES.gstPercent;
   }
 
+  // GST is only added on top for items where the price is NOT inclusive of tax,
+  // matching how computeCheckoutSummary builds TotalAmount at checkout.
   get gstAmount(): number {
-    return this.selectedOrder
-      ? Math.round((this.invoiceSubtotal * ORDER_CHARGES.gstPercent) / 100)
+    if (!this.selectedOrder) return 0;
+    const taxableSubtotal = (this.selectedOrder.Products ?? []).reduce(
+      (sum, p) => (p.IsPriceInclusiveOfTax ? sum : sum + (p.DisplayPrice ?? 0)),
+      0,
+    );
+    return taxableSubtotal > 0
+      ? Math.round((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100)
       : 0;
   }
 
@@ -751,6 +777,7 @@ export class AccountComponent {
       0,
     );
   }
+
 
   // Grand total is exactly what the buyer paid — use TotalAmount as the source of truth.
   get invoiceTotal(): number {
@@ -801,7 +828,7 @@ export class AccountComponent {
       const renderHeight = Math.min(imgHeight, pageHeight - margin * 2);
 
       pdf.addImage(imgData, 'PNG', margin, margin, usableWidth, renderHeight);
-      pdf.save(`invoice-${this.selectedOrder._id}.pdf`);
+      pdf.save(`invoice-${this.selectedOrder.OrderID || this.selectedOrder._id}.pdf`);
     } catch (error) {
       console.error('Error generating invoice PDF:', error);
       this.toastrService.error('Failed to download invoice. Please try again.');
@@ -886,7 +913,6 @@ export class AccountComponent {
   // --- Edit profile (email / phone) ------------------------------------------
 
   openProfileModal(): void {
-    this.profileEmail = this.userData?.email ?? '';
     this.profilePhone = this.userData?.phone ?? '';
     this.isProfileModalOpen = true;
   }
@@ -901,7 +927,6 @@ export class AccountComponent {
     if (!userId) return;
 
     const payload: any = {};
-    if (this.profileEmail.trim()) payload.email = this.profileEmail.trim();
     if (this.profilePhone.trim()) payload.phone = this.profilePhone.trim();
     if (!Object.keys(payload).length) {
       this.closeProfileModal();
@@ -921,6 +946,81 @@ export class AccountComponent {
         this.toastrService.error(err?.error?.message ?? 'Failed to update profile');
       },
     });
+  }
+
+  openOtpModal(): void {
+    const raw = this.displayPhone.replace(/\D/g, '');
+    this.otpPhone = raw.startsWith('91') ? raw.slice(2) : raw;
+    this.otpValue = '';
+    this.otpSent = false;
+    this.isOtpModalOpen = true;
+    this.sendOtp();
+  }
+
+  closeOtpModal(): void {
+    this.isOtpModalOpen = false;
+    this.otpSent = false;
+    this.otpValue = '';
+    this.otpError = '';
+    this.sendingOtp = false;
+    this.verifyingOtp = false;
+    this.resendCooldown = 0;
+    clearInterval(this.resendTimer);
+  }
+
+  private startResendCooldown(): void {
+    clearInterval(this.resendTimer);
+    this.resendCooldown = 300;
+    this.resendTimer = setInterval(() => {
+      this.resendCooldown--;
+      this.cdr.markForCheck();
+      if (this.resendCooldown <= 0) {
+        clearInterval(this.resendTimer);
+      }
+    }, 1000);
+  }
+
+  sendOtp(): void {
+    if (!this.otpPhone || this.resendCooldown > 0) return;
+    this.sendingOtp = true;
+    this.genericService
+      .postObservableToken(SEND_MOBILE_OTP, { phone: this.otpPhone, countryCode: '91' })
+      .subscribe({
+        next: () => {
+          this.otpSent = true;
+          this.sendingOtp = false;
+          this.startResendCooldown();
+          this.toastrService.success('OTP sent to your mobile number');
+        },
+        error: (err) => {
+          this.sendingOtp = false;
+          this.toastrService.error(err?.error?.message ?? 'Failed to send OTP');
+        },
+      });
+  }
+
+  verifyOtp(): void {
+    if (!this.otpValue.trim()) return;
+    this.otpError = '';
+    this.verifyingOtp = true;
+    this.genericService
+      .postObservableToken(VERIFY_MOBILE_OTP, {
+        phone: this.otpPhone,
+        countryCode: '91',
+        otp: this.otpValue.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.store.dispatch(loadUser({ skipNavigation: true }));
+          this.toastrService.success('Mobile number verified successfully');
+          this.closeOtpModal();
+        },
+        error: (err) => {
+          this.verifyingOtp = false;
+          this.otpError = err?.error?.message ?? 'Invalid OTP. Please try again.';
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   ngOnInit(): void {

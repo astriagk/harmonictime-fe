@@ -45,14 +45,12 @@
         <ng-container *ngFor="let order of paginationOrders; let i = index">
           <tr
             [routerLink]="
-              order.ApprovalStatus === 'Approved' &&
-              order.RemainingQuantity !== 0
+              !(order.ApprovalStatus === 'Approved' && order.RemainingQuantity === 0)
                 ? ['/seller/product-details', order._id]
                 : null
             "
             [class.product-list__row]="
-              order.ApprovalStatus === 'Approved' &&
-              order.RemainingQuantity !== 0
+              !(order.ApprovalStatus === 'Approved' && order.RemainingQuantity === 0)
             "
           >
             <td>{{ i + 1 }}</td>
@@ -104,13 +102,13 @@
             </td>
             <td (click)="$event.stopPropagation()">
               <a
-                *ngIf="order.ApprovalStatus !== 'Approved'"
+                *ngIf="!(order.ApprovalStatus === 'Approved' && order.RemainingQuantity === 0)"
                 class="admin-table__action-link cursor-pointer"
                 [routerLink]="['/seller/add-product', order._id]"
                 >Edit</a
               >
               <span
-                *ngIf="order.ApprovalStatus === 'Approved'"
+                *ngIf="order.ApprovalStatus === 'Approved' && order.RemainingQuantity === 0"
                 class="text-muted"
                 >—</span
               >

@@ -51,6 +51,8 @@ export class VerifyEmailComponent implements OnInit {
         // Set the GST flag so mergeGuestCartOnLogin$ routes business accounts correctly.
         if (d?.redirectTo === '/auth/gst-onboarding') {
           localStorage.setItem('_pendingGstRedirect', 'true');
+        } else if (d?.redirectTo) {
+          localStorage.setItem('_pendingRedirect', d.redirectTo);
         }
 
         this.store.dispatch(loginUserSuccess({ data: d }));

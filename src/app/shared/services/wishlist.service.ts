@@ -59,8 +59,14 @@ export class WishlistService {
 
           if (data) {
             if (existing) {
-              // Already in wishlist -> remove it on the server. The row id lives
-              // on WishlistID after normalization (existing._id is the product id).
+              // Optimistically remove from store so the icon updates instantly
+              this.store.dispatch(
+                updateWishlist({
+                  wishlist: this.wishlistItems.filter(
+                    (p: any) => p.ProductID !== payload._id && p._id !== payload._id
+                  ),
+                })
+              );
               const url =
                 DELETE_WISHLIST_ITEM + `${existing.WishlistID ?? existing._id}`;
               return this.genericService.deleteObservable(url).pipe(
@@ -72,6 +78,15 @@ export class WishlistService {
                 })
               );
             }
+            // Optimistically add to store so the icon updates instantly
+            this.store.dispatch(
+              updateWishlist({
+                wishlist: [
+                  ...this.wishlistItems,
+                  { ...payload, ProductID: payload._id },
+                ],
+              })
+            );
             const wishlistPayload = {
               UserID: data._id,
               ProductID: payload._id,

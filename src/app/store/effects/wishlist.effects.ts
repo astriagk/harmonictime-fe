@@ -40,20 +40,34 @@ export class WishlistEffects {
   // read ProductName/Price/Images and link to the product, while keeping the
   // wishlist row id (WishlistID) for removal (DELETE /wishlist/:id).
   private normalizeWishlistRow(row: any): any {
-    const product =
+    // Detect whether ProductID was populated (an object) or left as a raw id string.
+    const populated =
       row?.ProductID && typeof row.ProductID === 'object'
         ? row.ProductID
         : row?.Product && typeof row.Product === 'object'
         ? row.Product
         : row?.product && typeof row.product === 'object'
         ? row.product
-        : row;
+        : null;
 
+    if (populated) {
+      return {
+        ...populated,
+        _id: populated._id,         // product id — used for routerLink & add-to-cart
+        ProductID: populated._id,   // for isProductInWishlist checks
+        WishlistID: row._id,        // wishlist row id — used to remove the item
+      };
+    }
+
+    // ProductID came back as a plain string id — use it directly so the
+    // isProductInWishlist selector can still match by product id.
+    const productId =
+      typeof row?.ProductID === 'string' ? row.ProductID : row?._id;
     return {
-      ...product, // ProductName, Price, Images, _id (product id), ...
-      _id: product?._id ?? row?._id, // product id — used for routerLink & add-to-cart
-      ProductID: product?._id ?? row?.ProductID, // for isProductInWishlist checks
-      WishlistID: row?._id, // wishlist row id — used to remove the item
+      ...row,
+      _id: productId,
+      ProductID: productId,
+      WishlistID: row?._id,
     };
   }
 

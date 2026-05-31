@@ -1,4 +1,5 @@
 @import 'variables';
+@import 'mixins';
 
 .wallet__breakdown {
   font-size: 12px;
@@ -31,6 +32,17 @@
       font-weight: 600;
       color: $heading-color;
     }
+  }
+}
+
+.profile__otp-resend {
+  font-size: 13px;
+  color: $body-text-color;
+
+  a {
+    color: $theme-color;
+    @include transition(.3s);
+    &:hover { opacity: 0.8; }
   }
 }
 

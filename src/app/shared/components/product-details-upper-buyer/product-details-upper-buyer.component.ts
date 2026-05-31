@@ -4,11 +4,13 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   OnDestroy,
   Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { Product } from '../../types/product-d-t';
 import { ProductService } from '../../services/product.service';
@@ -18,6 +20,7 @@ import { GenericService } from '../../services/generic.service';
 import { Store } from '@ngrx/store';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
+import { isProductInWishlist } from 'src/app/store/selectors/wishlist.selectors';
 import { ReviewFormComponent } from '../forms/review-form/review-form.component';
 import {
   getPrimaryImageUrl,
@@ -31,7 +34,7 @@ import { USER_CART_ITEM } from '@config/index';
   styleUrls: ['./product-details-upper-buyer.component.scss'],
 })
 export class ProductDetailsUpperBuyerComponent
-  implements AfterViewInit, OnDestroy
+  implements AfterViewInit, OnChanges, OnDestroy
 {
   @Input() product!: any; //  Product;
   @Input() bottomShow: boolean = true;
@@ -44,6 +47,7 @@ export class ProductDetailsUpperBuyerComponent
   stars = [1, 2, 3, 4, 5];
   isInCart = false;
   userId: string | null = null;
+  inWishlist$!: Observable<boolean>;
 
   @ViewChild('reviewModal') reviewModalRef?: ElementRef<HTMLElement>;
   @ViewChild(ReviewFormComponent) reviewFormCmp?: ReviewFormComponent;
@@ -89,6 +93,9 @@ export class ProductDetailsUpperBuyerComponent
       this.productService.activeImg = getPrimaryImageUrl(this.product.Images);
       this.productService.activeIsVideo = false;
       this.checkCartStatus();
+      if (this.product._id) {
+        this.inWishlist$ = this.store.select(isProductInWishlist(this.product._id));
+      }
     }
   }
 
