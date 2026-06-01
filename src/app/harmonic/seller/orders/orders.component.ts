@@ -20,7 +20,7 @@ import { selectUserData } from 'src/app/store/selectors/user.selectors';
   styleUrls: ['./orders.component.scss'],
 })
 export class OrdersComponent {
-  public orders = [];
+  public orders: any[] = [];
   paginationOrders: any = [];
 
   public paginate: any = {}; // Pagination use only
@@ -28,6 +28,19 @@ export class OrdersComponent {
   public pageNo: number = 1;
   public userData: any = {};
   public loading = true; // Show skeleton until the first orders response
+
+  public approvalFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
+  public readonly approvalFilters: { label: string; value: 'All' | 'Pending' | 'Approved' | 'Rejected' }[] = [
+    { label: 'All', value: 'All' },
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Approved', value: 'Approved' },
+    { label: 'Rejected', value: 'Rejected' },
+  ];
+
+  get filteredOrders(): any[] {
+    if (this.approvalFilter === 'All') return this.orders;
+    return this.orders.filter((o) => o.SellerApprovalStatus === this.approvalFilter);
+  }
 
   // Expandable detail rows
   public expandedOrderId: string | null = null;
@@ -84,17 +97,7 @@ export class OrdersComponent {
           .pipe(finalize(() => (this.loading = false)))
           .subscribe((response) => {
             this.orders = response?.data || [];
-
-            this.paginate = this.productService.getPager(
-              this.orders.length,
-              Number(+this.pageNo),
-              this.pageSize
-            );
-
-            this.paginationOrders = this.orders.slice(
-              this.paginate.startIndex,
-              this.paginate.endIndex + 1
-            );
+            this.refreshPagination(Number(+this.pageNo));
           });
       } else if (state) {
         // Store has emitted but there's no logged-in seller — stop the skeleton.
@@ -104,16 +107,25 @@ export class OrdersComponent {
 
     this.route.queryParams.subscribe((params) => {
       this.pageNo = params['page'] ? params['page'] : this.pageNo;
-      this.paginate = this.productService.getPager(
-        this.orders.length,
-        Number(+this.pageNo),
-        this.pageSize
-      );
-      this.paginationOrders = this.orders.slice(
-        this.paginate.startIndex,
-        this.paginate.endIndex + 1
-      );
+      this.refreshPagination(Number(+this.pageNo));
     });
+  }
+
+  setApprovalFilter(value: 'All' | 'Pending' | 'Approved' | 'Rejected'): void {
+    this.approvalFilter = value;
+    this.refreshPagination(1);
+  }
+
+  private refreshPagination(pageNo: number = this.pageNo): void {
+    this.paginate = this.productService.getPager(
+      this.filteredOrders.length,
+      pageNo,
+      this.pageSize,
+    );
+    this.paginationOrders = this.filteredOrders.slice(
+      this.paginate.startIndex,
+      this.paginate.endIndex + 1,
+    );
   }
 
   setPage(page: number) {
