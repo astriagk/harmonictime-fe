@@ -228,8 +228,15 @@ export class CheckoutComponent implements OnDestroy {
   }
 
   private readonly ADDRESS_FIELDS = [
-    'firstName', 'lastName', 'country', 'address',
-    'apartment', 'city', 'state', 'zipCode', 'phone',
+    'firstName',
+    'lastName',
+    'country',
+    'address',
+    'apartment',
+    'city',
+    'state',
+    'zipCode',
+    'phone',
   ] as const;
 
   // Returns true if the user edited any address field after selecting a saved address.
@@ -266,7 +273,8 @@ export class CheckoutComponent implements OnDestroy {
   incrementQty(item: any) {
     const max = item.RemainingQuantity ?? Infinity;
     const current = item.Quantity || 1;
-    if (current < max) this.cartService.updateCartItemQuantity(item, current + 1);
+    if (current < max)
+      this.cartService.updateCartItemQuantity(item, current + 1);
   }
 
   decrementQty(item: any) {
@@ -455,7 +463,9 @@ export class CheckoutComponent implements OnDestroy {
     try {
       const unavailableReasons = await this.checkStockAvailability();
       if (unavailableReasons.length) {
-        unavailableReasons.forEach((reason) => this.toastrService.error(reason));
+        unavailableReasons.forEach((reason) =>
+          this.toastrService.error(reason),
+        );
         return;
       }
       await this.payNow();
@@ -511,7 +521,9 @@ export class CheckoutComponent implements OnDestroy {
     const amount = grandTotal * 100; // Razorpay expects the amount in paise
 
     try {
-      const cartItems = this.cartItems.map((el: any) => el.ProductID);
+      const cartItems = this.cartItems.flatMap((el: any) =>
+        Array(el.Quantity || 1).fill(el.ProductID),
+      );
 
       // Consolidated flow: send the address and checkout data nested inside
       // create-order. The backend only holds these as a draft against a pending
