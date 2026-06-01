@@ -7,6 +7,12 @@
   @media #{$xs}{
       text-align: center;
   }
+  &-img {
+      width: 100%;
+      @media #{$xs} {
+          width: 40%;
+      }
+  }
   &__6{
       @media #{$xs}{
           padding-bottom: 15px;

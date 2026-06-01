@@ -50,7 +50,27 @@
                 </td>
                 <td class="product-quantity">
                   <div class="cart-plus-minus">
-                    <span class="amount">1</span>
+                    <button
+                      class="dec qtybutton"
+                      (click)="decrementQty(item)"
+                      [disabled]="(item.Quantity || 1) <= 1"
+                    >-</button>
+                    <input
+                      class="cart-plus-minus-box"
+                      type="text"
+                      [value]="item.Quantity || 1"
+                      readonly
+                    />
+                    <button
+                      class="inc qtybutton"
+                      (click)="incrementQty(item)"
+                      [disabled]="(item.Quantity || 1) >= (item.RemainingQuantity ?? 1)"
+                    >+</button>
+                  </div>
+                  <div *ngIf="item.RemainingQuantity != null && (item.Quantity || 1) >= item.RemainingQuantity" class="d-flex justify-content-center">
+                    <small class="qty-max-info">
+                      <i class="fas fa-info-circle"></i> Max {{ item.RemainingQuantity }} available
+                    </small>
                   </div>
                 </td>
                 <td class="product-remove">

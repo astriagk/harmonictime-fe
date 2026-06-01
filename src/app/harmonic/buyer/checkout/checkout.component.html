@@ -482,15 +482,34 @@
                         <div *ngIf="item.IsPriceInclusiveOfTax">
                           <small class="product__tax-note">Incl. all taxes</small>
                         </div>
+                        <div class="checkout-qty">
+                          <button
+                            class="checkout-qty__btn"
+                            (click)="decrementQty(item)"
+                            [disabled]="(item.Quantity || 1) <= 1"
+                          >−</button>
+                          <span class="checkout-qty__value">{{ item.Quantity || 1 }}</span>
+                          <button
+                            class="checkout-qty__btn"
+                            (click)="incrementQty(item)"
+                            [disabled]="(item.Quantity || 1) >= (item.RemainingQuantity ?? 1)"
+                          >+</button>
+                        </div>
+                        <small
+                          *ngIf="item.RemainingQuantity != null && (item.Quantity || 1) >= item.RemainingQuantity"
+                          class="qty-max-info"
+                        >
+                          <i class="fas fa-info-circle"></i> Max {{ item.RemainingQuantity }} available
+                        </small>
                       </td>
                       <td class="product-total">
                         <ng-container *ngIf="item.Offer?.IsActive && item.DisplayPrice; else regularPrice">
-                          <span class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR" }}</span>
+                          <span class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) * (item.Quantity || 1) | currency: "INR" }}</span>
                           <small class="offer-badge ml-5">{{ item.Offer.DiscountPercentage }}% off</small>
                           <div><small class="old-price">MRP: {{ item.DisplayPrice | currency: "INR" }}</small></div>
                         </ng-container>
                         <ng-template #regularPrice>
-                          <span class="amount">{{ item.DisplayPrice | currency: "INR" }}</span>
+                          <span class="amount">{{ item.DisplayPrice * (item.Quantity || 1) | currency: "INR" }}</span>
                         </ng-template>
                       </td>
                     </tr>

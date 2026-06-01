@@ -48,6 +48,8 @@ export class ProductDetailsUpperBuyerComponent
   isInCart = false;
   userId: string | null = null;
   inWishlist$!: Observable<boolean>;
+  quantity = 1;
+  maxQty = 1;
 
   @ViewChild('reviewModal') reviewModalRef?: ElementRef<HTMLElement>;
   @ViewChild(ReviewFormComponent) reviewFormCmp?: ReviewFormComponent;
@@ -96,6 +98,8 @@ export class ProductDetailsUpperBuyerComponent
       if (this.product._id) {
         this.inWishlist$ = this.store.select(isProductInWishlist(this.product._id));
       }
+      this.maxQty = this.product.RemainingQuantity ?? 1;
+      this.quantity = 1;
     }
   }
 
@@ -113,8 +117,16 @@ export class ProductDetailsUpperBuyerComponent
       });
   }
 
+  incrementQty(): void {
+    if (this.quantity < this.maxQty) this.quantity++;
+  }
+
+  decrementQty(): void {
+    if (this.quantity > 1) this.quantity--;
+  }
+
   addToCart(): void {
-    this.cartService.addCartProduct(this.product);
+    this.cartService.addCartProduct(this.product, this.quantity);
     this.isInCart = true;
   }
 

@@ -27,16 +27,16 @@
         <tr>
           <th scope="col">#</th>
           <th scope="col">Product</th>
-          <th scope="col">Ship To</th>
           <th scope="col">Date</th>
-          <th scope="col">Payment</th>
           <th scope="col">Delivery</th>
+          <th scope="col">Approval</th>
           <th scope="col">Tracking</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
         <ng-container *ngFor="let order of paginationOrders; let i = index">
-          <tr class="clickable-row">
+          <tr class="clickable-row" (click)="toggleExpand(order._id)">
             <td>{{ paginate.startIndex + i + 1 }}</td>
             <td>
               <div
@@ -53,27 +53,109 @@
                   {{ product.ProductName }}
                   <small class="d-block text-muted">
                     {{ product.Price | currency: "INR" }}
+                    <span *ngIf="product.Quantity > 1"> &times; {{ product.Quantity }}</span>
                   </small>
                 </span>
               </div>
             </td>
-            <td>
-              {{ order.ShippingAddress?.FirstName }}
-              {{ order.ShippingAddress?.LastName }}
-              <small class="d-block text-muted">
-                {{ order.ShippingAddress?.AddressLine1 }},
-                {{ order.ShippingAddress?.City }},
-                {{ order.ShippingAddress?.State }}
-                {{ order.ShippingAddress?.PostalCode }}
-              </small>
-            </td>
             <td>{{ order.CheckoutDate | date: "mediumDate" }}</td>
-            <td>{{ order.PaymentStatus }}</td>
             <td>{{ order.DeliveryStatus }}</td>
-            <td>
+            <td (click)="$event.stopPropagation()">
+              <ng-container [ngSwitch]="order.SellerApprovalStatus">
+                <div *ngSwitchCase="'Pending'" class="d-flex flex-column" style="gap:6px">
+                  <button
+                    type="button"
+                    class="os-btn os-btn-sm"
+                    (click)="approveOrder(order)"
+                  >Approve</button>
+                  <button
+                    type="button"
+                    class="os-btn os-btn-danger os-btn-sm"
+                    (click)="openRejectionModal(order)"
+                  >Reject</button>
+                </div>
+                <span
+                  *ngSwitchCase="'Approved'"
+                  class="admin-status-badge admin-status-badge--approved"
+                >Approved</span>
+                <span
+                  *ngSwitchCase="'Rejected'"
+                  class="admin-status-badge admin-status-badge--rejected"
+                >Rejected</span>
+                <span *ngSwitchDefault class="text-muted">—</span>
+              </ng-container>
+            </td>
+            <td (click)="$event.stopPropagation()">
               <a class="tracking-link cursor-pointer" (click)="addTracking(order)">
                 {{ isShipped(order) ? "Update Tracking" : "Add Tracking" }}
               </a>
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <a
+                class="admin-table__action-link cursor-pointer"
+                (click)="toggleExpand(order._id)"
+              >
+                <i class="fa mr-5" [ngClass]="expandedOrderId === order._id ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                {{ expandedOrderId === order._id ? 'Hide' : 'View Details' }}
+              </a>
+            </td>
+          </tr>
+
+          <!-- Expanded detail row -->
+          <tr *ngIf="expandedOrderId === order._id" class="order-detail-row">
+            <td colspan="7">
+              <div class="row">
+                <div class="col-md-4 mb-15">
+                  <h6 class="mb-10">Order Information</h6>
+                  <div class="row mb-5">
+                    <div class="col-5"><small class="text-muted">Order ID</small></div>
+                    <div class="col-7">{{ order.OrderID }}</div>
+                  </div>
+                  <div class="row mb-5">
+                    <div class="col-5"><small class="text-muted">Date</small></div>
+                    <div class="col-7">{{ order.CheckoutDate | date: "medium" }}</div>
+                  </div>
+                  <div class="row mb-5">
+                    <div class="col-5"><small class="text-muted">Payment</small></div>
+                    <div class="col-7">
+                      <span class="admin-status-badge admin-status-badge--{{ order.PaymentStatus | lowercase }}">
+                        {{ order.PaymentStatus }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+<div class="col-md-4 mb-15">
+                  <h6 class="mb-10">Shipping Address</h6>
+                  <p class="mb-5">
+                    {{ order.ShippingAddress?.FirstName }}
+                    {{ order.ShippingAddress?.LastName }}
+                  </p>
+                  <p class="mb-5 text-muted">{{ order.ShippingAddress?.AddressLine1 }}</p>
+                  <p *ngIf="order.ShippingAddress?.AddressLine2" class="mb-5 text-muted">
+                    {{ order.ShippingAddress?.AddressLine2 }}
+                  </p>
+                  <p class="mb-5 text-muted">
+                    {{ order.ShippingAddress?.City }},
+                    {{ order.ShippingAddress?.State }}
+                    {{ order.ShippingAddress?.PostalCode }}
+                  </p>
+                  <p class="mb-5 text-muted">{{ order.ShippingAddress?.Country }}</p>
+                  <p *ngIf="order.ShippingAddress?.Phone" class="mb-0 text-muted">
+                    Ph: {{ order.ShippingAddress?.Phone }}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                *ngIf="order.SellerApprovalStatus === 'Rejected' && order.SellerRejectionReason"
+                class="row mt-5"
+              >
+                <div class="col-12">
+                  <h6 class="mb-5">Rejection Reason</h6>
+                  <p class="text-danger mb-0">{{ order.SellerRejectionReason }}</p>
+                </div>
+              </div>
             </td>
           </tr>
         </ng-container>
@@ -93,7 +175,70 @@
   </div>
 </section>
 
-<!-- Add tracking ID modal -->
+<!-- Rejection reason modal -->
+<div
+  *ngIf="isRejectionModalOpen"
+  class="modal fade show add-lookup-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reject Order</h5>
+        <button
+          type="button"
+          class="add-lookup-close"
+          aria-label="Close"
+          (click)="closeRejectionModal()"
+        >
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-15">
+          Optionally provide a reason for rejecting this order.
+        </p>
+        <div class="checkout-form-list">
+          <label for="rejectionReason">
+            Reason <small class="text-muted">(optional, max 500 chars)</small>
+          </label>
+          <textarea
+            id="rejectionReason"
+            rows="4"
+            [(ngModel)]="rejectionReason"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="e.g. Item already sold offline"
+            maxlength="500"
+          ></textarea>
+          <small class="text-muted">{{ rejectionReason.length }}/500</small>
+        </div>
+        <span *ngIf="rejectionReasonError" class="text-danger">{{ rejectionReasonError }}</span>
+      </div>
+      <div class="modal-footer d-flex justify-content-end">
+        <button
+          type="button"
+          class="os-btn mr-5"
+          (click)="closeRejectionModal()"
+          [disabled]="isSubmittingApproval"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="os-btn os-btn-danger"
+          (click)="submitRejection()"
+          [disabled]="isSubmittingApproval"
+        >
+          {{ isSubmittingApproval ? "Rejecting..." : "Confirm Reject" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isRejectionModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Add / edit tracking modal -->
 <div
   *ngIf="isTrackingModalOpen"
   class="modal fade show add-lookup-modal"

@@ -134,6 +134,52 @@
   }
 }
 
+// Compact quantity pill — used in the order summary table
+.checkout-qty {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid $border;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+
+  &__btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: $grey;
+    color: $heading-color;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+      background: $grey-2;
+    }
+
+    &:disabled {
+      color: $grey-3;
+      cursor: default;
+    }
+  }
+
+  &__value {
+    min-width: 32px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: $heading-color;
+    border-left: 1px solid $border;
+    border-right: 1px solid $border;
+    padding: 0 6px;
+    line-height: 28px;
+  }
+}
+
 // Inputs inside coupon login/register panels must not carry extra bottom
 // margin — checkout-form-list already provides the field spacing, and any
 // input margin would push the error text away from the input just like

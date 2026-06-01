@@ -252,3 +252,134 @@
     color: $theme-color;
   }
 }
+
+/* ── Seller order list — clickable rows & expanded detail row ── */
+.clickable-row {
+  cursor: pointer;
+
+  &:hover td {
+    background-color: $grey;
+  }
+}
+
+.order-detail-row td {
+  background: $grey;
+  padding: 16px 20px;
+}
+
+/* ── Small button variant for use inside table cells ── */
+.os-btn-sm {
+  height: 30px;
+  line-height: 26px;
+  padding: 0 14px;
+  font-size: 11px;
+}
+
+/* ── Offer selector cards (seller bulk-offer panel) ── */
+.offer-scroll-area {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.offer-card {
+  border: 1px solid $border;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    border-color: $theme-color;
+  }
+
+  &.selected {
+    border-color: $theme-color;
+    background: rgba(188, 130, 70, 0.07);
+  }
+}
+
+.offer-discount-badge {
+  display: inline-block;
+  background: $theme-color;
+  color: $white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 20px;
+}
+
+.offer-divider {
+  border: none;
+  border-top: 1px solid $border;
+  margin: 20px 0;
+}
+
+.product-scroll-area {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid $border;
+
+  table {
+    margin-bottom: 0;
+  }
+}
+
+.offer-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &__count {
+    font-size: 12px;
+    white-space: nowrap;
+    margin-right: 12px;
+  }
+
+  &__actions {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 575px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    &__count {
+      margin-right: 0;
+      margin-bottom: 12px;
+    }
+
+    &__actions {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .os-btn {
+        flex: 1;
+        text-align: center;
+        margin-right: 0 !important;
+        min-width: 0;
+        padding: 0 12px;
+      }
+    }
+  }
+}
+
+.offer-pill {
+  display: inline-block;
+  background: rgba(188, 130, 70, 0.1);
+  color: $theme-color;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+
+  &--current {
+    background: $theme-color;
+    color: $white;
+  }
+}

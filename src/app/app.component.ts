@@ -10,7 +10,7 @@ import { UserService } from '@shared/services/user.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'Harmonic Time';
+  title = 'krono';
 
   constructor(
     private userService: UserService,

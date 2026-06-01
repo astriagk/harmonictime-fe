@@ -150,6 +150,11 @@
     color: #f57f17;
   }
 
+  &--seller-resubmitted {
+    background: #e8f0fe;
+    color: #1a56cc;
+  }
+
   &--seller-approved {
     background: #e8f5e9;
     color: #2e7d32;
@@ -209,6 +214,91 @@
 
 /* ── Gap utilities ── */
 .gap-20 { gap: 20px; }
+
+/* ── GST document list (admin seller profile) ── */
+.admin-doc-list {
+  border: 1px solid $border;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.admin-doc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid $border;
+  background: $white;
+  font-size: 13px;
+
+  &:last-child { border-bottom: none; }
+  &:nth-child(even) { background: $grey; }
+
+  &__type {
+    color: $heading-color;
+    font-weight: 500;
+  }
+
+  &__link {
+    color: $theme-color;
+    font-size: 12px;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+
+    i { margin-right: 4px; }
+  }
+}
+
+/* ── Bank account row (admin seller profile) ── */
+.admin-bank-row {
+  padding: 10px 14px;
+  border: 1px solid $border;
+  border-radius: 4px;
+  background: $white;
+  font-size: 13px;
+}
+
+/* ── Admin product thumbnails ── */
+.admin-product-thumb-sm {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid $border;
+}
+
+.admin-product-thumb {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border: 1px solid $border;
+
+  &--video {
+    object-fit: contain;
+    background: $heading-color;
+  }
+}
+
+.admin-media-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.admin-primary-chip {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: $heading-color;
+  color: $white;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+}
 
 /* ── Date input inside checkout-form-list (date type not covered globally) ── */
 .checkout-form-list input[type='date'] {

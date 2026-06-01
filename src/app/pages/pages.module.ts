@@ -14,6 +14,7 @@ import { BlogDynamicDetailsComponent } from './blog-dynamic-details/blog-dynamic
 import { ContactComponent } from './contact/contact.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { PolicyComponent } from './policy/policy.component';
+import { SellComponent } from './sell/sell.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { PolicyComponent } from './policy/policy.component';
     ContactComponent,
     NotFoundComponent,
     PolicyComponent,
+    SellComponent,
   ],
   imports: [
     CommonModule,

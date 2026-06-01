@@ -44,10 +44,6 @@ export class RegisterComponent implements OnDestroy {
     this.registerForm = new FormGroup(
       {
         email: new FormControl(null, [Validators.required, Validators.email]),
-        phone: new FormControl(null, [
-          Validators.pattern('^\\+?[0-9]{7,15}$'),
-        ]),
-        accountType: new FormControl('individual', [Validators.required]),
         password: new FormControl(null, [
           Validators.required,
           Validators.pattern(
@@ -67,8 +63,6 @@ export class RegisterComponent implements OnDestroy {
   }
 
   get email() { return this.registerForm.get('email'); }
-  get phone() { return this.registerForm.get('phone'); }
-  get accountType() { return this.registerForm.get('accountType'); }
   get password() { return this.registerForm.get('password'); }
   get confirmPassword() { return this.registerForm.get('confirmPassword'); }
 
@@ -89,10 +83,9 @@ export class RegisterComponent implements OnDestroy {
       const payload: any = {
         email: formValue.email,
         password: formValue.password,
-        accountType: formValue.accountType,
+        accountType: 'individual',
         acceptedTerms: true,
       };
-      if (formValue.phone) payload.phone = formValue.phone;
 
       this.userDataSub?.unsubscribe();
       this.userErrorSub?.unsubscribe();
@@ -121,7 +114,6 @@ export class RegisterComponent implements OnDestroy {
           this.isSubmitting = false;
           const email = this.registerForm.value.email;
           this.registerForm.reset();
-          this.registerForm.get('accountType')?.setValue('individual');
           this.formSubmitted = false;
           this.router.navigate(['/auth/check-email'], {
             queryParams: { reason: 'pending', email },

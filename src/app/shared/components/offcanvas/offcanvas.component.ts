@@ -3,7 +3,7 @@ import { UtilsService } from '../../services/utils.service';
 import { IMobileMenu } from '../../types/menu-d-t';
 import { mobile_menus } from '../../data/menu-data';
 import { UserService } from '@shared/services/user.service';
-import { selectUserData } from 'src/app/store/selectors/user.selectors';
+import { selectUserRoles } from 'src/app/store/selectors/user.selectors';
 import { Store } from '@ngrx/store';
 
 @Component({
@@ -24,8 +24,8 @@ export class OffcanvasComponent {
   activeMenu: string = '';
 
   ngOnInit(): void {
-    this.store.select(selectUserData).subscribe((state) => {
-      this.roles = state?.user?.data?.roles;
+    this.store.select(selectUserRoles).subscribe((roles) => {
+      this.roles = roles;
     });
   }
 
@@ -39,6 +39,8 @@ export class OffcanvasComponent {
 
   checkRole(menu: IMobileMenu) {
     if (menu.admin) return this.roles?.includes(1);
+    if (menu.seller) return this.roles?.includes(2);
+    if (menu.buyer) return this.roles?.includes(3);
     return true;
   }
 }
