@@ -3,27 +3,32 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
-import { ADMIN_USERS, ADMIN_USER_BY_ID, ADMIN_SELLERS, ADMIN_SELLER_BY_ID, adminUserAction, adminSellerAction } from 'src/app/config';
+import { ADMIN_USERS, ADMIN_USER_BY_ID, adminUserAction, adminSellerAction } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
 
 interface AdminUser {
   _id: string;
   email: string;
-  phone: string;
-  status?: 'active' | 'blocked' | 'suspended';
+  phone: string | null;
+  status: 'active' | 'blocked' | 'suspended';
   dateCreated: string;
+  roles: string[];
+  accountType: string | null;
+  businessName: string | null;
+  sellerVerificationStatus: string | null;
+  sellerVerificationNote: string | null;
+  sellerVerifiedAt: string | null;
+  sellerVerifiedBy: string | null;
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  profilePicUrl: string | null;
 }
 
-interface AdminSeller {
-  _id: string;
-  email: string;
-  phone: string | null;
-  accountType?: string;
-  sellerVerificationStatus: 'Unverified' | 'Pending' | 'Approved' | 'Rejected';
-  dateCreated: string;
-  sellerVerifiedAt?: string;
-  sellerVerificationNote?: string;
+interface GstDocument {
+  url: string;
+  key: string;
+  documentType: string;
 }
 
 interface SellerGst {
@@ -36,6 +41,9 @@ interface SellerGst {
   State?: string;
   PinCode?: string;
   IsVerified?: boolean;
+  Documents?: GstDocument[];
+  CreatedAt?: string;
+  UpdatedAt?: string;
 }
 
 interface SellerBankAccount {
@@ -47,32 +55,20 @@ interface SellerBankAccount {
   IsDefault?: boolean;
   IsVerified?: boolean;
   VerificationStatus?: string;
+  VerifiedName?: string;
+  VerifiedAt?: string;
 }
 
-interface SellerProductStats {
-  total: number;
-  approved: number;
-  pending: number;
-  rejected: number;
-}
-
-interface SellerProfileData {
-  seller: AdminSeller;
-  gst?: SellerGst | null;
+interface UserDetailData {
+  user: AdminUser;
+  roles: { roleId: number; roleName: string }[];
+  gst: SellerGst | null;
   bankAccounts: SellerBankAccount[];
-  products: SellerProductStats;
-}
-
-interface AdminUserDetail extends AdminUser {
-  firstName?: string;
-  lastName?: string;
-  role?: string;
-  lastLogin?: string;
 }
 
 type PageView = 'customers' | 'sellers';
 type StatusFilter = 'all' | 'active' | 'blocked' | 'suspended';
-type SellerStatusFilter = 'all' | 'Unverified' | 'Pending' | 'Approved' | 'Rejected';
+type SellerStatusFilter = 'all' | 'Unverified' | 'Pending' | 'Resubmitted' | 'Approved' | 'Rejected';
 type UserAction = 'block' | 'unblock' | 'suspend';
 type SellerVerifyAction = 'approve' | 'reject' | 'request-info';
 
@@ -84,20 +80,19 @@ type SellerVerifyAction = 'approve' | 'reject' | 'request-info';
 export class UsersComponent implements OnInit {
   pageView: PageView = 'customers';
 
+  // raw cache from single API call
+  private allUsersCache: AdminUser[] = [];
+  listLoading = false;
+
   // --- customers ---
   users: AdminUser[] = [];
   paginatedUsers: AdminUser[] = [];
   paginate: any = {};
   pageSize = 10;
   pageNo = 1;
-  loading = false;
   activeFilter: StatusFilter = 'all';
   actionInProgress: string | null = null;
   confirmAction: { user: AdminUser; action: UserAction } | null = null;
-
-  // --- user detail ---
-  selectedUser: AdminUserDetail | null = null;
-  userDetailLoading = false;
 
   readonly filters: { label: string; value: StatusFilter }[] = [
     { label: 'All', value: 'all' },
@@ -106,27 +101,29 @@ export class UsersComponent implements OnInit {
     { label: 'Suspended', value: 'suspended' },
   ];
 
-  // --- sellers list ---
-  sellers: AdminSeller[] = [];
-  paginatedSellers: AdminSeller[] = [];
+  // --- sellers ---
+  sellers: AdminUser[] = [];
+  paginatedSellers: AdminUser[] = [];
   sellerPaginate: any = {};
   sellerPageNo = 1;
-  sellersLoading = false;
   sellerStatusFilter: SellerStatusFilter = 'all';
 
   readonly sellerFilters: { label: string; value: SellerStatusFilter }[] = [
     { label: 'All', value: 'all' },
     { label: 'Unverified', value: 'Unverified' },
     { label: 'Pending', value: 'Pending' },
+    { label: 'Resubmitted', value: 'Resubmitted' },
     { label: 'Approved', value: 'Approved' },
     { label: 'Rejected', value: 'Rejected' },
   ];
 
-  // --- seller profile modal ---
-  sellerProfileData: SellerProfileData | null = null;
-  sellerProfileLoading = false;
+  // --- user detail modal (customers) ---
+  selectedUserDetail: UserDetailData | null = null;
+  userDetailLoading = false;
 
-  // inline action state (within profile modal — no second modal needed)
+  // --- seller profile modal ---
+  sellerDetail: UserDetailData | null = null;
+  sellerProfileLoading = false;
   sellerPendingAction: SellerVerifyAction | null = null;
   sellerActionNote = '';
   sellerActionInProgress = false;
@@ -143,40 +140,64 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       this.pageNo = params['page'] ? Number(params['page']) : 1;
-      this.updatePagination();
     });
-    this.loadUsers();
+    this.loadAllUsers();
   }
 
   setView(view: PageView): void {
     this.pageView = view;
-    if (view === 'sellers' && this.sellers.length === 0) {
-      this.loadSellers();
-    }
   }
 
-  // --- customers ---
+  // --- load + filter ---
 
-  loadUsers(): void {
-    this.loading = true;
-    const url =
-      this.activeFilter === 'all' ? ADMIN_USERS : `${ADMIN_USERS}?status=${this.activeFilter}`;
-
+  loadAllUsers(): void {
+    this.listLoading = true;
     this.genericService
-      .getObservableToken(url)
-      .pipe(finalize(() => (this.loading = false)))
+      .getObservableToken(ADMIN_USERS)
+      .pipe(finalize(() => (this.listLoading = false)))
       .subscribe({
         next: (res) => {
-          this.users = res?.data ?? [];
-          this.pageNo = 1;
-          this.updatePagination();
+          this.allUsersCache = res?.data ?? [];
+          this.applyFilters();
         },
         error: () => this.toastr.error('Failed to load users'),
       });
   }
 
+  private applyFilters(): void {
+    const allSellers = this.allUsersCache.filter((u) => u.accountType === 'business');
+    const allCustomers = this.allUsersCache.filter((u) => u.accountType !== 'business');
+
+    this.users =
+      this.activeFilter === 'all'
+        ? allCustomers
+        : allCustomers.filter((u) => u.status === this.activeFilter);
+
+    this.sellers =
+      this.sellerStatusFilter === 'all'
+        ? allSellers
+        : allSellers.filter((u) => u.sellerVerificationStatus === this.sellerStatusFilter);
+
+    this.pageNo = 1;
+    this.sellerPageNo = 1;
+    this.updatePagination();
+    this.updateSellerPagination();
+  }
+
+  setFilter(filter: StatusFilter): void {
+    this.activeFilter = filter;
+    this.applyFilters();
+  }
+
+  setSellerFilter(filter: SellerStatusFilter): void {
+    this.sellerStatusFilter = filter;
+    this.applyFilters();
+  }
+
+  // --- customer pagination ---
+
   updatePagination(): void {
-    if (!this.users.length) return;
+    if (!this.users.length) { this.paginate = {}; this.paginatedUsers = []; return; }
     this.paginate = this.productService.getPager(this.users.length, this.pageNo, this.pageSize);
     this.paginatedUsers = this.users.slice(this.paginate.startIndex, this.paginate.endIndex + 1);
   }
@@ -189,16 +210,25 @@ export class UsersComponent implements OnInit {
       .finally(() => this.viewScroller.setOffset([120, 120]));
   }
 
-  setFilter(filter: StatusFilter): void {
-    this.activeFilter = filter;
-    this.loadUsers();
+  // --- seller pagination ---
+
+  updateSellerPagination(): void {
+    if (!this.sellers.length) { this.sellerPaginate = {}; this.paginatedSellers = []; return; }
+    this.sellerPaginate = this.productService.getPager(this.sellers.length, this.sellerPageNo, this.pageSize);
+    this.paginatedSellers = this.sellers.slice(this.sellerPaginate.startIndex, this.sellerPaginate.endIndex + 1);
   }
+
+  setSellerPage(page: number): void {
+    this.sellerPageNo = page;
+    this.updateSellerPagination();
+  }
+
+  // --- customer actions ---
 
   actionsFor(user: AdminUser): UserAction[] {
     const status = user.status ?? 'active';
     if (status === 'active') return ['block', 'suspend'];
-    if (status === 'blocked') return ['unblock'];
-    if (status === 'suspended') return ['unblock'];
+    if (status === 'blocked' || status === 'suspended') return ['unblock'];
     return [];
   }
 
@@ -227,10 +257,12 @@ export class UsersComponent implements OnInit {
       .pipe(finalize(() => (this.actionInProgress = null)))
       .subscribe({
         next: () => {
-          this.toastr.success(`User ${action}ed successfully`);
           const newStatus = statusMap[action];
-          this.users = this.users.map(u => u._id === user._id ? { ...u, status: newStatus } : u);
-          this.paginatedUsers = this.paginatedUsers.map(u => u._id === user._id ? { ...u, status: newStatus } : u);
+          this.toastr.success(`User ${action}ed successfully`);
+          this.allUsersCache = this.allUsersCache.map((u) =>
+            u._id === user._id ? { ...u, status: newStatus } : u
+          );
+          this.applyFilters();
         },
         error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
       });
@@ -240,88 +272,47 @@ export class UsersComponent implements OnInit {
     return action.charAt(0).toUpperCase() + action.slice(1);
   }
 
-  // --- user detail ---
+  // --- customer detail modal ---
 
   openUserDetail(user: AdminUser): void {
-    this.selectedUser = { ...user };
+    this.selectedUserDetail = { user, roles: [], gst: null, bankAccounts: [] };
     this.userDetailLoading = true;
 
     this.genericService
       .getObservableToken(ADMIN_USER_BY_ID + user._id)
       .pipe(finalize(() => (this.userDetailLoading = false)))
       .subscribe({
-        next: (res) => { if (res?.data) this.selectedUser = res.data; },
+        next: (res) => {
+          if (res?.data) this.selectedUserDetail = res.data as UserDetailData;
+        },
         error: () => this.toastr.error('Failed to load user details'),
       });
   }
 
   closeUserDetail(): void {
-    this.selectedUser = null;
+    this.selectedUserDetail = null;
   }
 
-  // --- sellers ---
+  // --- seller profile modal ---
 
-  loadSellers(): void {
-    this.sellersLoading = true;
-    const url =
-      this.sellerStatusFilter === 'all'
-        ? ADMIN_SELLERS
-        : `${ADMIN_SELLERS}?status=${this.sellerStatusFilter}`;
-
-    this.genericService
-      .getObservableToken(url)
-      .pipe(finalize(() => (this.sellersLoading = false)))
-      .subscribe({
-        next: (res) => {
-          this.sellers = res?.data ?? [];
-          this.sellerPageNo = 1;
-          this.updateSellerPagination();
-        },
-        error: () => this.toastr.error('Failed to load sellers'),
-      });
-  }
-
-  updateSellerPagination(): void {
-    if (!this.sellers.length) return;
-    this.sellerPaginate = this.productService.getPager(this.sellers.length, this.sellerPageNo, this.pageSize);
-    this.paginatedSellers = this.sellers.slice(this.sellerPaginate.startIndex, this.sellerPaginate.endIndex + 1);
-  }
-
-  setSellerPage(page: number): void {
-    this.sellerPageNo = page;
-    this.updateSellerPagination();
-  }
-
-  setSellerFilter(filter: SellerStatusFilter): void {
-    this.sellerStatusFilter = filter;
-    this.loadSellers();
-  }
-
-  openSellerProfile(listSeller: AdminSeller): void {
-    // Pre-populate with list data so the modal opens immediately with known status.
-    this.sellerProfileData = {
-      seller: listSeller,
-      gst: null,
-      bankAccounts: [],
-      products: { total: 0, approved: 0, pending: 0, rejected: 0 },
-    };
+  openSellerProfile(listSeller: AdminUser): void {
+    this.sellerDetail = { user: listSeller, roles: [], gst: null, bankAccounts: [] };
     this.sellerPendingAction = null;
     this.sellerActionNote = '';
     this.sellerProfileLoading = true;
 
     this.genericService
-      .getObservableToken(ADMIN_SELLER_BY_ID(listSeller._id))
+      .getObservableToken(ADMIN_USER_BY_ID + listSeller._id)
       .pipe(finalize(() => (this.sellerProfileLoading = false)))
       .subscribe({
         next: (res) => {
           if (res?.data) {
-            // Undefined status = newly registered, nothing submitted yet → Unverified.
-            this.sellerProfileData = {
-              ...res.data,
-              seller: {
-                ...res.data.seller,
+            this.sellerDetail = {
+              ...(res.data as UserDetailData),
+              user: {
+                ...(res.data.user as AdminUser),
                 sellerVerificationStatus:
-                  res.data.seller?.sellerVerificationStatus ??
+                  res.data.user?.sellerVerificationStatus ??
                   listSeller.sellerVerificationStatus ??
                   'Unverified',
               },
@@ -330,22 +321,22 @@ export class UsersComponent implements OnInit {
         },
         error: () => {
           this.toastr.error('Failed to load seller profile');
-          this.sellerProfileData = null;
+          this.sellerDetail = null;
         },
       });
   }
 
   closeSellerProfile(): void {
-    this.sellerProfileData = null;
+    this.sellerDetail = null;
     this.sellerPendingAction = null;
     this.sellerActionNote = '';
   }
 
-  sellerActionsFor(status: string): SellerVerifyAction[] {
-    if (status === 'Pending') return ['approve', 'reject', 'request-info'];
+  sellerActionsFor(status: string | null): SellerVerifyAction[] {
+    if (status === 'Pending' || status === 'Resubmitted') return ['approve', 'reject', 'request-info'];
     if (status === 'Approved') return ['reject'];
     if (status === 'Rejected') return ['approve', 'request-info'];
-    return ['request-info']; // Unverified — prompt seller to complete their account
+    return ['request-info'];
   }
 
   armAction(action: SellerVerifyAction): void {
@@ -359,7 +350,7 @@ export class UsersComponent implements OnInit {
   }
 
   executeSellerAction(): void {
-    if (!this.sellerPendingAction || !this.sellerProfileData) return;
+    if (!this.sellerPendingAction || !this.sellerDetail) return;
     const action = this.sellerPendingAction;
 
     if ((action === 'reject' || action === 'request-info') && !this.sellerActionNote.trim()) {
@@ -371,14 +362,14 @@ export class UsersComponent implements OnInit {
     const body = this.sellerActionNote.trim() ? { note: this.sellerActionNote.trim() } : {};
 
     this.genericService
-      .putObservableToken(adminSellerAction(this.sellerProfileData.seller._id, action), body)
+      .putObservableToken(adminSellerAction(this.sellerDetail.user._id, action), body)
       .pipe(finalize(() => (this.sellerActionInProgress = false)))
       .subscribe({
         next: () => {
           const label = action === 'request-info' ? 'Info requested' : `Seller ${action}d`;
           this.toastr.success(label);
           this.closeSellerProfile();
-          this.loadSellers();
+          this.loadAllUsers();
         },
         error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
       });
@@ -399,5 +390,17 @@ export class UsersComponent implements OnInit {
     if (action === 'approve') return 'os-btn os-btn-black';
     if (action === 'reject') return 'os-btn os-btn-danger';
     return 'os-btn';
+  }
+
+  docTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      GSTCertificate: 'GST Certificate',
+      AddressProof: 'Address Proof',
+      PANCard: 'PAN Card',
+      CancelledCheque: 'Cancelled Cheque',
+      BankStatement: 'Bank Statement',
+      Other: 'Other',
+    };
+    return map[type] ?? type;
   }
 }

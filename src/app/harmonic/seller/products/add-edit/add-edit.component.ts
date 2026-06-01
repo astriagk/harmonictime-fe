@@ -824,7 +824,7 @@ export class AddEditComponent implements OnInit {
     let newProductId: string | undefined;
 
     this.genericService
-      .postObservable(this.CREATE_PRODUCT_URL, productPayload) // First API call
+      .postObservableToken(this.CREATE_PRODUCT_URL, productPayload) // First API call
       .pipe(
         concatMap((response) => {
           const productId = response?.data?.insertedId;
@@ -898,25 +898,25 @@ export class AddEditComponent implements OnInit {
                   ],
                 };
                 return this.genericService
-                  .postObservable(
+                  .postObservableToken(
                     this.CREATE_PRODUCT_DETAILS_URL,
                     productDetailsPayload,
                   )
                   .pipe(
                     concatMap(() =>
-                      this.genericService.postObservable(
+                      this.genericService.postObservableToken(
                         this.CREATE_PRODUCT_DESCRIPTION_URL,
                         productDescriptionPayload,
                       ),
                     ),
                     concatMap(() =>
-                      this.genericService.postObservable(
+                      this.genericService.postObservableToken(
                         this.CREATE_PRODUCT_RETURN_POLICY_URL,
                         productDeliveryReturnPayload,
                       ),
                     ),
                     concatMap(() =>
-                      this.genericService.postObservable(
+                      this.genericService.postObservableToken(
                         POST_PRODUCT_IMAGES,
                         imagesPayload,
                       ),
@@ -1010,7 +1010,7 @@ export class AddEditComponent implements OnInit {
     // (RemovedImageIDs rides along on this same payload).
     if (this.basicProductInformation.dirty || this.removedImageIds.length) {
       updateRequests.push(
-        this.genericService.putObservable(
+        this.genericService.putObservableToken(
           `${PRODUCT}/${productId}`,
           productPayload,
         ),
@@ -1018,7 +1018,7 @@ export class AddEditComponent implements OnInit {
     }
     if (this.productInformation.dirty) {
       updateRequests.push(
-        this.genericService.putObservable(
+        this.genericService.putObservableToken(
           `${UPDATE_PRODUCT_DETAILS}${productId}`,
           productDetailsPayload,
         ),
@@ -1026,7 +1026,7 @@ export class AddEditComponent implements OnInit {
     }
     if (this.productDescription.dirty) {
       updateRequests.push(
-        this.genericService.putObservable(
+        this.genericService.putObservableToken(
           `${this.CREATE_PRODUCT_DESCRIPTION_URL}/${productId}`,
           productDescriptionPayload,
         ),
@@ -1034,7 +1034,7 @@ export class AddEditComponent implements OnInit {
     }
     if (this.deliveryAndReturns.dirty) {
       updateRequests.push(
-        this.genericService.putObservable(
+        this.genericService.putObservableToken(
           `${this.CREATE_PRODUCT_RETURN_POLICY_URL}/${productId}`,
           productDeliveryReturnPayload,
         ),
@@ -1047,7 +1047,7 @@ export class AddEditComponent implements OnInit {
     this.uploadedImages.forEach((image: any) => {
       if (image._id && !!image.isPrimary !== !!image.IsPrimary) {
         updateRequests.push(
-          this.genericService.putObservable(
+          this.genericService.putObservableToken(
             `${UPDATE_PRODUCT_IMAGE}${image._id}`,
             { IsPrimary: !!image.isPrimary },
           ),
@@ -1121,7 +1121,7 @@ export class AddEditComponent implements OnInit {
               ProductID: productId,
               ImageURLs: imageURLs,
             };
-            return this.genericService.postObservable(
+            return this.genericService.postObservableToken(
               POST_PRODUCT_IMAGES,
               imagesPayload,
             );

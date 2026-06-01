@@ -9,6 +9,7 @@ import { BlogDetailsComponent } from './blog-details/blog-details.component';
 import { BlogDynamicDetailsComponent } from './blog-dynamic-details/blog-dynamic-details.component';
 import { ContactComponent } from './contact/contact.component';
 import { PolicyComponent } from './policy/policy.component';
+import { SellComponent } from './sell/sell.component';
 
 const routes: Routes = [
   {
@@ -45,6 +46,11 @@ const routes: Routes = [
     path: 'blog-details/:id',
     component: BlogDynamicDetailsComponent,
     title: 'Blog Details',
+  },
+  {
+    path: 'sell',
+    component: SellComponent,
+    title: 'Sell',
   },
   {
     path: 'contact',

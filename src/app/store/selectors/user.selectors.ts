@@ -24,3 +24,18 @@ export const selectIsAccountRestricted = createSelector(
   selectUserState,
   (state: UserState) => ({ blocked: state.blocked, suspended: state.suspended })
 );
+
+export const selectUserRoles = createSelector(
+  selectUserState,
+  (state: UserState) => (state.user?.data?.roles as number[]) ?? []
+);
+
+export const selectSellerVerificationStatus = createSelector(
+  selectUserState,
+  (state: UserState) => (state.user?.data?.sellerVerificationStatus as string | null) ?? null
+);
+
+export const selectIsLoggedIn = createSelector(
+  selectUserState,
+  (state: UserState) => !!state.user?.data
+);

@@ -3,6 +3,7 @@ export interface IMenuType {
   title: string;
   seller?: boolean;
   admin?: boolean;
+  buyer?: boolean;
   hasDropdown?: boolean;
   megamenu?: boolean;
   dropdownItems?: {
@@ -21,6 +22,7 @@ export interface IMobileMenu {
   link?: string;
   seller?: boolean;
   admin?: boolean;
+  buyer?: boolean;
   dropdownMenu?: {
     link: string;
     title: string;

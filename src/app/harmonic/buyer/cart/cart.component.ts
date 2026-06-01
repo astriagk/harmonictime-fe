@@ -44,6 +44,17 @@ export class CartComponent {
       .subscribe((loading) => (this.isLoading = loading));
   }
 
+  incrementQty(item: any) {
+    const max = item.RemainingQuantity ?? Infinity;
+    const current = item.Quantity || 1;
+    if (current < max) this.cartService.updateCartItemQuantity(item, current + 1);
+  }
+
+  decrementQty(item: any) {
+    const current = item.Quantity || 1;
+    if (current > 1) this.cartService.updateCartItemQuantity(item, current - 1);
+  }
+
   handleCouponSubmit() {
     if (this.couponCode) {
       this.couponCode = '';

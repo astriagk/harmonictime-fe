@@ -11,13 +11,12 @@ import {
 import { countries } from '@shared/constants/countries';
 import { GenericService } from '@shared/services/generic.service';
 import {
+  CHECK_AVAILABILITY,
   CHECKOUT_ITEM_ORDER,
   CREATE_PAYMENT_ORDER,
   GET_ADDRESSES_BY_USER,
-  GET_PRODUCT_BY_ID,
   LOGIN_USER,
   REGISTER_USER,
-  UPDATE_PRODUCT,
   VERIFY_PAYMENT_ORDER,
 } from '@config/index';
 import { loginUser, registerUser } from 'src/app/store/actions/user.actions';
@@ -264,28 +263,37 @@ export class CheckoutComponent implements OnDestroy {
     };
   }
 
-  // Verify every cart product is still purchasable before taking payment.
-  // Returns the names of any products that are no longer available. A product
-  // is treated as unavailable only when the API explicitly says IsAvailable is
-  // false; transient fetch errors are ignored so a network blip can't block an
-  // otherwise valid checkout.
-  private async getUnavailableProducts(): Promise<string[]> {
-    const checks = (this.cartItems as any[]).map(async (item) => {
-      const productId = item?.ProductID ?? item?._id;
-      try {
-        const res: any = await firstValueFrom(
-          this.genericService.getObservable(`${GET_PRODUCT_BY_ID}${productId}`),
-        );
-        const product = res?.data ?? res;
-        return product?.IsAvailable === false
-          ? (item?.ProductName ?? 'A product')
-          : null;
-      } catch {
-        return null;
-      }
-    });
-    const results = await Promise.all(checks);
-    return results.filter((name): name is string => !!name);
+  incrementQty(item: any) {
+    const max = item.RemainingQuantity ?? Infinity;
+    const current = item.Quantity || 1;
+    if (current < max) this.cartService.updateCartItemQuantity(item, current + 1);
+  }
+
+  decrementQty(item: any) {
+    const current = item.Quantity || 1;
+    if (current > 1) this.cartService.updateCartItemQuantity(item, current - 1);
+  }
+
+  // Batch stock check before payment. Returns reason strings for any item that
+  // can't be fulfilled. Network errors are swallowed so a blip can't block a
+  // valid checkout.
+  private async checkStockAvailability(): Promise<string[]> {
+    const items = (this.cartItems as any[]).map((item) => ({
+      ProductID: item.ProductID ?? item._id,
+      Quantity: item.Quantity || 1,
+    }));
+    try {
+      const res: any = await firstValueFrom(
+        this.genericService.postObservable(CHECK_AVAILABILITY, { items }),
+      );
+      const data = res?.data;
+      if (data?.allAvailable) return [];
+      return (data?.items ?? [])
+        .filter((i: any) => !i.Available)
+        .map((i: any) => i.Reason ?? `${i.ProductID} is unavailable`);
+    } catch {
+      return [];
+    }
   }
 
   passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
@@ -445,16 +453,9 @@ export class CheckoutComponent implements OnDestroy {
 
     this.placingOrder = true;
     try {
-      // Don't take payment for items that are no longer available.
-      const unavailable = await this.getUnavailableProducts();
-      if (unavailable.length) {
-        this.toastrService.error(
-          `${unavailable.join(', ')} ${
-            unavailable.length > 1 ? 'are' : 'is'
-          } no longer available. Please remove ${
-            unavailable.length > 1 ? 'them' : 'it'
-          } from your cart.`,
-        );
+      const unavailableReasons = await this.checkStockAvailability();
+      if (unavailableReasons.length) {
+        unavailableReasons.forEach((reason) => this.toastrService.error(reason));
         return;
       }
       await this.payNow();

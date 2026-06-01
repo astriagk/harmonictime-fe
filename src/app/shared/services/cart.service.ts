@@ -6,6 +6,7 @@ import {
   ADD_TO_CART,
   DELETE_CART_ITEM,
   ORDER_CHARGES,
+  UPDATE_CART,
   USER_CART,
   withPlatformMarkup,
 } from '@config/index';
@@ -24,7 +25,7 @@ import {
 } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
-import { loadCart, updateCart } from 'src/app/store/actions/cart.actions';
+import { loadCart, patchCartItemQty, updateCart } from 'src/app/store/actions/cart.actions';
 import { Router } from '@angular/router';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
@@ -53,13 +54,13 @@ export class CartService {
   }
 
   // add_cart_product
-  addCartProduct(payload: any) {
+  addCartProduct(payload: any, quantity: number = 1) {
     this.store
       .select(selectUserData)
       .pipe(
         take(1),
         switchMap((state) => {
-          const data = state?.user?.data; // Extract user data from store
+          const data = state?.user?.data;
 
           if (data) {
             const url = USER_CART + `${data._id}/${payload._id}`;
@@ -70,10 +71,10 @@ export class CartService {
                 ),
               ),
               catchError(() => {
-                // If item is not found in the cart, add it
                 const cartPayload = {
                   UserID: data._id,
                   ProductID: payload._id,
+                  Quantity: quantity,
                 };
                 return this.genericService
                   .postObservable(ADD_TO_CART, cartPayload)
@@ -82,23 +83,38 @@ export class CartService {
                       this.toastrService.success(
                         `${payload.ProductName} added to cart`,
                       );
-                      this.store.dispatch(loadCart()); // Dispatch action to reload cart
+                      this.store.dispatch(loadCart());
                     }),
                   );
               }),
             );
           } else {
-            // Guest user: keep the cart in session storage instead of forcing login
-            this.addGuestCartProduct(payload);
+            this.addGuestCartProduct(payload, quantity);
             return EMPTY;
           }
         }),
       )
       .subscribe({
         error: (err) => {
-          // Surface the server's message (e.g. "Product already in cart")
           const message =
             err?.error?.message || 'Something went wrong. Please try again.';
+          this.toastrService.error(message);
+        },
+      });
+  }
+
+  updateCartItemQuantity(cartItem: any, newQty: number) {
+    const previousQty = cartItem.Quantity || 1;
+    // Optimistic: update the store instantly so the UI responds without a reload
+    this.store.dispatch(patchCartItemQty({ cartItemId: cartItem._id, quantity: newQty }));
+    this.genericService
+      .putObservable(`${UPDATE_CART}${cartItem._id}`, { Quantity: newQty })
+      .subscribe({
+        next: () => {},
+        error: (err) => {
+          // Revert the optimistic update if the server rejects it
+          this.store.dispatch(patchCartItemQty({ cartItemId: cartItem._id, quantity: previousQty }));
+          const message = err?.error?.message || 'Failed to update quantity.';
           this.toastrService.error(message);
         },
       });
@@ -136,22 +152,27 @@ export class CartService {
       (cartTotal: { total: number; quantity: number }, cartItem: any) => {
         const base = cartItem.DisplayPrice;
         const offer = cartItem.Offer;
+        const qty = cartItem.Quantity || 1;
         const price = (offer?.IsActive && base)
           ? base * (1 - offer.DiscountPercentage / 100)
           : base;
-        if (price) cartTotal.total += price;
+        if (price) {
+          cartTotal.total += price * qty;
+          cartTotal.quantity += qty;
+        }
         return cartTotal;
       },
       { total: 0, quantity: 0 },
     );
   }
 
-  // Savings = DisplayPrice minus offer price
+  // Savings = DisplayPrice minus offer price, multiplied by quantity
   computeOfferDiscount(cartItems: any): number {
     return cartItems.reduce((savings: number, cartItem: any) => {
-      const { DisplayPrice, Offer } = cartItem;
+      const { DisplayPrice, Offer, Quantity } = cartItem;
+      const qty = Quantity || 1;
       if (DisplayPrice && Offer?.IsActive) {
-        savings += DisplayPrice - DisplayPrice * (1 - Offer.DiscountPercentage / 100);
+        savings += (DisplayPrice - DisplayPrice * (1 - Offer.DiscountPercentage / 100)) * qty;
       }
       return savings;
     }, 0);
@@ -166,10 +187,11 @@ export class CartService {
       if (cartItem.IsPriceInclusiveOfTax) return total;
       const base = cartItem.DisplayPrice;
       const offer = cartItem.Offer;
+      const qty = cartItem.Quantity || 1;
       const price = (offer?.IsActive && base)
         ? base * (1 - offer.DiscountPercentage / 100)
         : base;
-      return total + (price || 0);
+      return total + (price || 0) * qty;
     }, 0);
     const gst = Math.round((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100);
     const gstPercent = ORDER_CHARGES.gstPercent;
@@ -255,15 +277,14 @@ export class CartService {
     this.store.dispatch(updateCart({ cart: this.getGuestCart() }));
   }
 
-  private addGuestCartProduct(payload: any) {
+  private addGuestCartProduct(payload: any, quantity: number = 1) {
     const guestCart = this.getGuestCart();
     const exists = guestCart.some((p: any) => p.ProductID === payload._id);
     if (exists) {
       this.toastrService.warning(`${payload.ProductName} exists in the cart`);
       return;
     }
-    // Keep ProductID so isProductInCart() and the merge-on-login flow work
-    const item = { ...payload, ProductID: payload._id };
+    const item = { ...payload, ProductID: payload._id, Quantity: quantity };
     this.saveGuestCart([...guestCart, item]);
     this.toastrService.success(`${payload.ProductName} added to cart`);
   }
@@ -288,6 +309,7 @@ export class CartService {
         .postObservable(ADD_TO_CART, {
           UserID: userId,
           ProductID: item.ProductID || item._id,
+          Quantity: item.Quantity || 1,
         })
         .pipe(catchError(() => of(null))),
     );

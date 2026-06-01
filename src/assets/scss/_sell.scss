@@ -1,0 +1,167 @@
+/*----------------------------------------*/
+/*  SELL CSS
+/*----------------------------------------*/
+
+.sell {
+  &__tabs {
+    gap: 0;
+    border: 1px solid $border;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  &__tab-btn {
+    padding: 12px 48px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: $pop;
+    background: $white;
+    color: $heading-color;
+    border: none;
+    border-right: 1px solid $border;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    @include transition(.3s);
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &.active,
+    &:hover {
+      background: $theme-color;
+      color: $white;
+    }
+  }
+
+  &__cta-strip {
+    background: $white;
+    padding: 30px 40px;
+    border-left: 4px solid $theme-color;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+
+    h4 {
+      color: $heading-color;
+      font-weight: 600;
+    }
+
+    p {
+      color: $body-text-color;
+      font-size: 13px;
+      margin: 0;
+    }
+
+    @media #{$xs} {
+      padding: 24px 20px;
+      flex-direction: column;
+      align-items: flex-start !important;
+    }
+
+    &--pending {
+      border-left-color: #f57f17;
+      background: #fffdf5;
+
+      h4 { color: #e65100; }
+    }
+
+    &--approved {
+      border-left-color: #2e7d32;
+      background: #f6fbf6;
+
+      h4 { color: #1b5e20; }
+    }
+
+    &--rejected {
+      border-left-color: #c62828;
+      background: #fff5f5;
+
+      h4 { color: #b71c1c; }
+    }
+
+  }
+
+
+  &__step {
+    padding: 30px 20px;
+    border: 1px solid $border;
+    background: $white;
+    height: 100%;
+    @include transition(.3s);
+
+    &:hover {
+      border-color: $theme-color;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    &-icon i {
+      font-size: 34px;
+      color: $theme-color;
+    }
+
+    &-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      border-radius: 50%;
+      background: $theme-color;
+      color: $white;
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
+
+  &__info-box {
+    background: $white;
+    border: 1px solid $border;
+    padding: 25px;
+    height: 100%;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 9px 0;
+      border-bottom: 1px solid $border;
+      color: $body-text-color;
+      font-size: 13px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      i {
+        color: $theme-color;
+      }
+    }
+  }
+
+  &__business-step {
+    padding: 18px;
+    background: $white;
+    border: 1px solid $border;
+    @include transition(.3s);
+
+    &:hover {
+      border-color: $theme-color;
+    }
+
+    h6 {
+      color: $heading-color;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    p {
+      color: $body-text-color;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+}

@@ -3,6 +3,7 @@ import {
   loadCart,
   loadCartFailure,
   loadCartSuccess,
+  patchCartItemQty,
   updateCart,
 } from '../actions/cart.actions';
 
@@ -46,5 +47,12 @@ export const cartReducer = createReducer(
     ...state,
     cart,
     loading: false,
+  })),
+  // Patch a single item's quantity without triggering a loading state or re-fetch
+  on(patchCartItemQty, (state, { cartItemId, quantity }) => ({
+    ...state,
+    cart: state.cart.map((item) =>
+      item._id === cartItemId ? { ...item, Quantity: quantity } : item
+    ),
   }))
 );

@@ -21,11 +21,8 @@ export class BreadcrumbOneComponent {
   public bannerDismissed = false;
 
   get showVerificationBanner(): boolean {
-    return (
-      !this.bannerDismissed &&
-      this.sellerVerificationStatus === 'Pending' &&
-      !!this.sellerVerificationNote
-    );
+    const relevantStatus = ['Pending', 'Rejected', 'Resubmitted'].includes(this.sellerVerificationStatus ?? '');
+    return !this.bannerDismissed && relevantStatus && !!this.sellerVerificationNote;
   }
 
   constructor(

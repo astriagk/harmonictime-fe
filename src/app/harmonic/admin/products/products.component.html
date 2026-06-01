@@ -77,7 +77,7 @@
 
   <!-- Images & Videos -->
   <div class="d-flex gap-10 flex-wrap mb-20">
-    <ng-container *ngFor="let media of allMedia(selectedProduct)">
+    <div *ngFor="let media of allMedia(selectedProduct)" class="admin-media-wrap">
       <img
         *ngIf="media.mediaType !== 'video'"
         [src]="media.ImageURL"
@@ -91,7 +91,8 @@
         preload="metadata"
         class="admin-product-thumb admin-product-thumb--video"
       ></video>
-    </ng-container>
+      <span *ngIf="media.IsPrimary" class="admin-primary-chip">Primary</span>
+    </div>
     <p *ngIf="!allMedia(selectedProduct).length" class="text-muted">No images uploaded.</p>
   </div>
 
@@ -114,8 +115,16 @@
         <div class="col-7">₹{{ selectedProduct.Price | number }}</div>
       </div>
       <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Display Price</small></div>
+        <div class="col-7">₹{{ selectedProduct.DisplayPrice | number }}</div>
+      </div>
+      <div class="row mb-5">
         <div class="col-5"><small class="text-muted">GST Inclusive</small></div>
         <div class="col-7">{{ selectedProduct.IsPriceInclusiveOfTax ? 'Yes (18% included)' : 'No (GST on top)' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Quantity</small></div>
+        <div class="col-7">{{ selectedProduct.Quantity | number }} ({{ selectedProduct.RemainingQuantity | number }} remaining)</div>
       </div>
       <div class="row mb-5">
         <div class="col-5"><small class="text-muted">Brand</small></div>
@@ -132,6 +141,10 @@
       <div class="row mb-5">
         <div class="col-5"><small class="text-muted">Recipient</small></div>
         <div class="col-7">{{ selectedProduct.Details?.RecipientName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Delivery Option</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.DeliveryOptionName || '—' }}</div>
       </div>
     </div>
     <div class="col-md-6">
@@ -152,8 +165,12 @@
         <div class="col-7">{{ selectedProduct.Details?.DialColorName || '—' }}</div>
       </div>
       <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Watch Marker</small></div>
+        <div class="col-7">{{ selectedProduct.Details?.WatchMarkerName || '—' }}</div>
+      </div>
+      <div class="row mb-5">
         <div class="col-5"><small class="text-muted">Diameter</small></div>
-        <div class="col-7">{{ selectedProduct.Details?.Diameter || '—' }}</div>
+        <div class="col-7">{{ selectedProduct.Details?.Diameter ? selectedProduct.Details?.Diameter + ' mm' : '—' }}</div>
       </div>
       <div class="row mb-5">
         <div class="col-5"><small class="text-muted">Water Resistant</small></div>
@@ -171,9 +188,13 @@
   </div>
 
   <!-- Description -->
-  <ng-container *ngIf="selectedProduct.Description?.Content">
+  <ng-container *ngIf="selectedProduct.Description?.Content || selectedProduct.Description?.AdditionalDetails">
     <h6 class="mb-5">Description</h6>
-    <p class="text-muted mb-15" style="font-size: 13px">{{ selectedProduct.Description?.Content }}</p>
+    <p *ngIf="selectedProduct.Description?.Content" class="text-muted mb-5" style="font-size: 13px">{{ selectedProduct.Description?.Content }}</p>
+    <ng-container *ngIf="selectedProduct.Description?.AdditionalDetails">
+      <small class="text-muted d-block mb-3">Additional Details</small>
+      <p class="text-muted mb-15" style="font-size: 13px">{{ selectedProduct.Description?.AdditionalDetails }}</p>
+    </ng-container>
   </ng-container>
 
   <!-- Delivery & Returns -->
