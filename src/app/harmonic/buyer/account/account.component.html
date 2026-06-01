@@ -299,6 +299,7 @@
                         <th style="width: 300px">Product</th>
                         <th style="width: 120px">Total</th>
                         <th style="width: 220px">Shipping</th>
+                        <th style="width: 130px">Seller Status</th>
                         <th style="width: 90px">Invoice</th>
                         <th style="width: 110px"></th>
                       </tr>
@@ -347,6 +348,25 @@
                             Tracking:
                             {{ order.Shipments?.[0]?.TrackingNumber || "-" }}
                           </span>
+                        </td>
+                        <td class="order__title pr-2 pl-2">
+                          <ng-container [ngSwitch]="sellerStatusSummary(order)">
+                            <span *ngSwitchCase="'Approved'" class="admin-status-badge admin-status-badge--approved">
+                              Approved
+                            </span>
+                            <span *ngSwitchCase="'Rejected'" class="admin-status-badge admin-status-badge--rejected">
+                              Rejected
+                            </span>
+                            <span *ngSwitchCase="'Pending'" class="admin-status-badge admin-status-badge--pending">
+                              Pending
+                            </span>
+                            <span *ngSwitchDefault class="text-muted">—</span>
+                          </ng-container>
+                          <ng-container *ngIf="sellerStatusSummary(order) === 'Rejected'">
+                            <span *ngFor="let reason of sellerRejectionReasons(order)" class="d-block text-danger mt-1" style="font-size: 12px">
+                              {{ reason }}
+                            </span>
+                          </ng-container>
                         </td>
                         <td class="order__title pr-2 pl-2 text-center">
                           <!-- Desktop: open invoice modal -->

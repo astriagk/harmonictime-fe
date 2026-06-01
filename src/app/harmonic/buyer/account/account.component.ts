@@ -787,6 +787,24 @@ export class AccountComponent {
     return this.selectedOrder?.TotalAmount ?? 0;
   }
 
+  // Returns a single buyer-facing label summarising all seller confirmations:
+  // "Approved" only when every seller approved; "Rejected" if any rejected;
+  // "Pending" otherwise. Returns null for orders with no confirmation data.
+  sellerStatusSummary(order: Order): 'Approved' | 'Rejected' | 'Pending' | null {
+    const confirmations = order.SellerConfirmations;
+    if (!confirmations?.length) return null;
+    if (confirmations.some((c) => c.Status === 'Rejected')) return 'Rejected';
+    if (confirmations.every((c) => c.Status === 'Approved')) return 'Approved';
+    return 'Pending';
+  }
+
+  // Collects rejection reasons (non-blank) from all sellers in an order.
+  sellerRejectionReasons(order: Order): string[] {
+    return (order.SellerConfirmations ?? [])
+      .filter((c) => c.Status === 'Rejected' && c.Reason)
+      .map((c) => c.Reason!);
+  }
+
   viewInvoice(order: Order): void {
     this.selectedOrder = order;
     this.isInvoiceModalOpen = true;

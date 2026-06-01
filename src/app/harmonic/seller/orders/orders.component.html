@@ -3,9 +3,18 @@
 <section class="order-info container">
   <header
     *ngIf="orders.length > 0"
-    class="order-info__header d-flex justify-content-between align-items-center pt-40"
+    class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20"
   >
-    <h2 class="order-info__title">My Orders</h2>
+    <h2 class="order-info__title mb-0">My Orders</h2>
+    <ul class="nav nav-tabs admin-filter-tabs">
+      <li class="nav-item" *ngFor="let f of approvalFilters">
+        <a
+          class="nav-link cursor-pointer"
+          [class.active]="approvalFilter === f.value"
+          (click)="setApprovalFilter(f.value)"
+        >{{ f.label }}</a>
+      </li>
+    </ul>
   </header>
 
   <!-- Loading: shimmer table rows -->
@@ -18,8 +27,13 @@
     message="No Orders Found"
   ></app-empty-state>
 
+  <app-empty-state
+    *ngIf="!loading && orders.length > 0 && filteredOrders.length === 0"
+    message="No Orders Found"
+  ></app-empty-state>
+
   <div
-    *ngIf="orders.length > 0"
+    *ngIf="filteredOrders.length > 0"
     class="order-list white-bg table-responsive pt-40"
   >
     <table class="table">
@@ -163,11 +177,11 @@
     </table>
   </div>
   <div
-    *ngIf="orders.length > 0"
+    *ngIf="filteredOrders.length > 0"
     class="order__info-btn d-flex justify-content-end mb-20"
   >
     <app-pagination
-      [data]="orders"
+      [data]="filteredOrders"
       [paginate]="paginate"
       (setPage)="setPage($event)"
     >
