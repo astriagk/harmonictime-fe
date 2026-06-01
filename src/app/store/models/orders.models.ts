@@ -37,6 +37,12 @@ export interface ShippingAddress {
   Country?: string;
 }
 
+export interface SellerConfirmation {
+  Status: 'Pending' | 'Approved' | 'Rejected';
+  Reason?: string | null;
+  UpdatedAt?: string;
+}
+
 export interface Order {
   _id: string;
   OrderID?: string | null;
@@ -49,4 +55,6 @@ export interface Order {
   Products: Product[];
   Shipments?: Shipment[];
   ShippingAddress?: ShippingAddress;
+  SellerConfirmations?: SellerConfirmation[];
+  SellerApprovalStatus?: 'Pending' | 'Approved' | 'Rejected';
 }
