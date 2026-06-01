@@ -100,6 +100,7 @@ export const USER_CART = `${baseUrl}/cart/user/`; // append the user id
 export const USER_CART_ITEM = (userId: string, productId: string) => `${baseUrl}/cart/user/${userId}/${productId}`;
 export const ADD_TO_CART = `${baseUrl}/cart`;
 export const DELETE_CART_ITEM = `${baseUrl}/cart/`; // append the cart id
+export const UPDATE_CART = `${baseUrl}/cart/`; // append the cart item id (PUT)
 
 // wishlist
 export const USER_WISHLIST = `${baseUrl}/wishlist/user/`; // append the user id
@@ -134,9 +135,16 @@ export const GET_SELLER_ORDERS = `${baseUrl}/checkout/seller/`; // append the se
 export const CHECKOUT_ITEM_ORDER = `${baseUrl}/checkout-items`;
 export const CHECKOUT_ITEMS = `${baseUrl}/checkout-items/checkout/`; // append the checkout id
 
+// stock availability check (pre-checkout)
+export const CHECK_AVAILABILITY = `${baseUrl}/products/check-availability`;
+
 // shipments
 export const CREATE_SHIPMENT = `${baseUrl}/shipments`;
 export const UPDATE_SHIPMENT = `${baseUrl}/shipments/`; // append the shipment id
+
+// seller order approval
+export const SELLER_ORDER_APPROVAL = (sellerID: string, checkoutID: string) =>
+  `${baseUrl}/checkout/seller/${sellerID}/order/${checkoutID}/approval`;
 
 // seller wallet / settlement — seller identity comes from the JWT (no id in url).
 // All of these REQUIRE a Bearer token (use the *Token GenericService methods).
@@ -182,6 +190,8 @@ export const adminProductAction = (id: string, action: 'approve' | 'reject') =>
 
 // GST onboarding
 export const GST_ONBOARDING = `${baseUrl}/gst`;
+export const GST_CREATE_WITH_DOCS = `${baseUrl}/gst/with-documents`;
+export const GST_UPDATE_WITH_DOCS = (id: string) => `${baseUrl}/gst/${id}/with-documents`;
 
 // chat
 export const CHAT_THREADS = `${baseUrl}/chat/threads`;

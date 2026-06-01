@@ -158,3 +158,125 @@
     }
   }
 }
+
+
+// GST Onboarding — document upload list
+.gst-docs-section {
+  h6 {
+    font-weight: 600;
+    color: $heading-color;
+  }
+}
+
+.gst-doc-list {
+  border: 1px solid $border;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.gst-doc-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 0;
+  padding: 12px 18px 6px;
+  border-bottom: 1px solid $border;
+  background: $white;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:nth-child(even) {
+    background: $grey;
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: $heading-color;
+
+    span.required {
+      color: red;
+    }
+  }
+
+  &__file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  &__hint {
+    font-size: 12px;
+    color: $body-text-color;
+  }
+
+  &__check {
+    font-size: 14px;
+    color: $theme-color;
+    flex-shrink: 0;
+  }
+
+  &__filename {
+    font-size: 12px;
+    color: $black-soft;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+
+  &__action {
+    grid-column: 3;
+    grid-row: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  &__upload-btn,
+  &__remove-btn {
+    height: 32px;
+    line-height: 28px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__upload-btn {
+    cursor: pointer;
+  }
+
+  &__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  &__error {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 11px;
+    padding-top: 3px;
+    padding-bottom: 6px;
+    line-height: 1.2;
+  }
+
+}

@@ -24,33 +24,6 @@
               </span>
             </div>
 
-            <!-- Phone Field -->
-            <div class="mb-20">
-              <label for="phone">Phone Number <small class="text-muted">(optional)</small></label>
-              <div class="auth-input">
-                <input
-                  id="phone"
-                  type="text"
-                  placeholder="e.g. +919876543210"
-                  formControlName="phone"
-                />
-              </div>
-              <span *ngIf="phone?.invalid && phone?.touched" class="text-danger">
-                Enter a valid phone number
-              </span>
-            </div>
-
-            <!-- Account Type Field -->
-            <div class="mb-20">
-              <label for="accountType">Account Type <span>**</span></label>
-              <div class="auth-input">
-                <select id="accountType" formControlName="accountType">
-                  <option value="individual">Individual</option>
-                  <option value="business">Business</option>
-                </select>
-              </div>
-            </div>
-
             <!-- Password Field -->
             <div class="mb-20">
               <label for="password">Password <span>**</span></label>

@@ -240,6 +240,21 @@
         >
       </div>
 
+      <!-- Quantity selector — shown only before adding to cart -->
+      <div *ngIf="!isItemInCart(product) && maxQty > 0" class="mb-20">
+        <div class="d-flex align-items-center">
+          <div class="cart-plus-minus mr-15">
+            <button class="dec qtybutton" (click)="decrementQty()" [disabled]="quantity <= 1">-</button>
+            <input class="cart-plus-minus-box" type="text" [value]="quantity" readonly />
+            <button class="inc qtybutton" (click)="incrementQty()" [disabled]="quantity >= maxQty">+</button>
+          </div>
+          <small *ngIf="maxQty <= 5 && quantity < maxQty" class="text-danger">Only {{ maxQty }} left</small>
+        </div>
+        <small *ngIf="quantity >= maxQty" class="qty-max-info">
+          <i class="fas fa-info-circle"></i> Maximum available quantity selected ({{ maxQty }})
+        </small>
+      </div>
+
       <div class="add-cart-list d-flex align-items-center mb-20">
         <a
           *ngIf="!isItemInCart(product)"

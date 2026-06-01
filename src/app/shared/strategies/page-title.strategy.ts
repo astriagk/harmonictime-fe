@@ -3,13 +3,13 @@ import { Title } from '@angular/platform-browser';
 import { RouterStateSnapshot, TitleStrategy } from '@angular/router';
 
 /**
- * Sets the browser tab title to "<route title> - Harmonic Time" for any route
- * that defines a `title`, and just "Harmonic Time" when it doesn't. The per-page
+ * Sets the browser tab title to "<route title> - krono" for any route
+ * that defines a `title`, and just "krono" when it doesn't. The per-page
  * text comes from the `title` property on each route definition.
  */
 @Injectable({ providedIn: 'root' })
 export class PageTitleStrategy extends TitleStrategy {
-  private readonly brand = 'Harmonic Time';
+  private readonly brand = 'krono';
 
   constructor(private readonly title: Title) {
     super();

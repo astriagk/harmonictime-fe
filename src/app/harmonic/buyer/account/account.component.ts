@@ -762,7 +762,10 @@ export class AccountComponent {
   get gstAmount(): number {
     if (!this.selectedOrder) return 0;
     const taxableSubtotal = (this.selectedOrder.Products ?? []).reduce(
-      (sum, p) => (p.IsPriceInclusiveOfTax ? sum : sum + (p.DisplayPrice ?? 0)),
+      (sum, p) =>
+        p.IsPriceInclusiveOfTax
+          ? sum
+          : sum + (p.DisplayPrice ?? 0) * (p.Quantity ?? 1),
       0,
     );
     return taxableSubtotal > 0
@@ -770,10 +773,10 @@ export class AccountComponent {
       : 0;
   }
 
-  // Subtotal = sum of DisplayPrice across all items (buyer-facing price per product).
+  // Subtotal = sum of (DisplayPrice × Quantity) across all items.
   get invoiceSubtotal(): number {
     return (this.selectedOrder?.Products ?? []).reduce(
-      (sum, p) => sum + (p.DisplayPrice ?? 0),
+      (sum, p) => sum + (p.DisplayPrice ?? 0) * (p.Quantity ?? 1),
       0,
     );
   }

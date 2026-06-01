@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   CREATE_SHIPMENT,
   GET_SELLER_ORDERS,
+  SELLER_ORDER_APPROVAL,
   UPDATE_SHIPMENT,
 } from '@config/index';
 import { Store } from '@ngrx/store';
@@ -27,6 +28,16 @@ export class OrdersComponent {
   public pageNo: number = 1;
   public userData: any = {};
   public loading = true; // Show skeleton until the first orders response
+
+  // Expandable detail rows
+  public expandedOrderId: string | null = null;
+
+  // Approval state
+  public isRejectionModalOpen = false;
+  public rejectionOrder: any = null;
+  public rejectionReason = '';
+  public rejectionReasonError = '';
+  public isSubmittingApproval = false;
 
   // Tracking-ID modal state
   public isTrackingModalOpen = false;
@@ -147,6 +158,63 @@ export class OrdersComponent {
     this.shipmentStatus = 'Shipped';
     this.trackingError = '';
     this.isSavingTracking = false;
+  }
+
+  toggleExpand(orderId: string) {
+    this.expandedOrderId = this.expandedOrderId === orderId ? null : orderId;
+  }
+
+  approveOrder(order: any) {
+    const url = SELLER_ORDER_APPROVAL(this.userData._id, order._id);
+    this.genericService.putObservable(url, { Status: 'Approved' }).subscribe({
+      next: () => {
+        order.SellerApprovalStatus = 'Approved';
+        this.toastrService.success('Order approved successfully.');
+      },
+      error: () => {
+        this.toastrService.error('Failed to approve order.');
+      },
+    });
+  }
+
+  openRejectionModal(order: any) {
+    this.rejectionOrder = order;
+    this.rejectionReason = '';
+    this.rejectionReasonError = '';
+    this.isRejectionModalOpen = true;
+  }
+
+  closeRejectionModal() {
+    this.isRejectionModalOpen = false;
+    this.rejectionOrder = null;
+    this.rejectionReason = '';
+    this.rejectionReasonError = '';
+    this.isSubmittingApproval = false;
+  }
+
+  submitRejection() {
+    if (this.rejectionReason.length > 500) {
+      this.rejectionReasonError = 'Reason must be 500 characters or fewer.';
+      return;
+    }
+    this.isSubmittingApproval = true;
+    const payload: any = { Status: 'Rejected' };
+    if (this.rejectionReason.trim()) {
+      payload.Reason = this.rejectionReason.trim();
+    }
+    const url = SELLER_ORDER_APPROVAL(this.userData._id, this.rejectionOrder._id);
+    this.genericService.putObservable(url, payload).subscribe({
+      next: () => {
+        this.rejectionOrder.SellerApprovalStatus = 'Rejected';
+        this.rejectionOrder.SellerRejectionReason = payload.Reason ?? null;
+        this.toastrService.success('Order rejected.');
+        this.closeRejectionModal();
+      },
+      error: () => {
+        this.toastrService.error('Failed to reject order.');
+        this.isSubmittingApproval = false;
+      },
+    });
   }
 
   saveTracking() {

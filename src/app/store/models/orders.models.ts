@@ -8,6 +8,7 @@ export interface Product {
   ProductID?: string;
   ProductName: string;
   Price: number;
+  Quantity?: number;
   OfferApplied?: OfferApplied | null;
   EffectivePrice?: number;
   BuyerCommissionAmount?: number;
