@@ -18,9 +18,9 @@
             <div class="policy__section" *ngFor="let section of page.sections">
               <h4 *ngIf="section.heading">{{ section.heading }}</h4>
               <p *ngIf="section.content">{{ section.content }}</p>
-              <ol *ngIf="section.items && section.items.length">
+              <ul *ngIf="section.items && section.items.length">
                 <li *ngFor="let item of section.items">{{ item }}</li>
-              </ol>
+              </ul>
             </div>
           </div>
 
@@ -38,7 +38,7 @@
     </div>
   </section>
 
-  <app-subscribe-area></app-subscribe-area>
+  <!-- <app-subscribe-area></app-subscribe-area> -->
 </main>
 
 <app-footer-one></app-footer-one>

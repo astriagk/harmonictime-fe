@@ -11,6 +11,7 @@ import { selectIsLoggedIn, selectSellerVerificationStatus } from 'src/app/store/
 export class SellComponent implements OnInit {
   isLoggedIn = false;
   sellerVerificationStatus: string | null = null;
+  readonly sellTitle = 'Sell on Krono²';
 
   constructor(private router: Router, private store: Store) {}
 

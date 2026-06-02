@@ -585,3 +585,110 @@
     color: $body-text-color;
   }
 }
+
+// Track Package button (inline in the orders table)
+// Tracking modal — status bar + vertical timeline
+.tracking__status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  padding: 12px 16px;
+
+  .tracking__current-label {
+    font-size: 12px;
+    color: $body-text-color;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .tracking__current-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: $theme-color;
+    text-transform: capitalize;
+  }
+}
+
+.tracking__timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 24px;
+    bottom: 8px;
+    width: 2px;
+    background: $border;
+  }
+}
+
+.tracking__event {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 24px;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.tracking__dot {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: 2px solid $border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+
+  &::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+  }
+
+  .tracking__event--first & {
+    background: $theme-color;
+    border-color: $theme-color;
+
+    &::after {
+      background: $white;
+    }
+  }
+}
+
+.tracking__event-body {
+  padding-top: 2px;
+
+  .tracking__event-status {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 3px;
+    color: $heading-color;
+    line-height: 1.4;
+
+    .tracking__event--first & {
+      color: $theme-color;
+    }
+  }
+
+  .tracking__event-location,
+  .tracking__event-time {
+    font-size: 12px;
+    color: $body-text-color;
+    margin: 0;
+  }
+}

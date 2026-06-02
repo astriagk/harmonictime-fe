@@ -38,7 +38,7 @@ export interface ShippingAddress {
 }
 
 export interface SellerConfirmation {
-  Status: 'Pending' | 'Approved' | 'Rejected';
+  Status: 'Pending' | 'Approved' | 'Unavailable';
   Reason?: string | null;
   UpdatedAt?: string;
 }
