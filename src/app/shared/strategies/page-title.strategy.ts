@@ -9,7 +9,7 @@ import { RouterStateSnapshot, TitleStrategy } from '@angular/router';
  */
 @Injectable({ providedIn: 'root' })
 export class PageTitleStrategy extends TitleStrategy {
-  private readonly brand = 'krono';
+  private readonly brand = 'Krono²';
 
   constructor(private readonly title: Title) {
     super();

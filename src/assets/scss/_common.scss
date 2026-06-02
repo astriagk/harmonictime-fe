@@ -17,6 +17,31 @@
 	line-height: 24px;
 }
 
+.krono-brand {
+    display: inline-block;
+    position: relative;
+    font-family: $pop;
+
+    &__sup {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        top: -0.55em;
+        width: 14px;
+        height: 14px;
+        font-family: $pop;
+        font-size: 8px;
+        font-weight: 700;
+        line-height: 1;
+        color: $white;
+        background-color: $theme-color;
+        border-radius: 2px;
+        margin-left: 2px;
+        vertical-align: top;
+    }
+}
+
 .w-img{
 	& img{
 		width: 100%;
