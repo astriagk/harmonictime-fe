@@ -788,20 +788,20 @@ export class AccountComponent {
   }
 
   // Returns a single buyer-facing label summarising all seller confirmations:
-  // "Approved" only when every seller approved; "Rejected" if any rejected;
+  // "Approved" only when every seller approved; "Unavailable" if any unavailable;
   // "Pending" otherwise. Returns null for orders with no confirmation data.
-  sellerStatusSummary(order: Order): 'Approved' | 'Rejected' | 'Pending' | null {
+  sellerStatusSummary(order: Order): 'Approved' | 'Unavailable' | 'Pending' | null {
     const confirmations = order.SellerConfirmations;
     if (!confirmations?.length) return null;
-    if (confirmations.some((c) => c.Status === 'Rejected')) return 'Rejected';
+    if (confirmations.some((c) => c.Status === 'Unavailable')) return 'Unavailable';
     if (confirmations.every((c) => c.Status === 'Approved')) return 'Approved';
     return 'Pending';
   }
 
-  // Collects rejection reasons (non-blank) from all sellers in an order.
+  // Collects unavailability reasons (non-blank) from all sellers in an order.
   sellerRejectionReasons(order: Order): string[] {
     return (order.SellerConfirmations ?? [])
-      .filter((c) => c.Status === 'Rejected' && c.Reason)
+      .filter((c) => c.Status === 'Unavailable' && c.Reason)
       .map((c) => c.Reason!);
   }
 

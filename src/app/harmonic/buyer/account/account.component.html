@@ -226,14 +226,22 @@
                       <p>Phone</p>
                       <h4 class="d-flex align-items-center" style="gap: 10px">
                         {{ displayPhone }}
-                        <span *ngIf="phoneVerified" class="verify-badge verify-badge--verified">
+                        <span
+                          *ngIf="phoneVerified"
+                          class="verify-badge verify-badge--verified"
+                        >
                           <i class="fas fa-check-circle"></i> Verified
                         </span>
                         <button
                           *ngIf="!phoneVerified"
                           type="button"
                           class="os-btn"
-                          style="height: 28px; line-height: 24px; padding: 0 12px; font-size: 11px;"
+                          style="
+                            height: 28px;
+                            line-height: 24px;
+                            padding: 0 12px;
+                            font-size: 11px;
+                          "
                           (click)="openOtpModal()"
                         >
                           Verify
@@ -325,7 +333,10 @@
                             />
                             <span style="font-size: 13px; line-height: 1.3">
                               {{ product.ProductName }}
-                              <small *ngIf="product.Quantity && product.Quantity > 1" class="d-block text-muted">
+                              <small
+                                *ngIf="product.Quantity && product.Quantity > 1"
+                                class="d-block text-muted"
+                              >
                                 &times; {{ product.Quantity }}
                               </small>
                             </span>
@@ -351,20 +362,40 @@
                         </td>
                         <td class="order__title pr-2 pl-2">
                           <ng-container [ngSwitch]="sellerStatusSummary(order)">
-                            <span *ngSwitchCase="'Approved'" class="admin-status-badge admin-status-badge--approved">
+                            <span
+                              *ngSwitchCase="'Approved'"
+                              class="admin-status-badge admin-status-badge--approved"
+                            >
                               Approved
                             </span>
-                            <span *ngSwitchCase="'Rejected'" class="admin-status-badge admin-status-badge--rejected">
-                              Rejected
+                            <span
+                              *ngSwitchCase="'Unavailable'"
+                              class="admin-status-badge admin-status-badge--rejected"
+                            >
+                              Unavailable
                             </span>
-                            <span *ngSwitchCase="'Pending'" class="admin-status-badge admin-status-badge--pending">
+                            <span
+                              *ngSwitchCase="'Pending'"
+                              class="admin-status-badge admin-status-badge--pending"
+                            >
                               Pending
                             </span>
                             <span *ngSwitchDefault class="text-muted">—</span>
                           </ng-container>
-                          <ng-container *ngIf="sellerStatusSummary(order) === 'Rejected'">
-                            <span *ngFor="let reason of sellerRejectionReasons(order)" class="d-block text-danger mt-1" style="font-size: 12px">
+                          <ng-container
+                            *ngIf="sellerStatusSummary(order) === 'Unavailable'"
+                          >
+                            <span
+                              *ngFor="
+                                let reason of sellerRejectionReasons(order)
+                              "
+                              class="d-block text-danger mt-1"
+                              style="font-size: 12px"
+                            >
                               {{ reason }}
+                            </span>
+                            <span class="d-block mt-1" style="font-size: 12px">
+                              <i class="fas fa-circle-info mr-1"></i>The amount will be refunded soon.
                             </span>
                           </ng-container>
                         </td>
@@ -644,20 +675,32 @@
                                 >
                               </div>
                               <ng-container *ngIf="item.GSTAmount > 0">
-                                <div class="wallet__breakdown-row wallet__breakdown-row--deduct">
+                                <div
+                                  class="wallet__breakdown-row wallet__breakdown-row--deduct"
+                                >
                                   <span>GST ({{ item.GSTRate }}%)</span>
-                                  <span>− {{ item.GSTAmount | currency: "INR" }}</span>
+                                  <span
+                                    >−
+                                    {{ item.GSTAmount | currency: "INR" }}</span
+                                  >
                                 </div>
-                                <div class="wallet__breakdown-row wallet__breakdown-row--sub">
+                                <div
+                                  class="wallet__breakdown-row wallet__breakdown-row--sub"
+                                >
                                   <span>After GST</span>
-                                  <span>{{ item.NetAmountAfterGST | currency: "INR" }}</span>
+                                  <span>{{
+                                    item.NetAmountAfterGST | currency: "INR"
+                                  }}</span>
                                 </div>
                               </ng-container>
                             </div>
                           </td>
                           <td class="order__title pr-2 pl-2">
                             <strong>{{
-                              (item.GSTAmount > 0 ? item.NetAmountAfterGST : item.NetAmount) | currency: "INR"
+                              (item.GSTAmount > 0
+                                ? item.NetAmountAfterGST
+                                : item.NetAmount
+                              ) | currency: "INR"
                             }}</strong>
                           </td>
                           <td class="order__title pr-2 pl-2">
@@ -1018,11 +1061,20 @@
               aria-labelledby="nav-gst-tab"
             >
               <div class="order__info">
-                <div class="order__info-top d-flex justify-content-between align-items-center">
+                <div
+                  class="order__info-top d-flex justify-content-between align-items-center"
+                >
                   <h3 class="order__info-title">GST Details</h3>
-                  <button type="button" class="os-btn os-btn-black" (click)="openGstModal()">
-                    <i class="fa" [ngClass]="gstDetails ? 'fa-pen-to-square' : 'fa-plus'"></i>
-                    {{ gstDetails ? 'Edit GST Details' : 'Add GST Details' }}
+                  <button
+                    type="button"
+                    class="os-btn os-btn-black"
+                    (click)="openGstModal()"
+                  >
+                    <i
+                      class="fa"
+                      [ngClass]="gstDetails ? 'fa-pen-to-square' : 'fa-plus'"
+                    ></i>
+                    {{ gstDetails ? "Edit GST Details" : "Add GST Details" }}
                   </button>
                 </div>
 
@@ -1041,19 +1093,26 @@
                 <div *ngIf="!gstLoading && gstDetails" class="row mt-20">
                   <div class="col-12">
                     <div class="account-card white-bg">
-                      <div class="account-card__head d-flex justify-content-between align-items-center">
+                      <div
+                        class="account-card__head d-flex justify-content-between align-items-center"
+                      >
                         <h4 class="account-card__label">
-                          <i class="fa fa-file-invoice"></i> {{ gstDetails.LegalBusinessName }}
+                          <i class="fa fa-file-invoice"></i>
+                          {{ gstDetails.LegalBusinessName }}
                         </h4>
                         <span
                           class="verify-badge"
                           [ngClass]="{
                             'verify-badge--verified': gstDetails.IsVerified,
-                            'verify-badge--unverified': !gstDetails.IsVerified
+                            'verify-badge--unverified': !gstDetails.IsVerified,
                           }"
                         >
                           <i class="fa fa-circle"></i>
-                          {{ gstDetails.IsVerified ? 'Verified' : 'Pending Verification' }}
+                          {{
+                            gstDetails.IsVerified
+                              ? "Verified"
+                              : "Pending Verification"
+                          }}
                         </span>
                       </div>
                       <div class="account-card__body">
@@ -1061,21 +1120,40 @@
                           <span>GSTIN</span>
                           <strong>{{ gstDetails.GSTIN }}</strong>
                         </div>
-                        <div class="account-card__row" *ngIf="gstDetails.TradeName">
+                        <div
+                          class="account-card__row"
+                          *ngIf="gstDetails.TradeName"
+                        >
                           <span>Trade Name</span>
                           <strong>{{ gstDetails.TradeName }}</strong>
                         </div>
-                        <div class="account-card__row" *ngIf="gstDetails.BusinessType">
+                        <div
+                          class="account-card__row"
+                          *ngIf="gstDetails.BusinessType"
+                        >
                           <span>Business Type</span>
                           <strong>{{ gstDetails.BusinessType }}</strong>
                         </div>
-                        <div class="account-card__row" *ngIf="gstDetails.RegisteredAddress">
+                        <div
+                          class="account-card__row"
+                          *ngIf="gstDetails.RegisteredAddress"
+                        >
                           <span>Registered Address</span>
                           <strong>{{ gstDetails.RegisteredAddress }}</strong>
                         </div>
-                        <div class="account-card__row" *ngIf="gstDetails.State || gstDetails.PinCode">
+                        <div
+                          class="account-card__row"
+                          *ngIf="gstDetails.State || gstDetails.PinCode"
+                        >
                           <span>State / PIN</span>
-                          <strong>{{ gstDetails.State }}{{ gstDetails.State && gstDetails.PinCode ? ' — ' : '' }}{{ gstDetails.PinCode }}</strong>
+                          <strong
+                            >{{ gstDetails.State
+                            }}{{
+                              gstDetails.State && gstDetails.PinCode
+                                ? " — "
+                                : ""
+                            }}{{ gstDetails.PinCode }}</strong
+                          >
                         </div>
                       </div>
                     </div>
@@ -1083,7 +1161,6 @@
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -1227,7 +1304,7 @@
               <div class="invoice__meta-row">
                 <h6 class="invoice__label">INVOICE #</h6>
                 <span class="invoice__text invoice__number">
-                  {{ (selectedOrder.OrderID || selectedOrder._id) | uppercase }}
+                  {{ selectedOrder.OrderID || selectedOrder._id | uppercase }}
                 </span>
               </div>
             </div>
@@ -1270,8 +1347,16 @@
                   </td>
                   <td class="text-center">{{ product.Quantity ?? 1 }}</td>
                   <td class="text-end">
-                    <strong>{{ (product.DisplayPrice ?? 0) * (product.Quantity ?? 1) | currency: "INR" }}</strong>
-                    <small *ngIf="product.IsPriceInclusiveOfTax" class="d-block text-muted" style="font-size:10px">incl. GST</small>
+                    <strong>{{
+                      (product.DisplayPrice ?? 0) * (product.Quantity ?? 1)
+                        | currency: "INR"
+                    }}</strong>
+                    <small
+                      *ngIf="product.IsPriceInclusiveOfTax"
+                      class="d-block text-muted"
+                      style="font-size: 10px"
+                      >incl. GST</small
+                    >
                   </td>
                 </tr>
               </tbody>
@@ -1521,9 +1606,9 @@
 
           <div class="verify-notice mb-20">
             <i class="fa fa-info-circle mr-5"></i>
-            Once your bank account is verified, HarmonicTime will send payouts
-            to it as-is. Please make sure the details are correct. Any payout
-            issues after verification are your responsibility.
+            Once your bank account is verified, Krono² will send payouts to it
+            as-is. Please make sure the details are correct. Any payout issues
+            after verification are your responsibility.
           </div>
 
           <div class="d-flex justify-content-end">
@@ -1575,7 +1660,7 @@
         </div>
         <div class="product__modal-inner p-30">
           <h3 class="order__info-title address-modal__title">
-            {{ gstDetails ? 'Edit GST Details' : 'Add GST Details' }}
+            {{ gstDetails ? "Edit GST Details" : "Add GST Details" }}
           </h3>
           <app-gst-form
             [gst]="gstDetails"
@@ -1620,7 +1705,12 @@
 <div *ngIf="isReviewModalOpen" class="modal-backdrop fade show"></div>
 
 <!-- Mobile OTP verification modal -->
-<div *ngIf="isOtpModalOpen" class="modal fade show invoice-modal" tabindex="-1" role="dialog">
+<div
+  *ngIf="isOtpModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="product__modal-wrapper p-relative">
@@ -1630,10 +1720,13 @@
           </button>
         </div>
         <div class="product__modal-inner p-30">
-          <h3 class="order__info-title address-modal__title">Verify Mobile Number</h3>
+          <h3 class="order__info-title address-modal__title">
+            Verify Mobile Number
+          </h3>
 
           <p class="mb-20">
-            Enter the 6-digit OTP sent to <strong>+91 {{ otpPhone }}</strong>.
+            Enter the 6-digit OTP sent to <strong>+91 {{ otpPhone }}</strong
+            >.
           </p>
 
           <div *ngIf="sendingOtp" class="text-center mb-20">
@@ -1651,7 +1744,11 @@
                 (ngModelChange)="otpError = ''"
                 placeholder="Enter 6-digit OTP"
               />
-              <span *ngIf="otpError" class="text-danger d-block mt-5" style="font-size: 13px;">
+              <span
+                *ngIf="otpError"
+                class="text-danger d-block mt-5"
+                style="font-size: 13px"
+              >
                 {{ otpError }}
               </span>
             </div>
@@ -1659,9 +1756,16 @@
             <div class="text-end mb-20">
               <span class="profile__otp-resend">
                 <ng-container *ngIf="resendCooldown > 0">
-                  Resend in <strong>{{ resendCooldown * 1000 | date:'mm:ss':'UTC' }}</strong>
+                  Resend in
+                  <strong>{{
+                    resendCooldown * 1000 | date: "mm:ss" : "UTC"
+                  }}</strong>
                 </ng-container>
-                <a *ngIf="resendCooldown === 0" class="cursor-pointer" (click)="sendOtp()">
+                <a
+                  *ngIf="resendCooldown === 0"
+                  class="cursor-pointer"
+                  (click)="sendOtp()"
+                >
                   Resend OTP
                 </a>
               </span>
@@ -1669,7 +1773,12 @@
 
             <div class="d-flex align-items-center justify-content-end mt-10">
               <div class="d-flex align-items-center" style="gap: 8px">
-                <button type="button" class="os-btn" (click)="closeOtpModal()" [disabled]="verifyingOtp">
+                <button
+                  type="button"
+                  class="os-btn"
+                  (click)="closeOtpModal()"
+                  [disabled]="verifyingOtp"
+                >
                   Cancel
                 </button>
                 <button
@@ -1678,8 +1787,11 @@
                   [disabled]="verifyingOtp || !otpValue.trim()"
                   (click)="verifyOtp()"
                 >
-                  <i *ngIf="verifyingOtp" class="fas fa-spinner fa-spin mr-5"></i>
-                  {{ verifyingOtp ? 'Verifying…' : 'Verify' }}
+                  <i
+                    *ngIf="verifyingOtp"
+                    class="fas fa-spinner fa-spin mr-5"
+                  ></i>
+                  {{ verifyingOtp ? "Verifying…" : "Verify" }}
                 </button>
               </div>
             </div>
@@ -1692,12 +1804,21 @@
 <div *ngIf="isOtpModalOpen" class="modal-backdrop fade show"></div>
 
 <!-- Edit profile modal -->
-<div *ngIf="isProfileModalOpen" class="modal fade show invoice-modal" tabindex="-1" role="dialog">
+<div
+  *ngIf="isProfileModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="product__modal-wrapper p-relative">
         <div class="product__modal-close p-absolute">
-          <button type="button" aria-label="Close" (click)="closeProfileModal()">
+          <button
+            type="button"
+            aria-label="Close"
+            (click)="closeProfileModal()"
+          >
             <i class="fal fa-times"></i>
           </button>
         </div>
@@ -1706,15 +1827,29 @@
 
           <div class="checkout-form-list">
             <label>Phone Number</label>
-            <input type="text" [(ngModel)]="profilePhone" placeholder="e.g. +919876543210" />
+            <input
+              type="text"
+              [(ngModel)]="profilePhone"
+              placeholder="e.g. +919876543210"
+            />
           </div>
 
           <div class="d-flex justify-content-end mt-10">
-            <button type="button" class="os-btn mr-5" (click)="closeProfileModal()" [disabled]="savingProfile">
+            <button
+              type="button"
+              class="os-btn mr-5"
+              (click)="closeProfileModal()"
+              [disabled]="savingProfile"
+            >
               Cancel
             </button>
-            <button type="button" class="os-btn os-btn-black" (click)="saveProfile()" [disabled]="savingProfile">
-              {{ savingProfile ? 'Saving…' : 'Save Changes' }}
+            <button
+              type="button"
+              class="os-btn os-btn-black"
+              (click)="saveProfile()"
+              [disabled]="savingProfile"
+            >
+              {{ savingProfile ? "Saving…" : "Save Changes" }}
             </button>
           </div>
         </div>
