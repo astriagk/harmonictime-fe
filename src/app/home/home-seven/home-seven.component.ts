@@ -43,7 +43,8 @@ export class HomeSevenComponent {
 
   // Static fallback until the CMS `video_area` block loads.
   public video_area: IVideoArea = {
-    bgImg: 'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/video_area/dadacacb-09fc-40a7-bde1-8f0c38f0e1bb-1779435991494',
+    bgImg:
+      'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/video_area/dadacacb-09fc-40a7-bde1-8f0c38f0e1bb-1779435991494',
     videoTitle: 'Art of Restoring',
     videoId: '8nsL3Uryv0U',
     description:
@@ -58,7 +59,7 @@ export class HomeSevenComponent {
   constructor(
     private productService: ProductService,
     public utilsService: UtilsService,
-    private siteContentService: SiteContentService
+    private siteContentService: SiteContentService,
   ) {
     this.productService.products.subscribe((products) => {
       const best_sale_prd = products.filter((p) => p.bestSeller);
@@ -136,12 +137,11 @@ export class HomeSevenComponent {
 
   // client logos
   public client_logos: string[] = [
-    '/assets/img/client/hmt.webp',
-    '/assets/img/client/seiko.jpg',
+    '/assets/img/client/hmt.png',
+    '/assets/img/client/seiko.png',
     '/assets/img/client/timex.png',
     '/assets/img/client/casio.png',
-    '/assets/img/client/r-weil.png',
-    '/assets/img/client/titoni.jfif',
+    '/assets/img/client/titoni.png',
     '/assets/img/client/citizen.png',
   ];
 

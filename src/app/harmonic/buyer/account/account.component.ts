@@ -17,6 +17,7 @@ import {
   GST_ONBOARDING,
   ORDER_CHARGES,
   SEND_MOBILE_OTP,
+  TRACK_SHIPMENT,
   UPDATE_ADDRESS,
   UPDATE_USER,
   VERIFY_MOBILE_OTP,
@@ -163,6 +164,11 @@ export class AccountComponent {
   public isCapturing = false;
   // Tracks which order is currently being downloaded on mobile (by _id).
   public downloadingOrderId: string | null = null;
+
+  // Package tracking modal
+  public isTrackingModalOpen = false;
+  public trackingLoading = false;
+  public trackingData: { CurrentStatus: string; Events: any[] } | null = null;
 
   constructor(
     public cartService: CartService,
@@ -929,6 +935,29 @@ export class AccountComponent {
 
   onUserReviewSubmitted(): void {
     this.closeReviewModal();
+  }
+
+  // --- Package tracking -------------------------------------------------------
+
+  openTracking(shipmentId: string): void {
+    this.isTrackingModalOpen = true;
+    this.trackingData = null;
+    this.trackingLoading = true;
+    this.genericService.getObservable(TRACK_SHIPMENT(shipmentId)).subscribe({
+      next: (res) => {
+        this.trackingData = res?.data ?? res;
+        this.trackingLoading = false;
+      },
+      error: () => {
+        this.trackingLoading = false;
+        this.toastrService.error('Could not fetch tracking info.');
+      },
+    });
+  }
+
+  closeTracking(): void {
+    this.isTrackingModalOpen = false;
+    this.trackingData = null;
   }
 
   // --- Edit profile (email / phone) ------------------------------------------

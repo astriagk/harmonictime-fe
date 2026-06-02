@@ -141,6 +141,7 @@ export const CHECK_AVAILABILITY = `${baseUrl}/products/check-availability`;
 // shipments
 export const CREATE_SHIPMENT = `${baseUrl}/shipments`;
 export const UPDATE_SHIPMENT = `${baseUrl}/shipments/`; // append the shipment id
+export const TRACK_SHIPMENT = (id: string) => `${baseUrl}/shipments/${id}/track`;
 
 // seller order approval
 export const SELLER_ORDER_APPROVAL = (sellerID: string, checkoutID: string) =>

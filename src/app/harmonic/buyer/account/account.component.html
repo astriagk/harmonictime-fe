@@ -307,7 +307,7 @@
                         <th style="width: 300px">Product</th>
                         <th style="width: 120px">Total</th>
                         <th style="width: 220px">Shipping</th>
-                        <th style="width: 130px">Seller Status</th>
+                        <th style="width: 130px">Status</th>
                         <th style="width: 90px">Invoice</th>
                         <th style="width: 110px"></th>
                       </tr>
@@ -349,16 +349,19 @@
                           <small class="d-block text-muted">incl. GST</small>
                         </td>
                         <td class="order__title pr-2 pl-2">
-                          <span class="d-block">
-                            Status: {{ order.DeliveryStatus || "Pending" }}
-                          </span>
-                          <span class="d-block">
-                            Courier: {{ order.Shipments?.[0]?.Courier || "-" }}
-                          </span>
-                          <span class="d-block">
-                            Tracking:
-                            {{ order.Shipments?.[0]?.TrackingNumber || "-" }}
-                          </span>
+                          <a
+                            *ngIf="order.Shipments?.[0]?._id; else noShipment"
+                            class="cursor-pointer"
+                            style="color: #bc8246; font-size: 12px; white-space: nowrap;"
+                            (click)="openTracking(order.Shipments![0]._id)"
+                          >
+                            <i class="fas fa-map-marker-alt mr-5"></i> Track
+                          </a>
+                          <ng-template #noShipment>
+                            <span class="text-muted" style="font-size: 12px"
+                              >Not shipped yet</span
+                            >
+                          </ng-template>
                         </td>
                         <td class="order__title pr-2 pl-2">
                           <ng-container [ngSwitch]="sellerStatusSummary(order)">
@@ -395,7 +398,8 @@
                               {{ reason }}
                             </span>
                             <span class="d-block mt-1" style="font-size: 12px">
-                              <i class="fas fa-circle-info mr-1"></i>The amount will be refunded soon.
+                              <i class="fas fa-circle-info mr-1"></i>The amount
+                              will be refunded soon.
                             </span>
                           </ng-container>
                         </td>
@@ -1703,6 +1707,79 @@
   </div>
 </div>
 <div *ngIf="isReviewModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Package tracking modal -->
+<div
+  *ngIf="isTrackingModalOpen"
+  class="modal fade show invoice-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeTracking()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+        <div class="product__modal-inner p-30">
+          <h4 class="mb-20">Track Package</h4>
+
+          <div *ngIf="trackingLoading" class="text-center py-20">
+            <i class="fas fa-spinner fa-spin mr-5"></i> Fetching tracking info…
+          </div>
+
+          <ng-container *ngIf="!trackingLoading && trackingData">
+            <div class="tracking__status-bar mb-25">
+              <span class="tracking__current-label">Current Status</span>
+              <span class="tracking__current-value">{{
+                trackingData.CurrentStatus
+              }}</span>
+            </div>
+
+            <ul class="tracking__timeline">
+              <li
+                *ngFor="let event of trackingData.Events; let i = index"
+                class="tracking__event"
+                [class.tracking__event--first]="i === 0"
+              >
+                <span class="tracking__dot"></span>
+                <div class="tracking__event-body">
+                  <p class="tracking__event-status">{{ event.Status }}</p>
+                  <p
+                    class="tracking__event-location"
+                    *ngIf="event.Location && event.Location !== '-'"
+                  >
+                    <i class="fas fa-map-marker-alt mr-5"></i
+                    >{{ event.Location }}
+                  </p>
+                  <p class="tracking__event-time" *ngIf="event.Timestamp">
+                    {{ event.Timestamp | date: "medium" }}
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </ng-container>
+
+          <div
+            *ngIf="!trackingLoading && !trackingData"
+            class="text-center text-muted py-20"
+          >
+            No tracking information available.
+          </div>
+
+          <div class="d-flex justify-content-end mt-20">
+            <button type="button" class="os-btn" (click)="closeTracking()">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="isTrackingModalOpen" class="modal-backdrop fade show"></div>
 
 <!-- Mobile OTP verification modal -->
 <div
