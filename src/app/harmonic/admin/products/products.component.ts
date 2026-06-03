@@ -22,6 +22,18 @@ interface AdminProduct {
   Quantity?: number;
   RemainingQuantity?: number;
   IsAvailable?: boolean;
+  Status?: string;
+  SoldCount?: number;
+  IsSold?: boolean;
+  Offer?: {
+    _id: string;
+    OfferName: string;
+    Description?: string;
+    DiscountPercentage: number;
+    StartDate: string;
+    EndDate: string;
+    IsActive: boolean;
+  };
   Images?: { ImageURL: string; IsPrimary: boolean; mediaType: string }[];
   Details?: {
     BrandName?: string;

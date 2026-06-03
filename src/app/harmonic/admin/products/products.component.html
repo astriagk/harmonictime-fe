@@ -78,19 +78,20 @@
   <!-- Images & Videos -->
   <div class="d-flex gap-10 flex-wrap mb-20">
     <div *ngFor="let media of allMedia(selectedProduct)" class="admin-media-wrap">
-      <img
-        *ngIf="media.mediaType !== 'video'"
-        [src]="media.ImageURL"
-        class="admin-product-thumb"
-        alt="Product image"
-      />
-      <video
-        *ngIf="media.mediaType === 'video'"
-        [src]="media.ImageURL"
-        controls
-        preload="metadata"
-        class="admin-product-thumb admin-product-thumb--video"
-      ></video>
+      <a [href]="media.ImageURL" target="_blank" rel="noopener">
+        <img
+          *ngIf="media.mediaType !== 'video'"
+          [src]="media.ImageURL"
+          class="admin-product-thumb admin-product-thumb--clickable"
+          alt="Product image"
+        />
+        <video
+          *ngIf="media.mediaType === 'video'"
+          [src]="media.ImageURL"
+          preload="metadata"
+          class="admin-product-thumb admin-product-thumb--video admin-product-thumb--clickable"
+        ></video>
+      </a>
       <span *ngIf="media.IsPrimary" class="admin-primary-chip">Primary</span>
     </div>
     <p *ngIf="!allMedia(selectedProduct).length" class="text-muted">No images uploaded.</p>
@@ -187,27 +188,115 @@
     </div>
   </div>
 
+  <!-- Offer details -->
+  <ng-container *ngIf="selectedProduct.Offer">
+    <h6 class="mb-5">Active Offer</h6>
+    <div class="row mb-20">
+      <div class="col-md-6">
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">Offer Name</small></div>
+          <div class="col-7">{{ selectedProduct.Offer.OfferName }}</div>
+        </div>
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">Discount</small></div>
+          <div class="col-7">{{ selectedProduct.Offer.DiscountPercentage }}%</div>
+        </div>
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">Active</small></div>
+          <div class="col-7">
+            <span class="admin-status-badge" [class.admin-status-badge--active]="selectedProduct.Offer.IsActive" [class.admin-status-badge--pending]="!selectedProduct.Offer.IsActive">
+              {{ selectedProduct.Offer.IsActive ? 'Yes' : 'No' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">Start Date</small></div>
+          <div class="col-7">{{ selectedProduct.Offer.StartDate | date: 'mediumDate' }}</div>
+        </div>
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">End Date</small></div>
+          <div class="col-7">{{ selectedProduct.Offer.EndDate | date: 'mediumDate' }}</div>
+        </div>
+        <div class="row mb-5">
+          <div class="col-5"><small class="text-muted">Offer Description</small></div>
+          <div class="col-7">{{ selectedProduct.Offer.Description || '—' }}</div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="!selectedProduct.Offer">
+    <div class="row mb-20">
+      <div class="col-12">
+        <small class="text-muted">No offer assigned to this product.</small>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Sales & availability -->
+  <h6 class="mb-5">Sales & Availability</h6>
+  <div class="row mb-20">
+    <div class="col-md-6">
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Date Listed</small></div>
+        <div class="col-7">{{ selectedProduct.DateListed | date: 'mediumDate' }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Is Available</small></div>
+        <div class="col-7">
+          <span class="admin-status-badge" [class.admin-status-badge--active]="selectedProduct.IsAvailable" [class.admin-status-badge--pending]="!selectedProduct.IsAvailable">
+            {{ selectedProduct.IsAvailable ? 'Yes' : 'No' }}
+          </span>
+        </div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Status</small></div>
+        <div class="col-7">{{ selectedProduct.Status || '—' }}</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Units Sold</small></div>
+        <div class="col-7">{{ selectedProduct.SoldCount | number }}</div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-5"><small class="text-muted">Has Been Sold</small></div>
+        <div class="col-7">
+          <span class="admin-status-badge" [class.admin-status-badge--active]="selectedProduct.IsSold" [class.admin-status-badge--pending]="!selectedProduct.IsSold">
+            {{ selectedProduct.IsSold ? 'Yes' : 'No' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Description -->
   <ng-container *ngIf="selectedProduct.Description?.Content || selectedProduct.Description?.AdditionalDetails">
-    <h6 class="mb-5">Description</h6>
-    <p *ngIf="selectedProduct.Description?.Content" class="text-muted mb-5" style="font-size: 13px">{{ selectedProduct.Description?.Content }}</p>
-    <ng-container *ngIf="selectedProduct.Description?.AdditionalDetails">
-      <small class="text-muted d-block mb-3">Additional Details</small>
-      <p class="text-muted mb-15" style="font-size: 13px">{{ selectedProduct.Description?.AdditionalDetails }}</p>
-    </ng-container>
+    <h6 class="admin-section-title">Description</h6>
+    <div class="admin-info-card mb-20">
+      <div *ngIf="selectedProduct.Description?.Content" class="admin-info-card__block">
+        <small class="admin-info-card__label">Overview</small>
+        <p class="admin-info-card__text">{{ selectedProduct.Description?.Content }}</p>
+      </div>
+      <div *ngIf="selectedProduct.Description?.AdditionalDetails" class="admin-info-card__block admin-info-card__block--muted">
+        <small class="admin-info-card__label">Additional Details</small>
+        <p class="admin-info-card__text">{{ selectedProduct.Description?.AdditionalDetails }}</p>
+      </div>
+    </div>
   </ng-container>
 
   <!-- Delivery & Returns -->
   <ng-container *ngIf="selectedProduct.DeliveryAndReturns?.DeliveryInformation || selectedProduct.DeliveryAndReturns?.ReturnsPolicy">
-    <h6 class="mb-5">Delivery &amp; Returns</h6>
-    <div class="row mb-20">
-      <div class="col-md-6" *ngIf="selectedProduct.DeliveryAndReturns?.DeliveryInformation">
-        <small class="text-muted d-block mb-3">Delivery</small>
-        <p style="font-size: 13px">{{ selectedProduct.DeliveryAndReturns?.DeliveryInformation }}</p>
+    <h6 class="admin-section-title">Delivery &amp; Returns</h6>
+    <div class="admin-info-card mb-20">
+      <div *ngIf="selectedProduct.DeliveryAndReturns?.DeliveryInformation" class="admin-info-card__block">
+        <small class="admin-info-card__label">Delivery</small>
+        <p class="admin-info-card__text">{{ selectedProduct.DeliveryAndReturns?.DeliveryInformation }}</p>
       </div>
-      <div class="col-md-6" *ngIf="selectedProduct.DeliveryAndReturns?.ReturnsPolicy">
-        <small class="text-muted d-block mb-3">Returns</small>
-        <p style="font-size: 13px">{{ selectedProduct.DeliveryAndReturns?.ReturnsPolicy }}</p>
+      <div *ngIf="selectedProduct.DeliveryAndReturns?.ReturnsPolicy" class="admin-info-card__block admin-info-card__block--muted">
+        <small class="admin-info-card__label">Returns</small>
+        <p class="admin-info-card__text">{{ selectedProduct.DeliveryAndReturns?.ReturnsPolicy }}</p>
       </div>
     </div>
   </ng-container>
