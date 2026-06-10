@@ -53,6 +53,12 @@
           [innerHTML]="product.Details.BrandName"
         ></a>
       </h4>
+      <h5 *ngIf="product.ProductName">
+        <a
+          [routerLink]="['/buyer/product-details', product._id]"
+          [innerHTML]="product.ProductName"
+        ></a>
+      </h5>
       <div class="product__price transition-3">
         <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
           {{ product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100) | currency: "INR" }}

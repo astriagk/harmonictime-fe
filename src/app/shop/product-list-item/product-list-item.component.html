@@ -24,6 +24,11 @@
               product.Details.BrandName
             }}</a>
           </h4>
+          <h5 *ngIf="product.ProductName">
+            <a [routerLink]="['/buyer/product-details', product._id]">{{
+              product.ProductName
+            }}</a>
+          </h5>
           <div class="product__price-2 mb-10">
             <span *ngIf="product.Offer?.IsActive && product.DisplayPrice">
               {{ product.DisplayPrice * (1 - product.Offer.DiscountPercentage / 100) | currency: "INR" }}
@@ -32,14 +37,8 @@
               {{ product.DisplayPrice | currency: "INR" }}
             </span>
           </div>
-          <p>{{ product.Description.Title }}</p>
-          <div class="product__list mb-30">
-            <ul>
-              <li>
-                <span>{{ product.Description.Content }}</span>
-              </li>
-            </ul>
-          </div>
+          <p *ngIf="product.Description?.Title">{{ product.Description.Title }}</p>
+          <p *ngIf="product.Description?.Content" class="mb-30">{{ product.Description.Content }}</p>
         </div>
         <div class="add-cart-list d-flex align-items-center">
           <a

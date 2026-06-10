@@ -221,7 +221,7 @@ export class ListComponent implements OnInit, OnDestroy {
 
     this.isSavingOffer = true;
     this.genericService
-      .putObservable(BULK_OFFER, payload)
+      .putObservableToken(BULK_OFFER, payload)
       .pipe(finalize(() => (this.isSavingOffer = false)))
       .subscribe({
         next: (res) => {
@@ -246,7 +246,7 @@ export class ListComponent implements OnInit, OnDestroy {
 
     this.isSavingOffer = true;
     this.genericService
-      .putObservable(BULK_OFFER, payload)
+      .putObservableToken(BULK_OFFER, payload)
       .pipe(finalize(() => (this.isSavingOffer = false)))
       .subscribe({
         next: (res) => {
