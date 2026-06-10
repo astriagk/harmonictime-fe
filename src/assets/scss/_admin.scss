@@ -277,6 +277,15 @@
     object-fit: contain;
     background: $heading-color;
   }
+
+  &--clickable {
+    cursor: zoom-in;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 }
 
 .admin-media-wrap {
@@ -298,6 +307,52 @@
   border-radius: 3px;
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* ── Product review modal — info cards & section titles ── */
+.admin-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $body-text-color;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid $border;
+}
+
+.admin-info-card {
+  background: $grey;
+  border: 1px solid $border;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &__block {
+    padding: 14px 16px;
+
+    &--muted {
+      background: $grey-2;
+      border-top: 1px solid $border;
+    }
+  }
+
+  &__label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $grey-3;
+    margin-bottom: 6px;
+  }
+
+  &__text {
+    font-size: 13px;
+    color: $black-soft;
+    line-height: 1.7;
+    margin: 0;
+  }
+
 }
 
 /* ── Date input inside checkout-form-list (date type not covered globally) ── */
