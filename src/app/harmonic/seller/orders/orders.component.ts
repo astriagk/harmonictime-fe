@@ -74,6 +74,10 @@ export class OrdersComponent {
     { value: 'Delivered', label: 'Delivered' },
   ];
 
+  get shipmentStatusLabel(): string {
+    return this.shipmentStatuses.find(s => s.value === this.shipmentStatus)?.label ?? this.shipmentStatus ?? '—';
+  }
+
   constructor(
     public productService: ProductService,
     private router: Router,
