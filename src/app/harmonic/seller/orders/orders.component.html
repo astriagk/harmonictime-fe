@@ -311,20 +311,9 @@
             placeholder="Optional"
           />
         </div>
-        <div class="country-select">
-          <label for="shipmentStatus">Shipment Status</label>
-          <select
-            id="shipmentStatus"
-            [(ngModel)]="shipmentStatus"
-            [ngModelOptions]="{ standalone: true }"
-          >
-            <option
-              *ngFor="let status of shipmentStatuses"
-              [value]="status.value"
-            >
-              {{ status.label }}
-            </option>
-          </select>
+        <div class="checkout-form-list">
+          <label>Shipment Status</label>
+          <p class="mb-0">{{ shipmentStatusLabel }}</p>
         </div>
         <span *ngIf="trackingError" class="text-danger">{{
           trackingError
