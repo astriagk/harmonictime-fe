@@ -45,6 +45,7 @@ import { SellerLayoutComponent } from './layout/seller-layout/seller-layout.comp
 import { BuyerLayoutComponent } from './layout/buyer-layout/buyer-layout.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { BreadcrumbTwoComponent } from './components/breadcrumb/breadcrumb-two/breadcrumb-two.component';
+import { BreadcrumbThreeComponent } from './components/breadcrumb/breadcrumb-three/breadcrumb-three.component';
 import { ProductDetailsUpperSellerComponent } from './components/product-details-upper-seller/product-details-upper-seller.component';
 import { ProductDetailsUpperBuyerComponent } from './components/product-details-upper-buyer/product-details-upper-buyer.component';
 import { PlatformPricePipe } from './pipes/platform-price.pipe';
@@ -98,6 +99,7 @@ import { ProductMediaMobileCarouselComponent } from './components/product-media-
     BuyerLayoutComponent,
     AdminLayoutComponent,
     BreadcrumbTwoComponent,
+    BreadcrumbThreeComponent,
     ProductDetailsUpperSellerComponent,
     ProductDetailsUpperBuyerComponent,
     PlatformPricePipe,
@@ -145,6 +147,7 @@ import { ProductMediaMobileCarouselComponent } from './components/product-media-
     BuyerLayoutComponent,
     AdminLayoutComponent,
     BreadcrumbTwoComponent,
+    BreadcrumbThreeComponent,
     ProductDetailsUpperSellerComponent,
     ProductDetailsUpperBuyerComponent,
     PlatformPricePipe,

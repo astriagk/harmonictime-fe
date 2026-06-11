@@ -46,7 +46,9 @@
       }
       &-2{
           @media #{$md} {
-              background: $white;
+              &.sticky{
+                  background: $white;
+              }
           }
       }
   }

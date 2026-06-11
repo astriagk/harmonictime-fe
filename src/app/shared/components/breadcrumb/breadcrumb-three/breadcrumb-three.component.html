@@ -1,0 +1,54 @@
+<section
+  class="page__title_three p-relative d-flex align-items-end pb-20"
+  [style.background-image]="'url(' + bg_img + ')'"
+>
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="page__title_three-inner d-flex justify-content-between align-items-end">
+          <h4 class="mb-0" [innerHTML]="title"></h4>
+          <div class="page__title_three-breadcrumb">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a routerLink="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                  {{ subtitle }}
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div
+  class="seller-verify-banner"
+  [class.seller-verify-banner--rejected]="
+    sellerVerificationStatus === 'Rejected'
+  "
+  *ngIf="showVerificationBanner"
+>
+  <div class="seller-verify-banner__body">
+    <i class="fas fa-triangle-exclamation seller-verify-banner__icon"></i>
+    <span class="seller-verify-banner__text">{{ sellerVerificationNote }}</span>
+    <a
+      [routerLink]="
+        sellerVerificationStatus === 'Pending'
+          ? '/buyer/account'
+          : '/auth/gst-onboarding'
+      "
+      class="seller-verify-banner__link"
+    >
+      {{ sellerVerificationStatus === "Pending" ? "Update now" : "Resubmit" }}
+    </a>
+  </div>
+  <button
+    class="seller-verify-banner__close"
+    (click)="bannerDismissed = true"
+    aria-label="Dismiss"
+  >
+    <i class="fas fa-xmark"></i>
+  </button>
+</div>
