@@ -1,7 +1,12 @@
-<app-breadcrumb-two title="Approve Payments" subtitle="Admin"></app-breadcrumb-two>
+<app-breadcrumb-three
+  title="Approve Payments"
+  subtitle="Admin"
+></app-breadcrumb-three>
 
 <section class="order-info container">
-  <header class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20">
+  <header
+    class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20"
+  >
     <h2 class="order-info__title">Withdrawals</h2>
 
     <!-- Status filter tabs -->
@@ -11,7 +16,8 @@
           class="nav-link cursor-pointer"
           [class.active]="activeFilter === f"
           (click)="setFilter(f)"
-        >{{ f }}</a>
+          >{{ f }}</a
+        >
       </li>
     </ul>
   </header>
@@ -28,7 +34,10 @@
   ></app-empty-state>
 
   <!-- Table -->
-  <div *ngIf="!loading && withdrawals.length > 0" class="order-list white-bg table-responsive pt-40">
+  <div
+    *ngIf="!loading && withdrawals.length > 0"
+    class="order-list white-bg table-responsive pt-40"
+  >
     <table class="table">
       <thead>
         <tr>
@@ -46,30 +55,40 @@
           <td>{{ paginate.startIndex + i + 1 }}</td>
           <td>
             <span class="d-block">{{ w.BankSnapshot.AccountHolderName }}</span>
-            <span class="d-block text-muted">{{ w.BankSnapshot.BankName }}</span>
-            <span class="d-block text-muted">{{ w.BankSnapshot.AccountNumber }}</span>
+            <span class="d-block text-muted">{{
+              w.BankSnapshot.BankName
+            }}</span>
+            <span class="d-block text-muted">{{
+              w.BankSnapshot.AccountNumber
+            }}</span>
             <span class="d-block text-muted">{{ w.BankSnapshot.IFSC }}</span>
           </td>
-          <td>₹{{ w.Amount | number: '1.2-2' }}</td>
-          <td>{{ w.RequestedAt | date: 'mediumDate' }}</td>
+          <td>₹{{ w.Amount | number: "1.2-2" }}</td>
+          <td>{{ w.RequestedAt | date: "mediumDate" }}</td>
           <td>
-            <span class="admin-status-badge admin-status-badge--{{ w.Status | lowercase }}">
+            <span
+              class="admin-status-badge admin-status-badge--{{
+                w.Status | lowercase
+              }}"
+            >
               {{ w.Status }}
             </span>
           </td>
-          <td>{{ w.Reference || '—' }}</td>
+          <td>{{ w.Reference || "—" }}</td>
           <td (click)="$event.stopPropagation()">
             <ng-container *ngIf="canPay(w) || canReject(w); else noAction">
               <a
                 *ngIf="canPay(w)"
                 class="admin-table__action-link cursor-pointer mr-15"
                 (click)="openPay(w)"
-              >Pay</a>
+                >Pay</a
+              >
               <a
                 *ngIf="canReject(w)"
                 class="admin-table__action-link admin-table__action-link--danger cursor-pointer"
                 (click)="openReject(w)"
-              >Reject</a>
+                >Reject</a
+              >
             </ng-container>
             <ng-template #noAction>—</ng-template>
           </td>
@@ -79,7 +98,10 @@
   </div>
 
   <!-- Pagination — bottom right -->
-  <div *ngIf="withdrawals.length > 0" class="d-flex justify-content-end mt-20 pb-40">
+  <div
+    *ngIf="withdrawals.length > 0"
+    class="d-flex justify-content-end mt-20 pb-40"
+  >
     <app-pagination
       [data]="withdrawals"
       [paginate]="paginate"
@@ -89,7 +111,12 @@
 </section>
 
 <!-- Pay modal -->
-<div *ngIf="modalMode === 'pay'" class="modal fade show offer__modal" tabindex="-1" role="dialog">
+<div
+  *ngIf="modalMode === 'pay'"
+  class="modal fade show offer__modal"
+  tabindex="-1"
+  role="dialog"
+>
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="product__modal-wrapper p-relative">
@@ -101,32 +128,58 @@
         <div class="product__modal-inner" [formGroup]="form">
           <h4 class="mb-5">Mark as Paid</h4>
           <p class="mb-20 text-muted" *ngIf="selectedWithdrawal">
-            ₹{{ selectedWithdrawal.Amount | number: '1.2-2' }} to
+            ₹{{ selectedWithdrawal.Amount | number: "1.2-2" }} to
             {{ selectedWithdrawal.BankSnapshot.AccountHolderName }}
           </p>
 
           <div class="checkout-form-list mb-20">
-            <label>UTR / Transaction Reference <span class="required">*</span></label>
-            <input type="text" formControlName="Reference" placeholder="e.g. UTR123456789012" />
+            <label
+              >UTR / Transaction Reference
+              <span class="required">*</span></label
+            >
+            <input
+              type="text"
+              formControlName="Reference"
+              placeholder="e.g. UTR123456789012"
+            />
             <span
-              *ngIf="form.get('Reference')?.invalid && form.get('Reference')?.touched"
+              *ngIf="
+                form.get('Reference')?.invalid && form.get('Reference')?.touched
+              "
               class="text-danger"
-            >Reference is required</span>
+              >Reference is required</span
+            >
           </div>
 
           <div class="checkout-form-list mb-20">
             <label>Notes <small class="text-muted">(optional)</small></label>
-            <input type="text" formControlName="Notes" placeholder="e.g. Transferred via NEFT" />
+            <input
+              type="text"
+              formControlName="Notes"
+              placeholder="e.g. Transferred via NEFT"
+            />
           </div>
 
-          <span *ngIf="formError" class="text-danger d-block mb-15">{{ formError }}</span>
+          <span *ngIf="formError" class="text-danger d-block mb-15">{{
+            formError
+          }}</span>
 
           <div class="d-flex justify-content-end">
-            <button type="button" class="os-btn mr-5" (click)="closeModal()" [disabled]="isSaving">
+            <button
+              type="button"
+              class="os-btn mr-5"
+              (click)="closeModal()"
+              [disabled]="isSaving"
+            >
               Cancel
             </button>
-            <button type="button" class="os-btn os-btn-black" (click)="submit()" [disabled]="isSaving">
-              {{ isSaving ? 'Saving…' : 'Mark as Paid' }}
+            <button
+              type="button"
+              class="os-btn os-btn-black"
+              (click)="submit()"
+              [disabled]="isSaving"
+            >
+              {{ isSaving ? "Saving…" : "Mark as Paid" }}
             </button>
           </div>
         </div>
@@ -137,7 +190,12 @@
 <div *ngIf="modalMode === 'pay'" class="modal-backdrop fade show"></div>
 
 <!-- Reject modal -->
-<div *ngIf="modalMode === 'reject'" class="modal fade show offer__modal" tabindex="-1" role="dialog">
+<div
+  *ngIf="modalMode === 'reject'"
+  class="modal fade show offer__modal"
+  tabindex="-1"
+  role="dialog"
+>
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="product__modal-wrapper p-relative">
@@ -149,7 +207,7 @@
         <div class="product__modal-inner" [formGroup]="form">
           <h4 class="mb-5">Reject Withdrawal</h4>
           <p class="mb-20 text-muted" *ngIf="selectedWithdrawal">
-            ₹{{ selectedWithdrawal.Amount | number: '1.2-2' }} to
+            ₹{{ selectedWithdrawal.Amount | number: "1.2-2" }} to
             {{ selectedWithdrawal.BankSnapshot.AccountHolderName }}
           </p>
 
@@ -163,17 +221,30 @@
             <span
               *ngIf="form.get('Notes')?.invalid && form.get('Notes')?.touched"
               class="text-danger"
-            >Reason is required</span>
+              >Reason is required</span
+            >
           </div>
 
-          <span *ngIf="formError" class="text-danger d-block mb-15">{{ formError }}</span>
+          <span *ngIf="formError" class="text-danger d-block mb-15">{{
+            formError
+          }}</span>
 
           <div class="d-flex justify-content-end">
-            <button type="button" class="os-btn mr-5" (click)="closeModal()" [disabled]="isSaving">
+            <button
+              type="button"
+              class="os-btn mr-5"
+              (click)="closeModal()"
+              [disabled]="isSaving"
+            >
               Cancel
             </button>
-            <button type="button" class="os-btn os-btn-black" (click)="submit()" [disabled]="isSaving">
-              {{ isSaving ? 'Saving…' : 'Reject' }}
+            <button
+              type="button"
+              class="os-btn os-btn-black"
+              (click)="submit()"
+              [disabled]="isSaving"
+            >
+              {{ isSaving ? "Saving…" : "Reject" }}
             </button>
           </div>
         </div>

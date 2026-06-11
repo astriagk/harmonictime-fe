@@ -1,4 +1,4 @@
-<app-breadcrumb-two title="Orders" subtitle="List"></app-breadcrumb-two>
+<app-breadcrumb-three title="Orders" subtitle="List"></app-breadcrumb-three>
 
 <section class="order-info container">
   <header
@@ -12,7 +12,8 @@
           class="nav-link cursor-pointer"
           [class.active]="approvalFilter === f.value"
           (click)="setApprovalFilter(f.value)"
-        >{{ f.label }}</a>
+          >{{ f.label }}</a
+        >
       </li>
     </ul>
   </header>
@@ -67,7 +68,9 @@
                   {{ product.ProductName }}
                   <small class="d-block text-muted">
                     {{ product.Price | currency: "INR" }}
-                    <span *ngIf="product.Quantity > 1"> &times; {{ product.Quantity }}</span>
+                    <span *ngIf="product.Quantity > 1">
+                      &times; {{ product.Quantity }}</span
+                    >
                   </small>
                 </span>
               </div>
@@ -76,31 +79,44 @@
             <td>{{ order.DeliveryStatus }}</td>
             <td (click)="$event.stopPropagation()">
               <ng-container [ngSwitch]="order.SellerApprovalStatus">
-                <div *ngSwitchCase="'Pending'" class="d-flex flex-column" style="gap:6px">
+                <div
+                  *ngSwitchCase="'Pending'"
+                  class="d-flex flex-column"
+                  style="gap: 6px"
+                >
                   <button
                     type="button"
                     class="os-btn os-btn-sm"
                     (click)="approveOrder(order)"
-                  >Approve</button>
+                  >
+                    Approve
+                  </button>
                   <button
                     type="button"
                     class="os-btn os-btn-danger os-btn-sm"
                     (click)="openRejectionModal(order)"
-                  >Reject</button>
+                  >
+                    Reject
+                  </button>
                 </div>
                 <span
                   *ngSwitchCase="'Approved'"
                   class="admin-status-badge admin-status-badge--approved"
-                >Approved</span>
+                  >Approved</span
+                >
                 <span
                   *ngSwitchCase="'Rejected'"
                   class="admin-status-badge admin-status-badge--rejected"
-                >Rejected</span>
+                  >Rejected</span
+                >
                 <span *ngSwitchDefault class="text-muted">—</span>
               </ng-container>
             </td>
             <td (click)="$event.stopPropagation()">
-              <a class="tracking-link cursor-pointer" (click)="addTracking(order)">
+              <a
+                class="tracking-link cursor-pointer"
+                (click)="addTracking(order)"
+              >
                 {{ isShipped(order) ? "Update Tracking" : "Add Tracking" }}
               </a>
             </td>
@@ -109,8 +125,15 @@
                 class="admin-table__action-link cursor-pointer"
                 (click)="toggleExpand(order._id)"
               >
-                <i class="fa mr-5" [ngClass]="expandedOrderId === order._id ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                {{ expandedOrderId === order._id ? 'Hide' : 'View Details' }}
+                <i
+                  class="fa mr-5"
+                  [ngClass]="
+                    expandedOrderId === order._id
+                      ? 'fa-chevron-up'
+                      : 'fa-chevron-down'
+                  "
+                ></i>
+                {{ expandedOrderId === order._id ? "Hide" : "View Details" }}
               </a>
             </td>
           </tr>
@@ -122,31 +145,48 @@
                 <div class="col-md-4 mb-15">
                   <h6 class="mb-10">Order Information</h6>
                   <div class="row mb-5">
-                    <div class="col-5"><small class="text-muted">Order ID</small></div>
+                    <div class="col-5">
+                      <small class="text-muted">Order ID</small>
+                    </div>
                     <div class="col-7">{{ order.OrderID }}</div>
                   </div>
                   <div class="row mb-5">
-                    <div class="col-5"><small class="text-muted">Date</small></div>
-                    <div class="col-7">{{ order.CheckoutDate | date: "medium" }}</div>
+                    <div class="col-5">
+                      <small class="text-muted">Date</small>
+                    </div>
+                    <div class="col-7">
+                      {{ order.CheckoutDate | date: "medium" }}
+                    </div>
                   </div>
                   <div class="row mb-5">
-                    <div class="col-5"><small class="text-muted">Payment</small></div>
+                    <div class="col-5">
+                      <small class="text-muted">Payment</small>
+                    </div>
                     <div class="col-7">
-                      <span class="admin-status-badge admin-status-badge--{{ order.PaymentStatus | lowercase }}">
+                      <span
+                        class="admin-status-badge admin-status-badge--{{
+                          order.PaymentStatus | lowercase
+                        }}"
+                      >
                         {{ order.PaymentStatus }}
                       </span>
                     </div>
                   </div>
                 </div>
 
-<div class="col-md-4 mb-15">
+                <div class="col-md-4 mb-15">
                   <h6 class="mb-10">Shipping Address</h6>
                   <p class="mb-5">
                     {{ order.ShippingAddress?.FirstName }}
                     {{ order.ShippingAddress?.LastName }}
                   </p>
-                  <p class="mb-5 text-muted">{{ order.ShippingAddress?.AddressLine1 }}</p>
-                  <p *ngIf="order.ShippingAddress?.AddressLine2" class="mb-5 text-muted">
+                  <p class="mb-5 text-muted">
+                    {{ order.ShippingAddress?.AddressLine1 }}
+                  </p>
+                  <p
+                    *ngIf="order.ShippingAddress?.AddressLine2"
+                    class="mb-5 text-muted"
+                  >
                     {{ order.ShippingAddress?.AddressLine2 }}
                   </p>
                   <p class="mb-5 text-muted">
@@ -154,20 +194,30 @@
                     {{ order.ShippingAddress?.State }}
                     {{ order.ShippingAddress?.PostalCode }}
                   </p>
-                  <p class="mb-5 text-muted">{{ order.ShippingAddress?.Country }}</p>
-                  <p *ngIf="order.ShippingAddress?.Phone" class="mb-0 text-muted">
+                  <p class="mb-5 text-muted">
+                    {{ order.ShippingAddress?.Country }}
+                  </p>
+                  <p
+                    *ngIf="order.ShippingAddress?.Phone"
+                    class="mb-0 text-muted"
+                  >
                     Ph: {{ order.ShippingAddress?.Phone }}
                   </p>
                 </div>
               </div>
 
               <div
-                *ngIf="order.SellerApprovalStatus === 'Rejected' && order.SellerRejectionReason"
+                *ngIf="
+                  order.SellerApprovalStatus === 'Rejected' &&
+                  order.SellerRejectionReason
+                "
                 class="row mt-5"
               >
                 <div class="col-12">
                   <h6 class="mb-5">Rejection Reason</h6>
-                  <p class="text-danger mb-0">{{ order.SellerRejectionReason }}</p>
+                  <p class="text-danger mb-0">
+                    {{ order.SellerRejectionReason }}
+                  </p>
                 </div>
               </div>
             </td>
@@ -227,7 +277,9 @@
           ></textarea>
           <small class="text-muted">{{ rejectionReason.length }}/500</small>
         </div>
-        <span *ngIf="rejectionReasonError" class="text-danger">{{ rejectionReasonError }}</span>
+        <span *ngIf="rejectionReasonError" class="text-danger">{{
+          rejectionReasonError
+        }}</span>
       </div>
       <div class="modal-footer d-flex justify-content-end">
         <button
@@ -276,9 +328,7 @@
       </div>
       <div class="modal-body">
         <div class="checkout-form-list">
-          <label for="courier"
-            >Courier <span class="required">*</span></label
-          >
+          <label for="courier">Courier <span class="required">*</span></label>
           <input
             id="courier"
             type="text"
@@ -338,8 +388,8 @@
             isSavingTracking
               ? "Saving..."
               : editingShipmentId
-              ? "Update"
-              : "Save"
+                ? "Update"
+                : "Save"
           }}
         </button>
       </div>

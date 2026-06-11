@@ -1,11 +1,13 @@
 <app-header-four></app-header-four>
 
 <main>
-  <app-breadcrumb-two [title]="sellTitle" subtitle="Sell"></app-breadcrumb-two>
+  <app-breadcrumb-three
+    [title]="sellTitle"
+    subtitle="Sell"
+  ></app-breadcrumb-three>
 
   <section class="pt-80 pb-80">
     <div class="container">
-
       <!-- Tabs -->
       <div class="row mb-40">
         <div class="col-xl-12 d-flex justify-content-center">
@@ -17,7 +19,9 @@
                 data-bs-target="#business"
                 type="button"
                 role="tab"
-              >Business</button>
+              >
+                Business
+              </button>
             </li>
             <li class="nav-item" role="presentation">
               <button
@@ -26,19 +30,24 @@
                 data-bs-target="#individual"
                 type="button"
                 role="tab"
-              >Individual</button>
+              >
+                Individual
+              </button>
             </li>
           </ul>
         </div>
       </div>
 
       <div class="tab-content">
-
         <!-- Business Tab -->
         <div class="tab-pane fade show active" id="business" role="tabpanel">
-
           <!-- CTA Strip -->
-          <div [class]="businessCtaStripClass + ' mb-50 d-flex align-items-center justify-content-between flex-wrap gap-3'">
+          <div
+            [class]="
+              businessCtaStripClass +
+              ' mb-50 d-flex align-items-center justify-content-between flex-wrap gap-3'
+            "
+          >
             <div>
               <h4 class="mb-5">{{ businessCtaTitle }}</h4>
               <p class="mb-0">{{ businessCtaSubtitle }}</p>
@@ -49,7 +58,9 @@
               [class.os-btn-danger]="sellerVerificationStatus === 'Rejected'"
               [disabled]="businessCtaDisabled"
               (click)="onBusinessSellerClick()"
-            >{{ businessCtaLabel }}</button>
+            >
+              {{ businessCtaLabel }}
+            </button>
           </div>
 
           <div class="row">
@@ -67,7 +78,10 @@
             <div class="col-xl-7 col-lg-7 mb-30">
               <h5 class="mb-20">How it works</h5>
               <div class="row">
-                <div class="col-xl-6 col-md-6 mb-20" *ngFor="let step of businessSteps; let i = index">
+                <div
+                  class="col-xl-6 col-md-6 mb-20"
+                  *ngFor="let step of businessSteps; let i = index"
+                >
                   <div class="sell__business-step h-100">
                     <div class="d-flex align-items-start">
                       <span class="sell__step-number mr-15">{{ i + 1 }}</span>
@@ -85,18 +99,27 @@
 
         <!-- Individual Tab -->
         <div class="tab-pane fade" id="individual" role="tabpanel">
-
           <!-- CTA Strip -->
-          <div class="sell__cta-strip mb-50 d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div
+            class="sell__cta-strip mb-50 d-flex align-items-center justify-content-between flex-wrap gap-3"
+          >
             <div>
               <h4 class="mb-5">Start selling as an Individual</h4>
-              <p class="mb-0">We personally verify every listing to ensure authenticity and trust.</p>
+              <p class="mb-0">
+                We personally verify every listing to ensure authenticity and
+                trust.
+              </p>
             </div>
-            <button class="os-btn os-btn-black flex-shrink-0" disabled>Coming Soon</button>
+            <button class="os-btn os-btn-black flex-shrink-0" disabled>
+              Coming Soon
+            </button>
           </div>
 
           <div class="row">
-            <div class="col-xl-4 col-lg-4 col-md-6 mb-30" *ngFor="let step of individualSteps">
+            <div
+              class="col-xl-4 col-lg-4 col-md-6 mb-30"
+              *ngFor="let step of individualSteps"
+            >
               <div class="sell__step text-center">
                 <div class="sell__step-icon mb-15">
                   <i [class]="step.icon"></i>
@@ -107,7 +130,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </section>

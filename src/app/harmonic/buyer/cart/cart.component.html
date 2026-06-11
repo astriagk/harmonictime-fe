@@ -1,4 +1,4 @@
-<app-breadcrumb-two title="Cart" subtitle="Cart"></app-breadcrumb-two>
+<app-breadcrumb-three title="Cart" subtitle="Cart"></app-breadcrumb-three>
 <section class="cart-area pt-100 pb-100">
   <div class="container">
     <!-- Loading: shimmer placeholders for the cart rows -->
@@ -34,18 +34,36 @@
                   </a>
                 </td>
                 <td class="product-name">
-                  <a [routerLink]="['/buyer/product-details', item.ProductID]">{{
-                    item.ProductName
-                  }}</a>
+                  <a
+                    [routerLink]="['/buyer/product-details', item.ProductID]"
+                    >{{ item.ProductName }}</a
+                  >
                 </td>
                 <td class="product-price">
-                  <ng-container *ngIf="item.Offer?.IsActive && item.DisplayPrice; else regularPrice">
-                    <div class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) | currency: "INR" }}</div>
-                    <small class="offer-badge">{{ item.Offer.DiscountPercentage }}% off</small>
-                    <div class="old-price">{{ item.DisplayPrice | currency: "INR" }}</div>
+                  <ng-container
+                    *ngIf="
+                      item.Offer?.IsActive && item.DisplayPrice;
+                      else regularPrice
+                    "
+                  >
+                    <div class="amount">
+                      {{
+                        item.DisplayPrice *
+                          (1 - item.Offer.DiscountPercentage / 100)
+                          | currency: "INR"
+                      }}
+                    </div>
+                    <small class="offer-badge"
+                      >{{ item.Offer.DiscountPercentage }}% off</small
+                    >
+                    <div class="old-price">
+                      {{ item.DisplayPrice | currency: "INR" }}
+                    </div>
                   </ng-container>
                   <ng-template #regularPrice>
-                    <span class="amount">{{ item.DisplayPrice | currency: "INR" }}</span>
+                    <span class="amount">{{
+                      item.DisplayPrice | currency: "INR"
+                    }}</span>
                   </ng-template>
                 </td>
                 <td class="product-quantity">
@@ -54,7 +72,9 @@
                       class="dec qtybutton"
                       (click)="decrementQty(item)"
                       [disabled]="(item.Quantity || 1) <= 1"
-                    >-</button>
+                    >
+                      -
+                    </button>
                     <input
                       class="cart-plus-minus-box"
                       type="text"
@@ -64,12 +84,23 @@
                     <button
                       class="inc qtybutton"
                       (click)="incrementQty(item)"
-                      [disabled]="(item.Quantity || 1) >= (item.RemainingQuantity ?? 1)"
-                    >+</button>
+                      [disabled]="
+                        (item.Quantity || 1) >= (item.RemainingQuantity ?? 1)
+                      "
+                    >
+                      +
+                    </button>
                   </div>
-                  <div *ngIf="item.RemainingQuantity != null && (item.Quantity || 1) >= item.RemainingQuantity" class="d-flex justify-content-center">
+                  <div
+                    *ngIf="
+                      item.RemainingQuantity != null &&
+                      (item.Quantity || 1) >= item.RemainingQuantity
+                    "
+                    class="d-flex justify-content-center"
+                  >
                     <small class="qty-max-info">
-                      <i class="fas fa-info-circle"></i> Max {{ item.RemainingQuantity }} available
+                      <i class="fas fa-info-circle"></i> Max
+                      {{ item.RemainingQuantity }} available
                     </small>
                   </div>
                 </td>
@@ -117,17 +148,27 @@
               <ul class="mb-20">
                 <li *ngIf="cartService.computeOfferDiscount(cartItems) > 0">
                   Offer Savings
-                  <span style="color: green;">
-                    - {{ cartService.computeOfferDiscount(cartItems) | currency: "INR" }}
+                  <span style="color: green">
+                    -
+                    {{
+                      cartService.computeOfferDiscount(cartItems)
+                        | currency: "INR"
+                    }}
                   </span>
                 </li>
                 <li>
                   Subtotal
-                  <span>{{ cartService.computeCartTotal(cartItems).total | currency: "INR" }}</span>
+                  <span>{{
+                    cartService.computeCartTotal(cartItems).total
+                      | currency: "INR"
+                  }}</span>
                 </li>
                 <li>
                   Total
-                  <span>{{ cartService.computeCartTotal(cartItems).total | currency: "INR" }}</span>
+                  <span>{{
+                    cartService.computeCartTotal(cartItems).total
+                      | currency: "INR"
+                  }}</span>
                 </li>
               </ul>
               <a class="os-btn" routerLink="/buyer/checkout"
