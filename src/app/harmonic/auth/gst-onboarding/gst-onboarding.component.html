@@ -1,20 +1,17 @@
-<app-breadcrumb-two
+<app-breadcrumb-three
   title="GST Onboarding"
   subtitle="GST Details"
-></app-breadcrumb-two>
+></app-breadcrumb-three>
 
 <section class="gst-onboarding-area pt-60 pb-60">
   <div class="container">
-
     <div *ngIf="isLoading" class="text-center py-40">
       <i class="fa fa-spinner fa-spin fa-2x"></i>
     </div>
 
     <form *ngIf="!isLoading" [formGroup]="gstForm" (ngSubmit)="onSubmit()">
-
       <!-- Business Details -->
       <div class="row">
-
         <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
           <div class="checkout-form-list">
             <label for="gstin">GSTIN <span class="required">*</span></label>
@@ -23,25 +20,40 @@
               type="text"
               placeholder="e.g. 27AAPFU0939F1ZV"
               formControlName="GSTIN"
-              style="text-transform:uppercase"
+              style="text-transform: uppercase"
             />
-            <span *ngIf="GSTIN?.invalid && (GSTIN?.touched || formSubmitted)" class="text-danger">
-              <ng-container *ngIf="GSTIN?.hasError('required')">GSTIN is required.</ng-container>
-              <ng-container *ngIf="GSTIN?.hasError('pattern')">Enter a valid 15-character GSTIN.</ng-container>
+            <span
+              *ngIf="GSTIN?.invalid && (GSTIN?.touched || formSubmitted)"
+              class="text-danger"
+            >
+              <ng-container *ngIf="GSTIN?.hasError('required')"
+                >GSTIN is required.</ng-container
+              >
+              <ng-container *ngIf="GSTIN?.hasError('pattern')"
+                >Enter a valid 15-character GSTIN.</ng-container
+              >
             </span>
           </div>
         </div>
 
         <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
           <div class="checkout-form-list">
-            <label for="legalName">Legal Business Name <span class="required">*</span></label>
+            <label for="legalName"
+              >Legal Business Name <span class="required">*</span></label
+            >
             <input
               id="legalName"
               type="text"
               placeholder="As per GST registration"
               formControlName="LegalBusinessName"
             />
-            <span *ngIf="LegalBusinessName?.invalid && (LegalBusinessName?.touched || formSubmitted)" class="text-danger">
+            <span
+              *ngIf="
+                LegalBusinessName?.invalid &&
+                (LegalBusinessName?.touched || formSubmitted)
+              "
+              class="text-danger"
+            >
               Legal Business Name is required.
             </span>
           </div>
@@ -49,14 +61,21 @@
 
         <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
           <div class="checkout-form-list">
-            <label for="tradeName">Trade Name <span class="required">*</span></label>
+            <label for="tradeName"
+              >Trade Name <span class="required">*</span></label
+            >
             <input
               id="tradeName"
               type="text"
               placeholder="Brand / display name"
               formControlName="TradeName"
             />
-            <span *ngIf="TradeName?.invalid && (TradeName?.touched || formSubmitted)" class="text-danger">
+            <span
+              *ngIf="
+                TradeName?.invalid && (TradeName?.touched || formSubmitted)
+              "
+              class="text-danger"
+            >
               Trade Name is required.
             </span>
           </div>
@@ -64,12 +83,22 @@
 
         <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
           <div class="country-select">
-            <label for="businessType">Business Type <span class="required">*</span></label>
+            <label for="businessType"
+              >Business Type <span class="required">*</span></label
+            >
             <select id="businessType" formControlName="BusinessType">
               <option [ngValue]="null" disabled>Select a business type</option>
-              <option *ngFor="let type of businessTypes" [value]="type">{{ type }}</option>
+              <option *ngFor="let type of businessTypes" [value]="type">
+                {{ type }}
+              </option>
             </select>
-            <span *ngIf="BusinessType?.invalid && (BusinessType?.touched || formSubmitted)" class="text-danger">
+            <span
+              *ngIf="
+                BusinessType?.invalid &&
+                (BusinessType?.touched || formSubmitted)
+              "
+              class="text-danger"
+            >
               Business Type is required.
             </span>
           </div>
@@ -77,14 +106,22 @@
 
         <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
           <div class="checkout-form-list">
-            <label for="address">Registered Address <span class="required">*</span></label>
+            <label for="address"
+              >Registered Address <span class="required">*</span></label
+            >
             <input
               id="address"
               type="text"
               placeholder="As per GST registration"
               formControlName="RegisteredAddress"
             />
-            <span *ngIf="RegisteredAddress?.invalid && (RegisteredAddress?.touched || formSubmitted)" class="text-danger">
+            <span
+              *ngIf="
+                RegisteredAddress?.invalid &&
+                (RegisteredAddress?.touched || formSubmitted)
+              "
+              class="text-danger"
+            >
               Registered Address is required.
             </span>
           </div>
@@ -92,7 +129,9 @@
 
         <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
           <div class="checkout-form-list">
-            <label for="pincode">Pin Code <span class="required">*</span></label>
+            <label for="pincode"
+              >Pin Code <span class="required">*</span></label
+            >
             <input
               id="pincode"
               type="text"
@@ -100,9 +139,16 @@
               formControlName="PinCode"
               maxlength="6"
             />
-            <span *ngIf="PinCode?.invalid && (PinCode?.touched || formSubmitted)" class="text-danger">
-              <ng-container *ngIf="PinCode?.hasError('required')">Pin Code is required.</ng-container>
-              <ng-container *ngIf="PinCode?.hasError('pattern')">Enter a valid 6-digit PIN code.</ng-container>
+            <span
+              *ngIf="PinCode?.invalid && (PinCode?.touched || formSubmitted)"
+              class="text-danger"
+            >
+              <ng-container *ngIf="PinCode?.hasError('required')"
+                >Pin Code is required.</ng-container
+              >
+              <ng-container *ngIf="PinCode?.hasError('pattern')"
+                >Enter a valid 6-digit PIN code.</ng-container
+              >
             </span>
           </div>
         </div>
@@ -112,14 +158,18 @@
             <label for="state">State <span class="required">*</span></label>
             <select id="state" formControlName="State">
               <option [ngValue]="null" disabled>Select a state</option>
-              <option *ngFor="let s of indianStates" [value]="s">{{ s }}</option>
+              <option *ngFor="let s of indianStates" [value]="s">
+                {{ s }}
+              </option>
             </select>
-            <span *ngIf="State?.invalid && (State?.touched || formSubmitted)" class="text-danger">
+            <span
+              *ngIf="State?.invalid && (State?.touched || formSubmitted)"
+              class="text-danger"
+            >
               State is required.
             </span>
           </div>
         </div>
-
       </div>
 
       <!-- Document Uploads -->
@@ -127,10 +177,11 @@
         <h6 class="mb-15">Documents</h6>
         <div class="gst-doc-list">
           <div *ngFor="let doc of docSlots; let i = index" class="gst-doc-row">
-
             <!-- Left: label -->
             <div class="gst-doc-row__info">
-              <span class="gst-doc-row__label">{{ doc.label }} <span class="required">*</span></span>
+              <span class="gst-doc-row__label"
+                >{{ doc.label }} <span class="required">*</span></span
+              >
             </div>
 
             <!-- Middle: status -->
@@ -140,19 +191,32 @@
               </ng-container>
               <ng-container *ngIf="doc.existingUrl">
                 <i class="fa fa-check-circle gst-doc-row__check"></i>
-                <a [href]="doc.existingUrl" target="_blank" class="gst-doc-row__filename">View uploaded file</a>
+                <a
+                  [href]="doc.existingUrl"
+                  target="_blank"
+                  class="gst-doc-row__filename"
+                  >View uploaded file</a
+                >
               </ng-container>
               <ng-container *ngIf="doc.newFile">
                 <i class="fa fa-check-circle gst-doc-row__check"></i>
-                <span class="gst-doc-row__filename" [title]="doc.newFile.name">{{ doc.newFile.name }}</span>
+                <span
+                  class="gst-doc-row__filename"
+                  [title]="doc.newFile.name"
+                  >{{ doc.newFile.name }}</span
+                >
               </ng-container>
             </div>
 
             <!-- Right: action -->
             <div class="gst-doc-row__action">
               <ng-container *ngIf="!doc.newFile">
-                <label [for]="'doc-' + i" class="os-btn gst-doc-row__upload-btn">
-                  <i class="fa fa-upload"></i> {{ doc.existingUrl ? 'Replace' : 'Upload' }}
+                <label
+                  [for]="'doc-' + i"
+                  class="os-btn gst-doc-row__upload-btn"
+                >
+                  <i class="fa fa-upload"></i>
+                  {{ doc.existingUrl ? "Replace" : "Upload" }}
                 </label>
                 <input
                   [id]="'doc-' + i"
@@ -173,20 +237,27 @@
             </div>
 
             <!-- Validation error -->
-            <div *ngIf="formSubmitted && !doc.existingUrl && !doc.newFile" class="gst-doc-row__error text-danger">
+            <div
+              *ngIf="formSubmitted && !doc.existingUrl && !doc.newFile"
+              class="gst-doc-row__error text-danger"
+            >
               {{ doc.label }} is required.
             </div>
-
           </div>
         </div>
       </div>
 
       <div class="d-md-flex justify-content-end mt-10">
         <button type="submit" class="os-btn" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Submitting...' : (existingGstId ? 'Update GST Details' : 'Submit GST Details') }}
+          {{
+            isSubmitting
+              ? "Submitting..."
+              : existingGstId
+                ? "Update GST Details"
+                : "Submit GST Details"
+          }}
         </button>
       </div>
-
     </form>
   </div>
 </section>

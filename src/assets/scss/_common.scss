@@ -771,6 +771,55 @@ p {
 }
 
 
+/* page title three - left h1, right breadcrumb */
+
+.page{
+	&__title_three{
+		height: 160px;
+		@include background();
+		@media #{$sm}{
+			height: 160px;
+		}
+		@media #{$xs}{
+			height: 240px;
+		}
+		&-inner{
+			& h1{
+				font-size: 36px;
+				color: $black-2;
+				text-transform: capitalize;
+				margin-bottom: 0;
+			}
+		}
+		&-breadcrumb{
+			& .breadcrumb{
+				background: transparent;
+				padding: 0;
+				margin-bottom: 0;
+				@include border-radius(0);
+			}
+			& .breadcrumb-item{
+				font-size: 12px;
+				text-transform: capitalize;
+				color: $black-soft;
+				font-weight: 500;
+				& a{
+					&:hover{
+						color: $theme-color;
+					}
+				}
+				&.active{
+					color: $black-2;
+					&::before{
+						color: $black-soft;
+					}
+				}
+			}
+		}
+	}
+}
+
+
 /* rating */
 
 .rating{

@@ -1,15 +1,11 @@
-<app-breadcrumb-two title="Offers" subtitle="Admin"></app-breadcrumb-two>
+<app-breadcrumb-three title="Offers" subtitle="Admin"></app-breadcrumb-three>
 
 <section class="order-info container">
   <header
     class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20"
   >
     <h2 class="order-info__title">Offers</h2>
-    <button
-      type="button"
-      class="os-btn os-btn-black"
-      (click)="openCreate()"
-    >
+    <button type="button" class="os-btn os-btn-black" (click)="openCreate()">
       New Offer
     </button>
   </header>
@@ -76,10 +72,7 @@
               [class.disabled]="isDeleting === offer._id"
               (click)="isDeleting !== offer._id && requestDelete(offer)"
             >
-              <i
-                *ngIf="isDeleting !== offer._id"
-                class="fal fa-trash-alt"
-              ></i>
+              <i *ngIf="isDeleting !== offer._id" class="fal fa-trash-alt"></i>
               <i
                 *ngIf="isDeleting === offer._id"
                 class="fal fa-spinner fa-spin"
@@ -264,7 +257,11 @@
           <button type="button" class="os-btn mr-10" (click)="cancelDelete()">
             No, Keep It
           </button>
-          <button type="button" class="os-btn os-btn-black" (click)="confirmDelete()">
+          <button
+            type="button"
+            class="os-btn os-btn-black"
+            (click)="confirmDelete()"
+          >
             Yes, Delete
           </button>
         </div>
