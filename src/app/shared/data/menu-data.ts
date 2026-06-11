@@ -35,7 +35,6 @@ const menuData: IMenuType[] = [
   {
     link: '/pages/sell',
     title: 'Sell',
-    buyer: true,
     hasDropdown: false,
   },
   {
@@ -75,7 +74,6 @@ export const mobile_menus: IMobileMenu[] = [
   {
     title: 'Sell',
     link: '/pages/sell',
-    buyer: true,
   },
   {
     title: 'Contact',
