@@ -1,8 +1,8 @@
-<app-breadcrumb-three title="Checkout" subtitle="Checkout"></app-breadcrumb-three>
-<section
-  class="coupon-area pt-100 pb-30"
-  *ngIf="!isLoading && cartItems.length > 0"
->
+<app-breadcrumb-three
+  title="Checkout"
+  subtitle="Checkout"
+></app-breadcrumb-three>
+<section class="coupon-area pt-60" *ngIf="!isLoading && cartItems.length > 0">
   <div class="container">
     <div class="row">
       <div class="col-md-6">
@@ -24,9 +24,13 @@
                   <label>Email <span class="required">*</span></label>
                   <input type="text" formControlName="email" />
                   <span
-                    *ngIf="loginEmail?.invalid && (loginEmail?.touched || loginSubmitted)"
+                    *ngIf="
+                      loginEmail?.invalid &&
+                      (loginEmail?.touched || loginSubmitted)
+                    "
                     class="text-danger"
-                  >A valid email is required</span>
+                    >A valid email is required</span
+                  >
                 </div>
                 <div class="checkout-form-list">
                   <label>Password <span class="required">*</span></label>
@@ -42,12 +46,18 @@
                     ></i>
                   </div>
                   <span
-                    *ngIf="loginPassword?.invalid && (loginPassword?.touched || loginSubmitted)"
+                    *ngIf="
+                      loginPassword?.invalid &&
+                      (loginPassword?.touched || loginSubmitted)
+                    "
                     class="text-danger"
-                  >Password is required</span>
+                    >Password is required</span
+                  >
                 </div>
                 <div class="checkout-form-list">
-                  <button class="os-btn os-btn-black" type="submit">Login</button>
+                  <button class="os-btn os-btn-black" type="submit">
+                    Login
+                  </button>
                 </div>
               </form>
             </div>
@@ -76,9 +86,13 @@
                   <label>Email <span class="required">*</span></label>
                   <input type="text" formControlName="email" />
                   <span
-                    *ngIf="registerEmail?.invalid && (registerEmail?.touched || registerSubmitted)"
+                    *ngIf="
+                      registerEmail?.invalid &&
+                      (registerEmail?.touched || registerSubmitted)
+                    "
                     class="text-danger"
-                  >A valid email is required</span>
+                    >A valid email is required</span
+                  >
                 </div>
                 <div class="checkout-form-list">
                   <label>Password <span class="required">*</span></label>
@@ -89,17 +103,26 @@
                     />
                     <i
                       class="fal"
-                      [ngClass]="showRegisterPassword ? 'fa-eye-slash' : 'fa-eye'"
+                      [ngClass]="
+                        showRegisterPassword ? 'fa-eye-slash' : 'fa-eye'
+                      "
                       (click)="toggleRegisterPassword('password')"
                     ></i>
                   </div>
                   <span
-                    *ngIf="registerPassword?.invalid && (registerPassword?.touched || registerSubmitted)"
+                    *ngIf="
+                      registerPassword?.invalid &&
+                      (registerPassword?.touched || registerSubmitted)
+                    "
                     class="text-danger"
-                  >Password must be at least 6 characters and include uppercase, lowercase, a number and a special character</span>
+                    >Password must be at least 6 characters and include
+                    uppercase, lowercase, a number and a special character</span
+                  >
                 </div>
                 <div class="checkout-form-list">
-                  <label>Confirm Password <span class="required">*</span></label>
+                  <label
+                    >Confirm Password <span class="required">*</span></label
+                  >
                   <div class="auth-input">
                     <input
                       [type]="showRegisterConfirmPassword ? 'text' : 'password'"
@@ -107,14 +130,20 @@
                     />
                     <i
                       class="fal"
-                      [ngClass]="showRegisterConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"
+                      [ngClass]="
+                        showRegisterConfirmPassword ? 'fa-eye-slash' : 'fa-eye'
+                      "
                       (click)="toggleRegisterPassword('confirmPassword')"
                     ></i>
                   </div>
                   <span
-                    *ngIf="registerForm.hasError('passwordsMismatch') && (registerConfirmPassword?.dirty || registerSubmitted)"
+                    *ngIf="
+                      registerForm.hasError('passwordsMismatch') &&
+                      (registerConfirmPassword?.dirty || registerSubmitted)
+                    "
                     class="text-danger"
-                  >Passwords do not match</span>
+                    >Passwords do not match</span
+                  >
                 </div>
                 <div class="login-action mb-30">
                   <input
@@ -125,11 +154,15 @@
                   />
                   <label for="checkoutAgreeTerms">
                     I agree to the
-                    <a href="/pages/policy/terms" target="_blank">Terms &amp; Conditions</a>
+                    <a href="/pages/policy/terms" target="_blank"
+                      >Terms &amp; Conditions</a
+                    >
                   </label>
                 </div>
                 <div class="checkout-form-list">
-                  <button class="os-btn os-btn-black" type="submit">Register</button>
+                  <button class="os-btn os-btn-black" type="submit">
+                    Register
+                  </button>
                 </div>
               </form>
             </div>
@@ -240,8 +273,8 @@
                           }}{{
                             addr.AddressLine2 ? ", " + addr.AddressLine2 : ""
                           }}<br />
-                          {{ addr.City }}, {{ addr.State }}
-                          {{ addr.PostalCode }}<br />
+                          {{ addr.City }}, {{ addr.State }} {{ addr.PostalCode
+                          }}<br />
                           {{ addr.Country }}
                           <ng-container *ngIf="addr.Phone"
                             ><br />{{ addr.Phone }}</ng-container
@@ -480,46 +513,90 @@
                       <td class="product-name">
                         {{ item.ProductName }}
                         <div *ngIf="item.IsPriceInclusiveOfTax">
-                          <small class="product__tax-note">Incl. all taxes</small>
+                          <small class="product__tax-note"
+                            >Incl. all taxes</small
+                          >
                         </div>
                         <div class="checkout-qty">
                           <button
                             class="checkout-qty__btn"
                             (click)="decrementQty(item)"
                             [disabled]="(item.Quantity || 1) <= 1"
-                          >−</button>
-                          <span class="checkout-qty__value">{{ item.Quantity || 1 }}</span>
+                          >
+                            −
+                          </button>
+                          <span class="checkout-qty__value">{{
+                            item.Quantity || 1
+                          }}</span>
                           <button
                             class="checkout-qty__btn"
                             (click)="incrementQty(item)"
-                            [disabled]="(item.Quantity || 1) >= (item.RemainingQuantity ?? 1)"
-                          >+</button>
+                            [disabled]="
+                              (item.Quantity || 1) >=
+                              (item.RemainingQuantity ?? 1)
+                            "
+                          >
+                            +
+                          </button>
                         </div>
                         <small
-                          *ngIf="item.RemainingQuantity != null && (item.Quantity || 1) >= item.RemainingQuantity"
+                          *ngIf="
+                            item.RemainingQuantity != null &&
+                            (item.Quantity || 1) >= item.RemainingQuantity
+                          "
                           class="qty-max-info"
                         >
-                          <i class="fas fa-info-circle"></i> Max {{ item.RemainingQuantity }} available
+                          <i class="fas fa-info-circle"></i> Max
+                          {{ item.RemainingQuantity }} available
                         </small>
                       </td>
                       <td class="product-total">
-                        <ng-container *ngIf="item.Offer?.IsActive && item.DisplayPrice; else regularPrice">
-                          <span class="amount">{{ item.DisplayPrice * (1 - item.Offer.DiscountPercentage / 100) * (item.Quantity || 1) | currency: "INR" }}</span>
-                          <small class="offer-badge ml-5">{{ item.Offer.DiscountPercentage }}% off</small>
-                          <div><small class="old-price">MRP: {{ item.DisplayPrice | currency: "INR" }}</small></div>
+                        <ng-container
+                          *ngIf="
+                            item.Offer?.IsActive && item.DisplayPrice;
+                            else regularPrice
+                          "
+                        >
+                          <span class="amount">{{
+                            item.DisplayPrice *
+                              (1 - item.Offer.DiscountPercentage / 100) *
+                              (item.Quantity || 1) | currency: "INR"
+                          }}</span>
+                          <small class="offer-badge ml-5"
+                            >{{ item.Offer.DiscountPercentage }}% off</small
+                          >
+                          <div>
+                            <small class="old-price"
+                              >MRP:
+                              {{ item.DisplayPrice | currency: "INR" }}</small
+                            >
+                          </div>
                         </ng-container>
                         <ng-template #regularPrice>
-                          <span class="amount">{{ item.DisplayPrice * (item.Quantity || 1) | currency: "INR" }}</span>
+                          <span class="amount">{{
+                            item.DisplayPrice * (item.Quantity || 1)
+                              | currency: "INR"
+                          }}</span>
                         </ng-template>
                       </td>
                     </tr>
                   </tbody>
                   <tfoot>
-                    <tr *ngIf="cartService.computeCheckoutSummary(cartItems).offerDiscount > 0" class="cart-subtotal">
+                    <tr
+                      *ngIf="
+                        cartService.computeCheckoutSummary(cartItems)
+                          .offerDiscount > 0
+                      "
+                      class="cart-subtotal"
+                    >
                       <th>Offer Savings</th>
                       <td>
-                        <span class="amount" style="color: green;">
-                          - {{ cartService.computeCheckoutSummary(cartItems).offerDiscount | currency: "INR" }}
+                        <span class="amount" style="color: green">
+                          -
+                          {{
+                            cartService.computeCheckoutSummary(cartItems)
+                              .offerDiscount | currency: "INR"
+                          }}
                         </span>
                       </td>
                     </tr>
@@ -533,8 +610,18 @@
                       </td>
                     </tr>
 
-                    <tr *ngIf="cartService.computeCheckoutSummary(cartItems).gst > 0" class="cart-subtotal">
-                      <th>GST ({{ cartService.computeCheckoutSummary(cartItems).gstPercent }}%)</th>
+                    <tr
+                      *ngIf="
+                        cartService.computeCheckoutSummary(cartItems).gst > 0
+                      "
+                      class="cart-subtotal"
+                    >
+                      <th>
+                        GST ({{
+                          cartService.computeCheckoutSummary(cartItems)
+                            .gstPercent
+                        }}%)
+                      </th>
                       <td>
                         <span class="amount">{{
                           cartService.computeCheckoutSummary(cartItems).gst
