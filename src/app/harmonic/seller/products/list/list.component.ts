@@ -2,7 +2,7 @@ import { ViewportScroller } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { OFFERS, BULK_OFFER, UPDATE_PRODUCT_BY_ID } from '@config/index';
+import { BULK_OFFER, UPDATE_PRODUCT_BY_ID } from '@config/index';
 import { GenericService } from '@shared/services/generic.service';
 import { UtilsService } from '@shared/services/utils.service';
 import { ToastrService } from 'ngx-toastr';
@@ -14,6 +14,11 @@ import {
   selectSellerProducts,
   selectSellerProductsLoading,
 } from 'src/app/store/selectors/seller-products.selectors';
+import { loadSellerOffers } from 'src/app/store/actions/seller-offers.actions';
+import {
+  selectSellerOffers,
+  selectSellerOffersLoading,
+} from 'src/app/store/selectors/seller-offers.selectors';
 
 interface Offer {
   _id: string;
@@ -78,6 +83,15 @@ export class ListComponent implements OnInit, OnDestroy {
       this.pageNo = params['page'] ? Number(params['page']) : this.pageNo;
       this.updatePagination();
     });
+
+    this.store
+      .select(selectSellerOffers)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((offers) => (this.offers = offers as Offer[]));
+    this.store
+      .select(selectSellerOffersLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.offersLoading = loading));
   }
 
   ngOnDestroy(): void {
@@ -129,16 +143,8 @@ export class ListComponent implements OnInit, OnDestroy {
     this.isOfferModalOpen = true;
     this.selectedOfferId = null;
     this.selectedProductIds = new Set();
-    if (this.offers.length === 0) {
-      this.offersLoading = true;
-      this.genericService
-        .getObservable(OFFERS)
-        .pipe(finalize(() => (this.offersLoading = false)))
-        .subscribe({
-          next: (res) => (this.offers = res?.data ?? []),
-          error: () => this.toastrService.error('Failed to load offers'),
-        });
-    }
+    // The slice's loaded-guard fetches once and serves cache on later opens.
+    this.store.dispatch(loadSellerOffers({}));
   }
 
   closeOfferModal(): void {

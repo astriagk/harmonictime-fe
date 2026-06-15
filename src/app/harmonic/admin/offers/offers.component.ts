@@ -9,7 +9,7 @@ import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
-import { loadAdminOffers, reloadAdminOffers } from 'src/app/store/actions/admin-offers.actions';
+import { loadAdminOffers, reloadAdminOffers, upsertAdminOffer } from 'src/app/store/actions/admin-offers.actions';
 import {
   selectAdminOffers,
   selectAdminOffersLoading,
@@ -184,7 +184,9 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
       .patchObservable(OFFER_STATUS(offer._id), { IsActive: newStatus })
       .subscribe({
         next: () => {
-          offer.IsActive = newStatus;
+          this.store.dispatch(
+            upsertAdminOffer({ offer: { ...offer, IsActive: newStatus } }),
+          );
           this.toastr.success(newStatus ? 'Offer enabled' : 'Offer disabled');
         },
         error: () => this.toastr.error('Failed to update offer status'),

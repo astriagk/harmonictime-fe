@@ -25,6 +25,15 @@ import { FiltersEffects } from './store/effects/filters.effects';
 import { SellerProductsEffects } from './store/effects/seller-products.effects';
 import { SellerOrdersEffects } from './store/effects/seller-orders.effects';
 import { AdminOffersEffects } from './store/effects/admin-offers.effects';
+import { AddressesEffects } from './store/effects/addresses.effects';
+import { WalletEffects } from './store/effects/wallet.effects';
+import { WalletItemsEffects } from './store/effects/wallet-items.effects';
+import { WithdrawalsEffects } from './store/effects/withdrawals.effects';
+import { BankAccountsEffects } from './store/effects/bank-accounts.effects';
+import { SellerOffersEffects } from './store/effects/seller-offers.effects';
+import { AdminUsersEffects } from './store/effects/admin-users.effects';
+import { AdminProductsEffects } from './store/effects/admin-products.effects';
+import { AdminWithdrawalsEffects } from './store/effects/admin-withdrawals.effects';
 import { TitleStrategy } from '@angular/router';
 import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
 
@@ -55,6 +64,15 @@ import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
       SellerProductsEffects,
       SellerOrdersEffects,
       AdminOffersEffects,
+      AddressesEffects,
+      WalletEffects,
+      WalletItemsEffects,
+      WithdrawalsEffects,
+      BankAccountsEffects,
+      SellerOffersEffects,
+      AdminUsersEffects,
+      AdminProductsEffects,
+      AdminWithdrawalsEffects,
     ]),
     StoreDevtoolsModule.instrument({
       maxAge: 25,

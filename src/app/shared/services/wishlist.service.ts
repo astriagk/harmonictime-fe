@@ -74,7 +74,7 @@ export class WishlistService {
                   this.toastrService.error(
                     `${payload.ProductName} removed from wishlist`
                   );
-                  this.store.dispatch(loadWishlist());
+                  this.store.dispatch(loadWishlist({ force: true }));
                 })
               );
             }
@@ -98,7 +98,7 @@ export class WishlistService {
                   this.toastrService.success(
                     `${payload.ProductName} added to wishlist`
                   );
-                  this.store.dispatch(loadWishlist());
+                  this.store.dispatch(loadWishlist({ force: true }));
                 })
               );
           } else {
@@ -136,7 +136,7 @@ export class WishlistService {
                 this.toastrService.error(
                   `${payload.ProductName} removed from wishlist`
                 );
-                this.store.dispatch(loadWishlist());
+                this.store.dispatch(loadWishlist({ force: true }));
               },
               error: () => {
                 this.toastrService.error(
@@ -160,8 +160,8 @@ export class WishlistService {
       .subscribe({
         next: () => {
           this.toastrService.success(`${item.ProductName} moved to cart`);
-          this.store.dispatch(loadWishlist());
-          this.store.dispatch(loadCart());
+          this.store.dispatch(loadWishlist({ force: true }));
+          this.store.dispatch(loadCart({ force: true }));
         },
         error: (err) => {
           const message = err?.error?.message || 'Failed to move item to cart';
@@ -221,7 +221,7 @@ export class WishlistService {
   mergeGuestWishlist(userId: string) {
     const guestWishlist = this.getGuestWishlist();
     if (!guestWishlist.length) {
-      this.store.dispatch(loadWishlist());
+      this.store.dispatch(loadWishlist({}));
       return;
     }
     const requests = guestWishlist.map((item: any) =>
@@ -234,7 +234,7 @@ export class WishlistService {
     );
     forkJoin(requests).subscribe(() => {
       sessionStorage.removeItem(this.GUEST_WISHLIST_KEY);
-      this.store.dispatch(loadWishlist());
+      this.store.dispatch(loadWishlist({ force: true }));
     });
   }
 }

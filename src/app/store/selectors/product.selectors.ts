@@ -37,3 +37,13 @@ export const selectProductDetailId = createSelector(
   selectProductsState,
   (state) => state.detailProductId
 );
+
+export const selectEditProduct = createSelector(
+  selectProductsState,
+  (state) => state.editProduct
+);
+
+export const selectEditProductLoading = createSelector(
+  selectProductsState,
+  (state) => state.editLoading
+);

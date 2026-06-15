@@ -10,6 +10,9 @@ import {
   loadProductDetail,
   loadProductDetailSuccess,
   loadProductDetailFailure,
+  loadEditProduct,
+  loadEditProductSuccess,
+  loadEditProductFailure,
 } from '../actions/product.actions';
 import { selectProductsLoaded, selectProductDetailId } from '../selectors/product.selectors';
 import { GenericService } from '@shared/services/generic.service';
@@ -49,6 +52,26 @@ export class ProductEffects {
             of(loadProductDetailFailure({ error: error.message }))
           )
         )
+      )
+    )
+  );
+
+  // Seller edit form: authenticated single-product fetch, always fresh so the
+  // form reflects the latest saved state after an edit.
+  loadEditProduct$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loadEditProduct),
+      exhaustMap((action) =>
+        this.genericService
+          .getObservableToken(GET_PRODUCT_BY_ID + action.id)
+          .pipe(
+            map((response: any) =>
+              loadEditProductSuccess({ product: response?.data?.[0] })
+            ),
+            catchError((error) =>
+              of(loadEditProductFailure({ error: error.message }))
+            )
+          )
       )
     )
   );

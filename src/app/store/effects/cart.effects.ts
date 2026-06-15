@@ -17,6 +17,7 @@ import {
 import { GenericService } from '@shared/services/generic.service';
 import { GET_PRODUCT_BY_ID, USER_CART } from '@config/index';
 import { selectUserData } from '../selectors/user.selectors';
+import { selectCartLoaded } from '../selectors/cart.selectors';
 import { Store } from '@ngrx/store';
 
 @Injectable()
@@ -24,8 +25,14 @@ export class CartEffects {
   loadCart$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadCart),
-      withLatestFrom(this.store.select(selectUserData)),
-      filter(([_, userData]) => !!userData?.user?.data),
+      withLatestFrom(
+        this.store.select(selectUserData),
+        this.store.select(selectCartLoaded)
+      ),
+      // Skip a redundant fetch when the cart is already cached, unless forced.
+      filter(([action, userData, loaded]) =>
+        !!userData?.user?.data && (!!action.force || !loaded)
+      ),
       switchMap(([_, userData]) => {
         const url = USER_CART + `${userData.user.data._id}`;
         return this.genericService.getObservable(url).pipe(

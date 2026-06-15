@@ -17,6 +17,18 @@ export const selectWishlistError = createSelector(
   (state) => state.error
 );
 
+// Select Loading State
+export const selectWishlistLoading = createSelector(
+  selectWishlistState,
+  (state) => state.loading
+);
+
+// Select Loaded flag (used by the effect's re-fetch guard)
+export const selectWishlistLoaded = createSelector(
+  selectWishlistState,
+  (state) => state.loaded
+);
+
 export const isProductInWishlist = (productId: string) =>
   createSelector(selectWishlistItems, (wishlistItems) =>
     wishlistItems.some(

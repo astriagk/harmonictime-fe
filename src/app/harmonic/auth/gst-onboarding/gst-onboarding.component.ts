@@ -116,7 +116,7 @@ export class GstOnboardingComponent implements OnInit, OnDestroy {
       State: new FormControl(null, [Validators.required]),
     });
 
-    this.store.dispatch(loadGst());
+    this.store.dispatch(loadGst({}));
 
     this.store.select(selectGstLoading).pipe(takeUntil(this.destroy$)).subscribe((loading) => {
       this.isLoading = loading;

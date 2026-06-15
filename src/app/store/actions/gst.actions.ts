@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 
-export const loadGst = createAction('[GST] Load');
+export const loadGst = createAction('[GST] Load', props<{ force?: boolean }>());
 export const loadGstSuccess = createAction('[GST] Load Success', props<{ data: any }>());
 export const loadGstFailure = createAction('[GST] Load Failure', props<{ error: any }>());
 
