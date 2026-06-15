@@ -21,7 +21,7 @@ export class GstEffects {
     this.actions$.pipe(
       ofType(loadGst),
       withLatestFrom(this.store.select(selectGstState)),
-      filter(([, state]) => !state.loaded),
+      filter(([action, state]) => !!action.force || !state.loaded),
       exhaustMap(() =>
         this.genericService.getObservableToken(GST_ONBOARDING).pipe(
           map((res: any) => loadGstSuccess({ data: res?.data ?? null })),

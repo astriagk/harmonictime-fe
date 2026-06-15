@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { switchMap, map, catchError, of } from 'rxjs';
+import { exhaustMap, map, catchError, of, withLatestFrom, filter } from 'rxjs';
+import { Store } from '@ngrx/store';
 import {
   loadOrders,
   loadOrdersFailure,
   loadOrdersSuccess,
 } from '../actions/orders.actions';
+import { selectOrdersLoaded } from '../selectors/orders.selectors';
 import { GenericService } from '@shared/services/generic.service';
 import { GET_ORDERS } from '@config/index';
 
@@ -14,7 +16,9 @@ export class OrdersEffects {
   loadOrders$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadOrders),
-      switchMap(({ userId }) =>
+      withLatestFrom(this.store.select(selectOrdersLoaded)),
+      filter(([action, loaded]) => !!action.force || !loaded),
+      exhaustMap(([{ userId }]) =>
         this.genericService.getObservable(`${GET_ORDERS}${userId}`).pipe(
           map((response: any) =>
             loadOrdersSuccess({ orders: response.data || [] })
@@ -27,6 +31,7 @@ export class OrdersEffects {
 
   constructor(
     private actions$: Actions,
-    private genericService: GenericService
+    private genericService: GenericService,
+    private store: Store
   ) {}
 }

@@ -3,6 +3,7 @@ import {
   loadSellerOrders,
   loadSellerOrdersSuccess,
   loadSellerOrdersFailure,
+  upsertSellerOrder,
 } from '../actions/seller-orders.actions';
 
 export interface SellerOrdersState {
@@ -41,5 +42,10 @@ export const sellerOrdersReducer = createReducer(
     loaded: false,
     loading: false,
     error,
+  })),
+
+  on(upsertSellerOrder, (state, { order }) => ({
+    ...state,
+    orders: state.orders.map((o) => (o._id === order._id ? order : o)),
   }))
 );

@@ -3,7 +3,7 @@ import { createAction, props } from '@ngrx/store';
 // Load Orders
 export const loadOrders = createAction(
   '[Orders] Load Orders',
-  props<{ userId: string }>()
+  props<{ userId: string; force?: boolean }>()
 );
 
 // Load Orders Success

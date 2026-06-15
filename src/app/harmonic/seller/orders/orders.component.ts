@@ -12,7 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ProductService } from 'src/app/shared/services/product.service';
-import { loadSellerOrders } from 'src/app/store/actions/seller-orders.actions';
+import { loadSellerOrders, upsertSellerOrder } from 'src/app/store/actions/seller-orders.actions';
 import {
   selectSellerOrders,
   selectSellerOrdersLoading,
@@ -181,7 +181,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const url = SELLER_ORDER_APPROVAL(this.userData._id, order._id);
     this.genericService.putObservable(url, { Status: 'Approved' }).subscribe({
       next: () => {
-        order.SellerApprovalStatus = 'Approved';
+        this.store.dispatch(
+          upsertSellerOrder({
+            order: { ...order, SellerApprovalStatus: 'Approved' },
+          }),
+        );
         this.toastrService.success('Order approved successfully.');
       },
       error: () => this.toastrService.error('Failed to approve order.'),
@@ -214,8 +218,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const url = SELLER_ORDER_APPROVAL(this.userData._id, this.rejectionOrder._id);
     this.genericService.putObservable(url, payload).subscribe({
       next: () => {
-        this.rejectionOrder.SellerApprovalStatus = 'Rejected';
-        this.rejectionOrder.SellerRejectionReason = payload.Reason ?? null;
+        this.store.dispatch(
+          upsertSellerOrder({
+            order: {
+              ...this.rejectionOrder,
+              SellerApprovalStatus: 'Rejected',
+              SellerRejectionReason: payload.Reason ?? null,
+            },
+          }),
+        );
         this.toastrService.success('Order rejected.');
         this.closeRejectionModal();
       },
@@ -248,15 +259,22 @@ export class OrdersComponent implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             if (this.selectedOrder) {
-              this.selectedOrder.DeliveryStatus = this.shipmentStatus;
-              this.selectedOrder.Shipment = {
-                ...(this.selectedOrder.Shipment ?? {}),
-                _id: this.editingShipmentId,
-                Courier: courier,
-                TrackingNumber: trackingNumber,
-                TrackingURL: trackingUrl,
-                ShipmentStatus: this.shipmentStatus,
-              };
+              this.store.dispatch(
+                upsertSellerOrder({
+                  order: {
+                    ...this.selectedOrder,
+                    DeliveryStatus: this.shipmentStatus,
+                    Shipment: {
+                      ...(this.selectedOrder.Shipment ?? {}),
+                      _id: this.editingShipmentId,
+                      Courier: courier,
+                      TrackingNumber: trackingNumber,
+                      TrackingURL: trackingUrl,
+                      ShipmentStatus: this.shipmentStatus,
+                    },
+                  },
+                }),
+              );
             }
             this.toastrService.success('Tracking details updated successfully.');
             this.closeTracking();
@@ -281,14 +299,21 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.genericService.postObservable(CREATE_SHIPMENT, payload).subscribe({
       next: (response) => {
         if (this.selectedOrder) {
-          this.selectedOrder.DeliveryStatus = this.shipmentStatus;
-          this.selectedOrder.Shipment = {
-            _id: response?.data?._id,
-            Courier: courier,
-            TrackingNumber: trackingNumber,
-            TrackingURL: trackingUrl,
-            ShipmentStatus: this.shipmentStatus,
-          };
+          this.store.dispatch(
+            upsertSellerOrder({
+              order: {
+                ...this.selectedOrder,
+                DeliveryStatus: this.shipmentStatus,
+                Shipment: {
+                  _id: response?.data?._id,
+                  Courier: courier,
+                  TrackingNumber: trackingNumber,
+                  TrackingURL: trackingUrl,
+                  ShipmentStatus: this.shipmentStatus,
+                },
+              },
+            }),
+          );
         }
         this.toastrService.success('Tracking ID added successfully.');
         this.closeTracking();

@@ -4,6 +4,7 @@ import {
   reloadAdminOffers,
   loadAdminOffersSuccess,
   loadAdminOffersFailure,
+  upsertAdminOffer,
 } from '../actions/admin-offers.actions';
 
 export interface AdminOffersState {
@@ -49,5 +50,10 @@ export const adminOffersReducer = createReducer(
     loaded: false,
     loading: false,
     error,
+  })),
+
+  on(upsertAdminOffer, (state, { offer }) => ({
+    ...state,
+    offers: state.offers.map((o) => (o._id === offer._id ? offer : o)),
   }))
 );

@@ -1,9 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { finalize } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
-import { ADMIN_PRODUCTS, adminProductAction } from 'src/app/config';
+import { adminProductAction } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
+import { loadAdminProducts } from 'src/app/store/actions/admin-products.actions';
+import {
+  selectAdminProducts,
+  selectAdminProductsLoading,
+} from 'src/app/store/selectors/admin-products.selectors';
 
 type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected';
 type ProductAction = 'approve' | 'reject';
@@ -60,7 +67,8 @@ interface AdminProduct {
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss'],
 })
-export class AdminProductsComponent implements OnInit {
+export class AdminProductsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   products: AdminProduct[] = [];
   paginated: AdminProduct[] = [];
   paginate: any = {};
@@ -86,30 +94,37 @@ export class AdminProductsComponent implements OnInit {
     private genericService: GenericService,
     private toastr: ToastrService,
     private productService: ProductService,
+    private store: Store,
   ) {}
 
   ngOnInit(): void {
+    this.store
+      .select(selectAdminProductsLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.loading = loading));
+
+    this.store
+      .select(selectAdminProducts)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((products) => {
+        this.products = products as AdminProduct[];
+        this.pageNo = 1;
+        this.updatePagination();
+      });
+
     this.loadProducts();
   }
 
-  loadProducts(): void {
-    this.loading = true;
-    const url =
-      this.statusFilter === 'all'
-        ? ADMIN_PRODUCTS
-        : `${ADMIN_PRODUCTS}?status=${this.statusFilter}`;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    this.genericService
-      .getObservableToken(url)
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res) => {
-          this.products = res?.data ?? [];
-          this.pageNo = 1;
-          this.updatePagination();
-        },
-        error: () => this.toastr.error('Failed to load products'),
-      });
+  // `force` bypasses the loaded/status cache guard (used after approve/reject).
+  loadProducts(force = false): void {
+    this.store.dispatch(
+      loadAdminProducts({ status: this.statusFilter, force }),
+    );
   }
 
   setFilter(filter: ApprovalStatus | 'all'): void {
@@ -205,7 +220,7 @@ export class AdminProductsComponent implements OnInit {
             this.pendingAction === 'approve' ? 'Product approved' : 'Product rejected',
           );
           this.closeProduct();
-          this.loadProducts();
+          this.loadProducts(true);
         },
         error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
       });

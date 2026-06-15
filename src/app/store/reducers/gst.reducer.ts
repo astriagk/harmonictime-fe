@@ -25,7 +25,12 @@ export const initialState: GstState = {
 export const gstReducer = createReducer(
   initialState,
 
-  on(loadGst, (state) => ({ ...state, loading: !state.loaded, error: null })),
+  on(loadGst, (state, { force }) => ({
+    ...state,
+    loading: force ? true : !state.loaded,
+    loaded: force ? false : state.loaded,
+    error: null,
+  })),
   on(loadGstSuccess, (state, { data }) => ({ ...state, data, loaded: true, loading: false, error: null })),
   on(loadGstFailure, (state, { error }) => ({ ...state, loaded: false, loading: false, error })),
 

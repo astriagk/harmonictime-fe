@@ -9,6 +9,7 @@ import {
 import { GenericService } from '@shared/services/generic.service';
 import { USER_WISHLIST } from '@config/index';
 import { selectUserData } from '../selectors/user.selectors';
+import { selectWishlistLoaded } from '../selectors/wishlist.selectors';
 import { Store } from '@ngrx/store';
 
 @Injectable()
@@ -16,8 +17,14 @@ export class WishlistEffects {
   loadWishlist$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadWishlist),
-      withLatestFrom(this.store.select(selectUserData)), // Get user data from Store
-      filter(([_, userData]) => !!userData?.user?.data), // Ensure user data exists
+      withLatestFrom(
+        this.store.select(selectUserData),
+        this.store.select(selectWishlistLoaded)
+      ),
+      // Need a user, and skip a redundant fetch when already cached unless forced.
+      filter(([action, userData, loaded]) =>
+        !!userData?.user?.data && (!!action.force || !loaded)
+      ),
       switchMap(([_, userData]) => {
         const url = USER_WISHLIST + `${userData.user.data._id}`;
         return this.genericService.getObservable(url).pipe(

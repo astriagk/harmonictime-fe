@@ -1,12 +1,19 @@
 import { ViewportScroller } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
-import { finalize } from 'rxjs/operators';
-import { ADMIN_WITHDRAWALS, adminWithdrawalAction } from 'src/app/config';
+import { Subject } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
+import { adminWithdrawalAction } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
+import { loadAdminWithdrawals } from 'src/app/store/actions/admin-withdrawals.actions';
+import {
+  selectAdminWithdrawals,
+  selectAdminWithdrawalsLoading,
+} from 'src/app/store/selectors/admin-withdrawals.selectors';
 
 interface BankSnapshot {
   AccountHolderName: string;
@@ -35,7 +42,8 @@ type ModalMode = 'pay' | 'reject';
   templateUrl: './approve-payments.component.html',
   styleUrls: ['./approve-payments.component.scss'],
 })
-export class ApprovePaymentsComponent implements OnInit {
+export class ApprovePaymentsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   withdrawals: Withdrawal[] = [];
   paginatedWithdrawals: Withdrawal[] = [];
   paginate: any = {};
@@ -60,34 +68,44 @@ export class ApprovePaymentsComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private viewScroller: ViewportScroller,
+    private store: Store,
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      this.pageNo = params['page'] ? Number(params['page']) : 1;
-      this.updatePagination();
-    });
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.pageNo = params['page'] ? Number(params['page']) : 1;
+        this.updatePagination();
+      });
+
+    this.store
+      .select(selectAdminWithdrawalsLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.loading = loading));
+
+    this.store
+      .select(selectAdminWithdrawals)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((withdrawals) => {
+        this.withdrawals = withdrawals as Withdrawal[];
+        this.pageNo = 1;
+        this.updatePagination();
+      });
+
     this.loadWithdrawals();
   }
 
-  loadWithdrawals(): void {
-    this.loading = true;
-    const url =
-      this.activeFilter === 'All'
-        ? ADMIN_WITHDRAWALS
-        : `${ADMIN_WITHDRAWALS}?status=${this.activeFilter}`;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    this.genericService
-      .getObservableToken(url)
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res) => {
-          this.withdrawals = res?.data ?? [];
-          this.pageNo = 1;
-          this.updatePagination();
-        },
-        error: () => this.toastr.error('Failed to load withdrawals'),
-      });
+  // `force` bypasses the loaded/status cache guard (used after pay/reject).
+  loadWithdrawals(force = false): void {
+    this.store.dispatch(
+      loadAdminWithdrawals({ status: this.activeFilter, force }),
+    );
   }
 
   updatePagination(): void {
@@ -156,7 +174,7 @@ export class ApprovePaymentsComponent implements OnInit {
           const msg = this.modalMode === 'pay' ? 'Withdrawal marked as paid' : 'Withdrawal rejected';
           this.toastr.success(msg);
           this.closeModal();
-          this.loadWithdrawals();
+          this.loadWithdrawals(true);
         },
         error: (err) => {
           const msg = err?.error?.message ?? 'Something went wrong';

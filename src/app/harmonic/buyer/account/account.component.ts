@@ -3,6 +3,8 @@ import {
   ElementRef,
   ViewChild,
   ChangeDetectorRef,
+  OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
@@ -11,9 +13,6 @@ import {
   bankAccountVerify,
   CREATE_ADDRESS,
   DELETE_ADDRESS,
-  GET_ADDRESSES_BY_USER,
-  GET_WALLET,
-  GET_WALLET_ITEMS,
   GST_ONBOARDING,
   ORDER_CHARGES,
   SEND_MOBILE_OTP,
@@ -24,7 +23,8 @@ import {
   WITHDRAWALS,
   WITHDRAWAL_BY_ID,
 } from '@config/index';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { companyDetails } from '@shared/constants/companyDetails';
 import { environment } from '@env/environment';
 import { CartService } from '@shared/services/cart.service';
@@ -33,6 +33,12 @@ import { UserService } from '@shared/services/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { loadOrders } from 'src/app/store/actions/orders.actions';
 import { loadUser } from 'src/app/store/actions/user.actions';
+import { loadAddresses as loadAddressesAction } from 'src/app/store/actions/addresses.actions';
+import { loadWallet as loadWalletAction } from 'src/app/store/actions/wallet.actions';
+import { loadWalletItems as loadWalletItemsAction } from 'src/app/store/actions/wallet-items.actions';
+import { loadWithdrawals as loadWithdrawalsAction } from 'src/app/store/actions/withdrawals.actions';
+import { loadBankAccounts as loadBankAccountsAction } from 'src/app/store/actions/bank-accounts.actions';
+import { loadGst } from 'src/app/store/actions/gst.actions';
 import { Order } from 'src/app/store/models/orders.models';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
 import {
@@ -43,13 +49,38 @@ import {
   selectUserData,
   selectUserLoading,
 } from 'src/app/store/selectors/user.selectors';
+import {
+  selectAddresses,
+  selectAddressesLoading,
+} from 'src/app/store/selectors/addresses.selectors';
+import {
+  selectWallet,
+  selectWalletLoading,
+} from 'src/app/store/selectors/wallet.selectors';
+import {
+  selectWalletItems,
+  selectWalletItemsLoading,
+} from 'src/app/store/selectors/wallet-items.selectors';
+import {
+  selectWithdrawals,
+  selectWithdrawalsLoading,
+} from 'src/app/store/selectors/withdrawals.selectors';
+import {
+  selectBankAccounts,
+  selectBankAccountsLoading,
+} from 'src/app/store/selectors/bank-accounts.selectors';
+import {
+  selectGstData,
+  selectGstLoading,
+} from 'src/app/store/selectors/gst.selectors';
 
 @Component({
   selector: 'app-account',
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss'],
 })
-export class AccountComponent {
+export class AccountComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   public userData: any = {};
   public mail = `mailt:${companyDetails.email}`;
   public cartItems: any = [];
@@ -181,24 +212,13 @@ export class AccountComponent {
 
   // --- Address book ----------------------------------------------------------
 
-  // Load the user's saved addresses from /address/user/:userId.
-  loadAddresses(userId: string): void {
+  // Load the user's saved addresses via the addresses NgRx slice. `force`
+  // bypasses the loaded-cache guard (used after add/edit/delete).
+  loadAddresses(userId: string, force = false): void {
     if (!userId) {
       return;
     }
-    this.addressesLoading = true;
-    this.genericService
-      .getObservable(`${GET_ADDRESSES_BY_USER}${userId}`)
-      .subscribe({
-        next: (res) => {
-          this.addresses = res?.data ?? res ?? [];
-          this.addressesLoading = false;
-        },
-        error: () => {
-          this.addresses = [];
-          this.addressesLoading = false;
-        },
-      });
+    this.store.dispatch(loadAddressesAction({ userId, force }));
   }
 
   openAddAddress(): void {
@@ -251,7 +271,7 @@ export class AccountComponent {
         await this.clearOtherDefaultAddresses(editingId);
       }
       this.closeAddressModal();
-      this.loadAddresses(userId);
+      this.loadAddresses(userId, true);
     } catch (error) {
       console.error('Error saving address:', error);
       this.toastrService.error('Failed to save address. Please try again.');
@@ -262,52 +282,21 @@ export class AccountComponent {
   // --- Wallet ----------------------------------------------------------------
 
   // Wallet summary (balances + per-bucket counts). Recomputed live server-side.
-  loadWallet(): void {
-    this.walletLoading = true;
-    this.genericService.getObservableToken(GET_WALLET).subscribe({
-      next: (res) => {
-        this.wallet = res?.data ?? null;
-        this.walletLoading = false;
-      },
-      error: () => {
-        this.wallet = null;
-        this.walletLoading = false;
-      },
-    });
+  // `force` bypasses the loaded-cache guard (used after withdrawal mutations).
+  loadWallet(force = false): void {
+    this.store.dispatch(loadWalletAction({ force }));
   }
 
-  // Itemized sold products, optionally filtered by status (''=all).
-  loadWalletItems(status: string = this.walletItemStatus): void {
+  // Itemized sold products, optionally filtered by status (''=all). The effect
+  // re-fetches on a status change; `force` is used after withdrawal mutations.
+  loadWalletItems(status: string = this.walletItemStatus, force = false): void {
     this.walletItemStatus = status;
-    this.walletItemsLoading = true;
-    const url = status
-      ? `${GET_WALLET_ITEMS}?status=${status}`
-      : GET_WALLET_ITEMS;
-    this.genericService.getObservableToken(url).subscribe({
-      next: (res) => {
-        this.walletItems = res?.data ?? [];
-        this.walletItemsLoading = false;
-      },
-      error: () => {
-        this.walletItems = [];
-        this.walletItemsLoading = false;
-      },
-    });
+    this.store.dispatch(loadWalletItemsAction({ status, force }));
   }
 
-  // Seller payout history.
-  loadWithdrawals(): void {
-    this.withdrawalsLoading = true;
-    this.genericService.getObservableToken(WITHDRAWALS).subscribe({
-      next: (res) => {
-        this.withdrawals = res?.data ?? [];
-        this.withdrawalsLoading = false;
-      },
-      error: () => {
-        this.withdrawals = [];
-        this.withdrawalsLoading = false;
-      },
-    });
+  // Seller payout history. `force` bypasses the loaded-cache guard.
+  loadWithdrawals(force = false): void {
+    this.store.dispatch(loadWithdrawalsAction({ force }));
   }
 
   // True when there are funds to withdraw (drives the Withdraw button).
@@ -347,9 +336,9 @@ export class AccountComponent {
       this.toastrService.success('Withdrawal requested');
       this.closeWithdraw();
       // availableBalance drops to 0 and inProcessBalance rises — re-fetch.
-      this.loadWallet();
-      this.loadWalletItems();
-      this.loadWithdrawals();
+      this.loadWallet(true);
+      this.loadWalletItems(this.walletItemStatus, true);
+      this.loadWithdrawals(true);
     } catch (error: any) {
       const message =
         error?.error?.message ??
@@ -374,9 +363,9 @@ export class AccountComponent {
         ),
       );
       this.toastrService.success('Withdrawal cancelled');
-      this.loadWallet();
-      this.loadWalletItems();
-      this.loadWithdrawals();
+      this.loadWallet(true);
+      this.loadWalletItems(this.walletItemStatus, true);
+      this.loadWithdrawals(true);
     } catch (error: any) {
       const message =
         error?.error?.message ??
@@ -389,19 +378,9 @@ export class AccountComponent {
 
   // --- Bank accounts ---------------------------------------------------------
 
-  loadBankAccounts(): void {
-    this.bankAccountsLoading = true;
-    this.genericService.getObservableToken(BANK_ACCOUNTS).subscribe({
-      next: (res) => {
-        this.bankAccounts = res?.data ?? [];
-        this.bankAccountsLoading = false;
-        this.restoreVerifyCountdowns();
-      },
-      error: () => {
-        this.bankAccounts = [];
-        this.bankAccountsLoading = false;
-      },
-    });
+  // `force` bypasses the loaded-cache guard (used after add/edit/delete/verify).
+  loadBankAccounts(force = false): void {
+    this.store.dispatch(loadBankAccountsAction({ force }));
   }
 
   openAddBankAccount(): void {
@@ -441,7 +420,7 @@ export class AccountComponent {
         this.toastrService.success('Bank account added');
       }
       this.closeBankModal();
-      this.loadBankAccounts();
+      this.loadBankAccounts(true);
     } catch (error: any) {
       const message =
         error?.error?.message ??
@@ -453,18 +432,9 @@ export class AccountComponent {
 
   // --- GST details -----------------------------------------------------------
 
-  loadGstDetails(): void {
-    this.gstLoading = true;
-    this.genericService.getObservableToken(GST_ONBOARDING).subscribe({
-      next: (res) => {
-        this.gstDetails = res?.data ?? null;
-        this.gstLoading = false;
-      },
-      error: () => {
-        this.gstDetails = null;
-        this.gstLoading = false;
-      },
-    });
+  // Reuses the shared `gst` NgRx slice. `force` bypasses the loaded-cache guard.
+  loadGstDetails(force = false): void {
+    this.store.dispatch(loadGst({ force }));
   }
 
   openGstModal(): void {
@@ -491,7 +461,7 @@ export class AccountComponent {
         this.toastrService.success('GST details submitted. Pending admin verification.');
       }
       this.closeGstModal();
-      this.loadGstDetails();
+      this.loadGstDetails(true);
     } catch (error: any) {
       const message = error?.error?.message ?? 'Failed to save GST details. Please try again.';
       this.toastrService.error(message);
@@ -534,7 +504,7 @@ export class AccountComponent {
         this.genericService.deleteObservableToken(`${BANK_ACCOUNT_BY_ID}${id}`),
       );
       this.toastrService.success('Bank account removed');
-      this.loadBankAccounts();
+      this.loadBankAccounts(true);
     } catch (error: any) {
       const message =
         error?.error?.message ??
@@ -586,28 +556,14 @@ export class AccountComponent {
         );
       }
 
-      const idx = this.bankAccounts.findIndex((b) => b._id === id);
-      if (idx !== -1) {
-        this.bankAccounts[idx] = {
-          ...this.bankAccounts[idx],
-          IsVerified: true,
-          VerificationStatus: 'verified',
-          VerifiedName: verifiedName,
-        };
-      }
+      // Refresh from the server so the verified status/name come from the
+      // source of truth (the slice owns the bank-accounts list now).
+      this.loadBankAccounts(true);
     } catch (error: any) {
       const message =
         error?.error?.message ??
         'Bank account verification failed. Please check your account number and IFSC code.';
       this.toastrService.error(message);
-
-      const idx = this.bankAccounts.findIndex((b) => b._id === id);
-      if (idx !== -1) {
-        this.bankAccounts[idx] = {
-          ...this.bankAccounts[idx],
-          VerificationStatus: 'failed',
-        };
-      }
       this.startVerifyCountdown(id);
     } finally {
       this.verifyingId = null;
@@ -693,7 +649,7 @@ export class AccountComponent {
         this.genericService.deleteObservable(`${DELETE_ADDRESS}${id}`),
       );
       this.toastrService.success('Address removed');
-      this.loadAddresses(userId);
+      this.loadAddresses(userId, true);
     } catch (error: any) {
       const message =
         error?.error?.message ?? 'Failed to remove address. Please try again.';
@@ -986,7 +942,7 @@ export class AccountComponent {
     this.savingProfile = true;
     this.genericService.putObservableToken(UPDATE_USER(userId), payload).subscribe({
       next: () => {
-        this.userData = { ...this.userData, ...payload };
+        this.store.dispatch(loadUser({ skipNavigation: true }));
         this.toastrService.success('Profile updated');
         this.closeProfileModal();
         this.cdr.markForCheck();
@@ -1075,42 +1031,109 @@ export class AccountComponent {
 
   ngOnInit(): void {
     this.preloadInvoiceLogo();
-    this.store.select(selectUserData).subscribe((state) => {
-      this.userData = state?.user?.data;
-      const userId = this.userData?._id;
-      if (userId && userId !== this.loadedUserId) {
-        this.loadedUserId = userId;
-        this.store.dispatch(loadOrders({ userId }));
-        this.loadAddresses(userId);
-        // Wallet/bank/withdrawals identify the seller from the JWT, not userId.
-        this.loadWallet();
-        this.loadWalletItems();
-        this.loadWithdrawals();
-        this.loadBankAccounts();
-        if (this.userData?.accountType === 'business') {
-          this.loadGstDetails();
+    this.store
+      .select(selectUserData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state) => {
+        this.userData = state?.user?.data;
+        const userId = this.userData?._id;
+        if (userId && userId !== this.loadedUserId) {
+          this.loadedUserId = userId;
+          this.store.dispatch(loadOrders({ userId }));
+          this.loadAddresses(userId);
+          // Wallet/bank/withdrawals identify the seller from the JWT, not userId.
+          this.loadWallet();
+          this.loadWalletItems();
+          this.loadWithdrawals();
+          this.loadBankAccounts();
+          if (this.userData?.accountType === 'business') {
+            this.loadGstDetails();
+          }
         }
-      }
-    });
-    this.store.select(selectCartItems).subscribe((state) => {
-      if (state?.length) {
-        this.cartItems = state;
-      } else {
-        this.cartItems = [];
-      }
-    });
-    this.store.select(selectOrders).subscribe((state) => {
-      if (state?.length) {
-        this.orders = state;
-      } else {
-        this.orders = [];
-      }
-    });
+      });
+    this.store
+      .select(selectCartItems)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state) => {
+        this.cartItems = state?.length ? state : [];
+      });
+    this.store
+      .select(selectOrders)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state) => {
+        this.orders = state?.length ? state : [];
+      });
     this.store
       .select(selectOrdersLoading)
+      .pipe(takeUntil(this.destroy$))
       .subscribe((loading) => (this.ordersLoading = loading));
     this.store
       .select(selectUserLoading)
+      .pipe(takeUntil(this.destroy$))
       .subscribe((loading) => (this.profileLoading = loading));
+
+    // --- Account data slices (addresses / wallet / bank / GST) ---------------
+    this.store
+      .select(selectAddresses)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((addresses) => (this.addresses = addresses ?? []));
+    this.store
+      .select(selectAddressesLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.addressesLoading = loading));
+
+    this.store
+      .select(selectWallet)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((wallet) => (this.wallet = wallet));
+    this.store
+      .select(selectWalletLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.walletLoading = loading));
+
+    this.store
+      .select(selectWalletItems)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((items) => (this.walletItems = items ?? []));
+    this.store
+      .select(selectWalletItemsLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.walletItemsLoading = loading));
+
+    this.store
+      .select(selectWithdrawals)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((withdrawals) => (this.withdrawals = withdrawals ?? []));
+    this.store
+      .select(selectWithdrawalsLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.withdrawalsLoading = loading));
+
+    this.store
+      .select(selectBankAccounts)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((bankAccounts) => {
+        this.bankAccounts = bankAccounts ?? [];
+        // Resume any per-account verification cooldowns for the loaded accounts.
+        this.restoreVerifyCountdowns();
+      });
+    this.store
+      .select(selectBankAccountsLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.bankAccountsLoading = loading));
+
+    this.store
+      .select(selectGstData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => (this.gstDetails = data));
+    this.store
+      .select(selectGstLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.gstLoading = loading));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

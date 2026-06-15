@@ -1,7 +1,10 @@
 import { createAction, props } from '@ngrx/store';
 
-// Load Cart
-export const loadCart = createAction('[Cart] Load Cart');
+// Load Cart. `force: true` bypasses the loaded-cache guard (used after mutations).
+export const loadCart = createAction(
+  '[Cart] Load Cart',
+  props<{ force?: boolean }>()
+);
 
 export const loadCartSuccess = createAction(
   '[Cart] Load Cart Success',

@@ -8,7 +8,6 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { UserService } from '@shared/services/user.service';
 import {
-  GET_PRODUCT_BY_ID,
   POST_PRODUCT,
   POST_PRODUCT_DESCRIPTION,
   POST_PRODUCT_DETAILS,
@@ -46,6 +45,11 @@ import { AppState } from 'src/app/store/app.state';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 import { loadFilters } from 'src/app/store/actions/filters.actions';
 import { loadSellerProducts } from 'src/app/store/actions/seller-products.actions';
+import { loadEditProduct } from 'src/app/store/actions/product.actions';
+import {
+  selectEditProduct,
+  selectEditProductLoading,
+} from 'src/app/store/selectors/product.selectors';
 import {
   selectLookupBrands,
   selectLookupCategories,
@@ -359,89 +363,82 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async loadProductData(): Promise<void> {
+  private loadProductData(): void {
     if (!this.productId) return;
-    try {
-      this.isLoadingProduct = true;
-      const url = GET_PRODUCT_BY_ID + `${this.productId}`;
-      this.genericService.getObservableToken(url).subscribe({
-        next: (response) => {
-          const data = response?.data[0];
-          this.productData = response?.data[0];
-          // In edit mode quantity can be 0 (no stock), so relax the min to 0.
-          this.basicProductInformation
-            .get('quantity')
-            ?.setValidators([Validators.required, Validators.min(0)]);
-          this.basicProductInformation
-            .get('quantity')
-            ?.updateValueAndValidity();
+    // Fetch through the product NgRx slice (authenticated edit endpoint).
+    this.store.dispatch(loadEditProduct({ id: this.productId }));
 
-          this.basicProductInformation.setValue({
-            productName: data.ProductName,
-            brandId: data.Details.BrandId,
-            categoryId: data.Details.CategoryId,
-            collectionId: data.Details.CollectionId,
-            price: data.Price,
-            isPriceInclusiveOfTax: data.IsPriceInclusiveOfTax ?? null,
-            quantity: data.Quantity,
-            recipientId: data.Details.RecipientId,
-          });
+    this.store
+      .select(selectEditProductLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.isLoadingProduct = loading));
 
-          this.productInformation.setValue({
-            dialColorId: data.Details.DialColorId,
-            diameter: data.Details.Diameter,
-            waterResistant: data.Details.WaterResistant,
-            movementId: data.Details.MovementId,
-            strapMaterialId: data.Details.StrapMaterialId,
-            caseMaterialId: data.Details.CaseMaterialId,
-            watchMarkersId: data.Details.WatchMarkerId,
-            manufacturerProductNumber: data.Details.ManufacturerProductNumber,
-            guarantee: data.Details.Guarantee,
-            deliveryOptionId: data.Details.DeliveryOptionID,
-          });
-
-          this.productDescription.setValue({
-            shortTitle: data.Description.Title,
-            detailedDescription: data.Description.Content,
-            additionalDescription: data.Description.AdditionalDetails,
-          });
-
-          this.deliveryAndReturns.setValue({
-            deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
-            returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
-          });
-
-          this.uploadedImages = data.Images.filter(
-            (el: any) => el.mediaType !== 'video',
-          ).map((el: any) => ({
-            url: el.ImageURL,
-            isPrimary: !!el.IsPrimary,
-            ...el,
-          }));
-          this.ensurePrimaryImage();
-          const videoEntry = data.Images.find(
-            (el: any) => el.mediaType === 'video',
-          );
-          if (videoEntry) {
-            this.uploadedVideo = {
-              url: videoEntry.ImageURL,
-              _id: videoEntry._id,
-            };
-          }
-          this.isLoadingProduct = false;
-        },
-        error: (err) => {
-          console.error('Error loading product:', err);
-          this.isLoadingProduct = false;
-        },
+    this.store
+      .select(selectEditProduct)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((product) => {
+        if (product) this.prefillEditForm(product);
       });
-      // Example of loading product data
-      // const product = await this.productService.getProduct(this.productId);
-      // this.patchFormValues(product);
-    } catch (error) {
-      this.isLoadingProduct = false;
-      console.error('Error loading product:', error);
-      // Handle error appropriately
+  }
+
+  // Populate every step's form group + media from a loaded product (edit mode).
+  private prefillEditForm(data: any): void {
+    this.productData = data;
+    // In edit mode quantity can be 0 (no stock), so relax the min to 0.
+    this.basicProductInformation
+      .get('quantity')
+      ?.setValidators([Validators.required, Validators.min(0)]);
+    this.basicProductInformation.get('quantity')?.updateValueAndValidity();
+
+    this.basicProductInformation.setValue({
+      productName: data.ProductName,
+      brandId: data.Details.BrandId,
+      categoryId: data.Details.CategoryId,
+      collectionId: data.Details.CollectionId,
+      price: data.Price,
+      isPriceInclusiveOfTax: data.IsPriceInclusiveOfTax ?? null,
+      quantity: data.Quantity,
+      recipientId: data.Details.RecipientId,
+    });
+
+    this.productInformation.setValue({
+      dialColorId: data.Details.DialColorId,
+      diameter: data.Details.Diameter,
+      waterResistant: data.Details.WaterResistant,
+      movementId: data.Details.MovementId,
+      strapMaterialId: data.Details.StrapMaterialId,
+      caseMaterialId: data.Details.CaseMaterialId,
+      watchMarkersId: data.Details.WatchMarkerId,
+      manufacturerProductNumber: data.Details.ManufacturerProductNumber,
+      guarantee: data.Details.Guarantee,
+      deliveryOptionId: data.Details.DeliveryOptionID,
+    });
+
+    this.productDescription.setValue({
+      shortTitle: data.Description.Title,
+      detailedDescription: data.Description.Content,
+      additionalDescription: data.Description.AdditionalDetails,
+    });
+
+    this.deliveryAndReturns.setValue({
+      deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
+      returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
+    });
+
+    this.uploadedImages = data.Images.filter(
+      (el: any) => el.mediaType !== 'video',
+    ).map((el: any) => ({
+      url: el.ImageURL,
+      isPrimary: !!el.IsPrimary,
+      ...el,
+    }));
+    this.ensurePrimaryImage();
+    const videoEntry = data.Images.find((el: any) => el.mediaType === 'video');
+    if (videoEntry) {
+      this.uploadedVideo = {
+        url: videoEntry.ImageURL,
+        _id: videoEntry._id,
+      };
     }
   }
 

@@ -26,3 +26,21 @@ export const loadProductDetailFailure = createAction(
   '[Products] Load Product Detail Failure',
   props<{ error: string }>()
 );
+
+// Seller edit-form load: fetches a single product via the authenticated
+// endpoint (returns the seller's own products incl. pending/unavailable).
+// Always re-fetches so the form reflects the latest saved state.
+export const loadEditProduct = createAction(
+  '[Products] Load Edit Product',
+  props<{ id: string }>()
+);
+
+export const loadEditProductSuccess = createAction(
+  '[Products] Load Edit Product Success',
+  props<{ product: any }>()
+);
+
+export const loadEditProductFailure = createAction(
+  '[Products] Load Edit Product Failure',
+  props<{ error: string }>()
+);

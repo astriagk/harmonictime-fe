@@ -1,7 +1,10 @@
 import { createAction, props } from '@ngrx/store';
 
-// Load Wishlist
-export const loadWishlist = createAction('[Wishlist] Load Wishlist');
+// Load Wishlist. `force: true` bypasses the loaded-cache guard (used after mutations).
+export const loadWishlist = createAction(
+  '[Wishlist] Load Wishlist',
+  props<{ force?: boolean }>()
+);
 
 export const loadWishlistSuccess = createAction(
   '[Wishlist] Load Wishlist Success',

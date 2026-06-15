@@ -1,11 +1,18 @@
 import { ViewportScroller } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
-import { finalize } from 'rxjs/operators';
-import { ADMIN_USERS, ADMIN_USER_BY_ID, adminUserAction, adminSellerAction } from 'src/app/config';
+import { Subject } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
+import { ADMIN_USER_BY_ID, adminUserAction, adminSellerAction } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
+import { loadAdminUsers } from 'src/app/store/actions/admin-users.actions';
+import {
+  selectAdminUsers,
+  selectAdminUsersLoading,
+} from 'src/app/store/selectors/admin-users.selectors';
 
 interface AdminUser {
   _id: string;
@@ -77,7 +84,8 @@ type SellerVerifyAction = 'approve' | 'reject' | 'request-info';
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   pageView: PageView = 'customers';
 
   // raw cache from single API call
@@ -135,13 +143,35 @@ export class UsersComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private viewScroller: ViewportScroller,
+    private store: Store,
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      this.pageNo = params['page'] ? Number(params['page']) : 1;
-    });
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.pageNo = params['page'] ? Number(params['page']) : 1;
+      });
+
+    this.store
+      .select(selectAdminUsersLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.listLoading = loading));
+
+    this.store
+      .select(selectAdminUsers)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((users) => {
+        this.allUsersCache = users as AdminUser[];
+        this.applyFilters();
+      });
+
     this.loadAllUsers();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   setView(view: PageView): void {
@@ -150,18 +180,9 @@ export class UsersComponent implements OnInit {
 
   // --- load + filter ---
 
-  loadAllUsers(): void {
-    this.listLoading = true;
-    this.genericService
-      .getObservableToken(ADMIN_USERS)
-      .pipe(finalize(() => (this.listLoading = false)))
-      .subscribe({
-        next: (res) => {
-          this.allUsersCache = res?.data ?? [];
-          this.applyFilters();
-        },
-        error: () => this.toastr.error('Failed to load users'),
-      });
+  // `force` bypasses the loaded-cache guard (used after admin user mutations).
+  loadAllUsers(force = false): void {
+    this.store.dispatch(loadAdminUsers({ force }));
   }
 
   private applyFilters(): void {
@@ -246,23 +267,14 @@ export class UsersComponent implements OnInit {
     this.confirmAction = null;
     this.actionInProgress = user._id;
 
-    const statusMap: Record<UserAction, AdminUser['status']> = {
-      block: 'blocked',
-      unblock: 'active',
-      suspend: 'suspended',
-    };
-
     this.genericService
       .putObservableToken(adminUserAction(user._id, action), {})
       .pipe(finalize(() => (this.actionInProgress = null)))
       .subscribe({
         next: () => {
-          const newStatus = statusMap[action];
           this.toastr.success(`User ${action}ed successfully`);
-          this.allUsersCache = this.allUsersCache.map((u) =>
-            u._id === user._id ? { ...u, status: newStatus } : u
-          );
-          this.applyFilters();
+          // Re-fetch from the source of truth (the slice owns the list now).
+          this.loadAllUsers(true);
         },
         error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
       });
@@ -369,7 +381,7 @@ export class UsersComponent implements OnInit {
           const label = action === 'request-info' ? 'Info requested' : `Seller ${action}d`;
           this.toastr.success(label);
           this.closeSellerProfile();
-          this.loadAllUsers();
+          this.loadAllUsers(true);
         },
         error: (err) => this.toastr.error(err?.error?.message ?? 'Action failed'),
       });

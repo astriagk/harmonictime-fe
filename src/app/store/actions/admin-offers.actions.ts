@@ -12,3 +12,10 @@ export const loadAdminOffersFailure = createAction(
   '[AdminOffers] Load Failure',
   props<{ error: string }>()
 );
+
+// Immutably replace a single offer in the cached list (e.g. after a status
+// toggle) without re-fetching the whole list.
+export const upsertAdminOffer = createAction(
+  '[AdminOffers] Upsert Offer',
+  props<{ offer: any }>()
+);

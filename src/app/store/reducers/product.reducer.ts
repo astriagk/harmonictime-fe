@@ -6,6 +6,9 @@ import {
   loadProductDetail,
   loadProductDetailSuccess,
   loadProductDetailFailure,
+  loadEditProduct,
+  loadEditProductSuccess,
+  loadEditProductFailure,
 } from '../actions/product.actions';
 
 export interface ProductsState {
@@ -16,6 +19,8 @@ export interface ProductsState {
   detailProduct: any | null;
   detailProductId: string | null;
   detailLoading: boolean;
+  editProduct: any | null;
+  editLoading: boolean;
 }
 
 export const initialState: ProductsState = {
@@ -26,6 +31,8 @@ export const initialState: ProductsState = {
   detailProduct: null,
   detailProductId: null,
   detailLoading: false,
+  editProduct: null,
+  editLoading: false,
 };
 
 export const productsReducer = createReducer(
@@ -68,5 +75,22 @@ export const productsReducer = createReducer(
   on(loadProductDetailFailure, (state) => ({
     ...state,
     detailLoading: false,
+  })),
+
+  on(loadEditProduct, (state) => ({
+    ...state,
+    editLoading: true,
+    editProduct: null,
+  })),
+
+  on(loadEditProductSuccess, (state, { product }) => ({
+    ...state,
+    editProduct: product,
+    editLoading: false,
+  })),
+
+  on(loadEditProductFailure, (state) => ({
+    ...state,
+    editLoading: false,
   }))
 );
