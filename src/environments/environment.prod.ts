@@ -1,9 +1,9 @@
 // src/environments/environment.prod.ts (production)
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.harmonictime.astriagk.com/api',
-  socketBaseUrl: 'https://api.harmonictime.astriagk.com',
-  imageUploadUrl: 'https://api.harmonictime.astriagk.com/upload',
+  apiBaseUrl: 'https://api.krono2.astriagk.com/api',
+  socketBaseUrl: 'https://api.krono2.astriagk.com',
+  imageUploadUrl: 'https://api.krono2.astriagk.com/upload',
   // TODO: replace with the live Razorpay key before going live with real payments
   razorpayKeyId: 'rzp_test_S7JpGRMIETfbv5',
   companyLogoUrl:
