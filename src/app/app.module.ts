@@ -20,6 +20,11 @@ import { CartEffects } from './store/effects/cart.effects';
 import { OrdersEffects } from './store/effects/orders.effects';
 import { WishlistEffects } from './store/effects/wishlist.effects';
 import { GstEffects } from './store/effects/gst.effects';
+import { ProductEffects } from './store/effects/product.effects';
+import { FiltersEffects } from './store/effects/filters.effects';
+import { SellerProductsEffects } from './store/effects/seller-products.effects';
+import { SellerOrdersEffects } from './store/effects/seller-orders.effects';
+import { AdminOffersEffects } from './store/effects/admin-offers.effects';
 import { TitleStrategy } from '@angular/router';
 import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
 
@@ -45,6 +50,11 @@ import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
       OrdersEffects,
       WishlistEffects,
       GstEffects,
+      ProductEffects,
+      FiltersEffects,
+      SellerProductsEffects,
+      SellerOrdersEffects,
+      AdminOffersEffects,
     ]),
     StoreDevtoolsModule.instrument({
       maxAge: 25,

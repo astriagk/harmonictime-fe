@@ -71,7 +71,7 @@
                 <li>
                   <a class="cart cursor-pointer">
                     <i class="ion-bag"></i> Cart
-                    <span
+                    <span *ngIf="cartService.totalPriceQuantity().quantity > 0"
                       >({{ cartService.totalPriceQuantity().quantity }})</span
                     >
                   </a>
@@ -116,7 +116,7 @@
               <li>
                 <a class="cart cursor-pointer"
                   ><i class="ion-bag"></i> Cart
-                  <span>({{ cartService.totalPriceQuantity().quantity }})</span>
+                  <span *ngIf="cartService.totalPriceQuantity().quantity > 0">({{ cartService.totalPriceQuantity().quantity }})</span>
                 </a>
                 <!-- mini cart start -->
                 <app-mini-cart></app-mini-cart>

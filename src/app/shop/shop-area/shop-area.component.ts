@@ -1,21 +1,25 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { normalizeDialColor } from '@shared/constants/dial-colors';
 import { ProductService } from 'src/app/shared/services/product.service';
 import { UtilsService } from 'src/app/shared/services/utils.service';
-import { IProduct } from 'src/app/shared/types/product-d-t';
-import { GenericService } from '@shared/services/generic.service';
-import { PRODUCT } from '@config/index';
 import { CartService } from '@shared/services/cart.service';
-import { finalize } from 'rxjs';
+import { loadProducts } from 'src/app/store/actions/product.actions';
+import {
+  selectProducts,
+  selectProductsLoading,
+} from 'src/app/store/selectors/product.selectors';
 
 @Component({
   selector: 'app-shop-area',
   templateUrl: './shop-area.component.html',
   styleUrls: ['./shop-area.component.scss'],
 })
-export class ShopAreaComponent {
+export class ShopAreaComponent implements OnInit, OnDestroy {
   @Input() shop_right = false;
   @Input() shop_4_col = false;
   @Input() shop_3_col = false;
@@ -38,10 +42,12 @@ export class ShopAreaComponent {
   public watchMarker: string | null = null;
   public pageNo: number = 1;
   public pageSize: number = 12;
-  public paginate: any = {}; // Pagination use only
-  public sortBy: string = 'asc'; // Sorting Order
-  public showFilters: boolean = false; // Toggle filter sidebar on mobile
-  public loading: boolean = true; // Show skeleton until the first product response
+  public paginate: any = {};
+  public sortBy: string = 'asc';
+  public showFilters: boolean = false;
+  public loading: boolean = true;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     public productService: ProductService,
@@ -49,8 +55,8 @@ export class ShopAreaComponent {
     private route: ActivatedRoute,
     private router: Router,
     private viewScroller: ViewportScroller,
-    private genericService: GenericService,
-    public cartService: CartService
+    public cartService: CartService,
+    private store: Store
   ) {
     this.route.queryParams.subscribe((params) => {
       this.maxPrice = params['maxPrice'] ? params['maxPrice'] : this.maxPrice;
@@ -79,29 +85,6 @@ export class ShopAreaComponent {
         this.productsInitial,
         this.sortBy
       );
-      // Category Filter
-      // if (this.category) {
-      //   this.products = this.products.filter(
-      //     (p) =>
-      //       this.utilsService.convertToURL(p.parentCategory) === this.category
-      //   );
-      // }
-      // sub category Filter
-      // if (this.subcategory) {
-      //   this.products = this.products.filter(
-      //     (p) =>
-      //       this.utilsService.convertToURL(p.category) === this.subcategory
-      //   );
-      // }
-      // size Filter
-      // if (this.size) {
-      //   this.products = this.products.filter((product) => {
-      //     return (
-      //       product.sizes &&
-      //       product.sizes.some((size) => size.toLowerCase() === this.size)
-      //     );
-      //   });
-      // }
       // color Filter
       if (this.color) {
         filteredProducts = filteredProducts.filter((product: any) => {
@@ -115,7 +98,7 @@ export class ShopAreaComponent {
       if (this.brand) {
         filteredProducts = filteredProducts.filter((p: any) => {
           const selectedBrands = this.brand?.toLowerCase();
-          return selectedBrands === p?.Details?.BrandName.toLowerCase(); // Check if product brand is in selected brands
+          return selectedBrands === p?.Details?.BrandName.toLowerCase();
         });
       }
       // category Filter
@@ -188,64 +171,69 @@ export class ShopAreaComponent {
   }
 
   ngOnInit() {
-    const url = PRODUCT;
-    this.genericService
-      .getObservable(url)
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-      next: (response) => {
-        this.products = response?.data;
-        this.productsInitial = response?.data;
-        this.paginate = this.productService.getPager(
-          this.products.length,
-          Number(+this.pageNo),
-          this.pageSize
-        );
-        this.products = this.products.slice(
-          this.paginate.startIndex,
-          this.paginate.endIndex + 1
-        );
-      },
-      error: (err) => {
-        console.error(`Error fetching data for :`, err);
-      },
-    });
+    this.store.dispatch(loadProducts());
+
+    this.store
+      .select(selectProductsLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.loading = loading));
+
+    this.store
+      .select(selectProducts)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((products) => {
+        if (products.length) {
+          this.productsInitial = products;
+          this.paginate = this.productService.getPager(
+            products.length,
+            Number(+this.pageNo),
+            this.pageSize
+          );
+          this.products = products.slice(
+            this.paginate.startIndex,
+            this.paginate.endIndex + 1
+          );
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onSortingChange(value: string) {
     this.sortByFilter(value);
   }
-  // SortBy Filter
+
   sortByFilter(value: string) {
     this.router
       .navigate([], {
         relativeTo: this.route,
         queryParams: { sortBy: value ? value : null },
-        queryParamsHandling: 'merge', // preserve the existing query params in the route
-        skipLocationChange: false, // do trigger navigation
+        queryParamsHandling: 'merge',
+        skipLocationChange: false,
       })
       .finally(() => {
         this.viewScroller.setOffset([120, 120]);
-        this.viewScroller.scrollToAnchor('products'); // Anchore Link
+        this.viewScroller.scrollToAnchor('products');
       });
   }
 
-  // product Pagination
   setPage(page: number) {
     this.router
       .navigate([], {
         relativeTo: this.route,
         queryParams: { page: page },
-        queryParamsHandling: 'merge', // preserve the existing query params in the route
-        skipLocationChange: false, // do trigger navigation
+        queryParamsHandling: 'merge',
+        skipLocationChange: false,
       })
       .finally(() => {
         this.viewScroller.setOffset([120, 120]);
-        this.viewScroller.scrollToAnchor('products'); // Anchore Link
+        this.viewScroller.scrollToAnchor('products');
       });
   }
 
-  // Toggle the filter sidebar visibility on mobile
   toggleFilters() {
     this.showFilters = !this.showFilters;
   }
