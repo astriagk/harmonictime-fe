@@ -97,7 +97,8 @@ export const GET_USER_REVIEWS = `${baseUrl}/user-reviews/user/`; // append the s
 
 // cart
 export const USER_CART = `${baseUrl}/cart/user/`; // append the user id
-export const USER_CART_ITEM = (userId: string, productId: string) => `${baseUrl}/cart/user/${userId}/${productId}`;
+export const USER_CART_ITEM = (userId: string, productId: string) =>
+  `${baseUrl}/cart/user/${userId}/${productId}`;
 export const ADD_TO_CART = `${baseUrl}/cart`;
 export const DELETE_CART_ITEM = `${baseUrl}/cart/`; // append the cart id
 export const UPDATE_CART = `${baseUrl}/cart/`; // append the cart item id (PUT)
@@ -106,7 +107,8 @@ export const UPDATE_CART = `${baseUrl}/cart/`; // append the cart item id (PUT)
 export const USER_WISHLIST = `${baseUrl}/wishlist/user/`; // append the user id
 export const ADD_TO_WISHLIST = `${baseUrl}/wishlist`;
 export const DELETE_WISHLIST_ITEM = `${baseUrl}/wishlist/`; // append the wishlist id
-export const WISHLIST_MOVE_TO_CART = (wishlistId: string) => `${baseUrl}/wishlist/${wishlistId}/move-to-cart`;
+export const WISHLIST_MOVE_TO_CART = (wishlistId: string) =>
+  `${baseUrl}/wishlist/${wishlistId}/move-to-cart`;
 
 // payments
 export const CREATE_PAYMENT_ORDER = `${baseUrl}/payments/create-order`;
@@ -141,7 +143,8 @@ export const CHECK_AVAILABILITY = `${baseUrl}/products/check-availability`;
 // shipments
 export const CREATE_SHIPMENT = `${baseUrl}/shipments`;
 export const UPDATE_SHIPMENT = `${baseUrl}/shipments/`; // append the shipment id
-export const TRACK_SHIPMENT = (id: string) => `${baseUrl}/shipments/${id}/track`;
+export const TRACK_SHIPMENT = (id: string) =>
+  `${baseUrl}/shipments/${id}/track`;
 
 // seller order approval
 export const SELLER_ORDER_APPROVAL = (sellerID: string, checkoutID: string) =>
@@ -157,7 +160,8 @@ export const GET_WALLET_ITEMS = `${baseUrl}/wallet/items`;
 export const BANK_ACCOUNTS = `${baseUrl}/bank-accounts`; // GET list, POST add
 export const BANK_ACCOUNT_BY_ID = `${baseUrl}/bank-accounts/`; // append id (PUT/DELETE)
 // verify a bank account via Razorpay penny-drop: POST /bank-accounts/:id/verify
-export const bankAccountVerify = (id: string) => `${baseUrl}/bank-accounts/${id}/verify`;
+export const bankAccountVerify = (id: string) =>
+  `${baseUrl}/bank-accounts/${id}/verify`;
 
 // withdrawals (seller side)
 export const WITHDRAWALS = `${baseUrl}/withdrawals`; // GET history, POST request
@@ -170,8 +174,10 @@ export const BULK_OFFER = `${baseUrl}/products/bulk-offer`;
 // admin — user management
 export const ADMIN_USERS = `${baseUrl}/admin/users`;
 export const ADMIN_USER_BY_ID = `${baseUrl}/admin/users/`; // append /:id
-export const adminUserAction = (id: string, action: 'block' | 'unblock' | 'suspend') =>
-  `${baseUrl}/admin/users/${id}/${action}`;
+export const adminUserAction = (
+  id: string,
+  action: 'block' | 'unblock' | 'suspend',
+) => `${baseUrl}/admin/users/${id}/${action}`;
 
 // admin — withdrawal management
 export const ADMIN_WITHDRAWALS = `${baseUrl}/admin/withdrawals`;
@@ -180,9 +186,12 @@ export const adminWithdrawalAction = (id: string, action: 'pay' | 'reject') =>
 
 // admin — seller verification
 export const ADMIN_SELLERS = `${baseUrl}/admin/sellers`;
-export const ADMIN_SELLER_BY_ID = (id: string) => `${baseUrl}/admin/sellers/${id}`;
-export const adminSellerAction = (id: string, action: 'approve' | 'reject' | 'request-info') =>
-  `${baseUrl}/admin/sellers/${id}/${action}`;
+export const ADMIN_SELLER_BY_ID = (id: string) =>
+  `${baseUrl}/admin/sellers/${id}`;
+export const adminSellerAction = (
+  id: string,
+  action: 'approve' | 'reject' | 'request-info',
+) => `${baseUrl}/admin/sellers/${id}/${action}`;
 
 // admin — product moderation
 export const ADMIN_PRODUCTS = `${baseUrl}/admin/products`;
@@ -192,12 +201,15 @@ export const adminProductAction = (id: string, action: 'approve' | 'reject') =>
 // GST onboarding
 export const GST_ONBOARDING = `${baseUrl}/gst`;
 export const GST_CREATE_WITH_DOCS = `${baseUrl}/gst/with-documents`;
-export const GST_UPDATE_WITH_DOCS = (id: string) => `${baseUrl}/gst/${id}/with-documents`;
+export const GST_UPDATE_WITH_DOCS = (id: string) =>
+  `${baseUrl}/gst/${id}/with-documents`;
 
 // chat
 export const CHAT_THREADS = `${baseUrl}/chat/threads`;
-export const CHAT_THREAD_MSG = (id: string) => `${baseUrl}/chat/threads/${id}/messages`;
-export const CHAT_CLOSE_THREAD = (id: string) => `${baseUrl}/chat/threads/${id}/close`;
+export const CHAT_THREAD_MSG = (id: string) =>
+  `${baseUrl}/chat/threads/${id}/messages`;
+export const CHAT_CLOSE_THREAD = (id: string) =>
+  `${baseUrl}/chat/threads/${id}/close`;
 
 // offers (admin)
 export const OFFERS = `${baseUrl}/offers`; // GET active, POST create

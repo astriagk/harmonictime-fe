@@ -16,7 +16,7 @@ export class AppComponent {
     private userService: UserService,
     private store: Store,
     public cartService: CartService,
-    public wishlistService: WishlistService
+    public wishlistService: WishlistService,
   ) {}
 
   ngOnInit(): void {
