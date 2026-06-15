@@ -1,6 +1,7 @@
 // src/environments/environment.prod.ts (production)
 export const environment = {
   production: true,
+  appEnv: 'production',
   apiBaseUrl: 'https://api.krono2.astriagk.com/api',
   socketBaseUrl: 'https://api.krono2.astriagk.com',
   imageUploadUrl: 'https://api.krono2.astriagk.com/upload',

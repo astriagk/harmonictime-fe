@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "node -e \"const e=process.env.VERCEL_ENV;require('child_process').execSync('ng build --configuration '+(e==='production'?'production':'development'),{stdio:'inherit'})\"",
+    "build": "node build.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
