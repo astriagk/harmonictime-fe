@@ -1,42 +1,48 @@
 import { ViewportScroller } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { GET_MOVEMENTS } from '@config/index';
-import { GenericService } from '@shared/services/generic.service';
-import { ProductService } from 'src/app/shared/services/product.service';
+import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { loadFilters } from 'src/app/store/actions/filters.actions';
+import { selectFilterMovements } from 'src/app/store/selectors/filters.selectors';
 
 @Component({
   selector: 'app-movement-filtering',
   templateUrl: './movement-filtering.component.html',
   styleUrls: ['./movement-filtering.component.scss'],
 })
-export class MovementFilteringComponent {
-  public movements: any[] = [];
+export class MovementFilteringComponent implements OnInit, OnDestroy {
+  public movements: string[] = [];
   public movement: string | null = null;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
-    public productService: ProductService,
     private route: ActivatedRoute,
     private router: Router,
     private viewScroller: ViewportScroller,
-    private genericService: GenericService
+    private store: Store
   ) {}
 
   ngOnInit(): void {
-    this.genericService.getObservable(GET_MOVEMENTS).subscribe({
-      next: (response) => {
-        const productMovements = response.data?.map(
-          (el: any) => el?.MovementName
-        );
-        this.movements = [...new Set(productMovements)];
-      },
-      error: (err) => {
-        this.movements = [];
-      },
-    });
-    this.route.queryParams.subscribe((params) => {
-      this.movement = params['movement'] ? params['movement'] : null;
-    });
+    this.store.dispatch(loadFilters());
+
+    this.store
+      .select(selectFilterMovements)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((movements) => (this.movements = movements));
+
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.movement = params['movement'] ? params['movement'] : null;
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   handleMovementRoute(event: any) {
@@ -52,7 +58,7 @@ export class MovementFilteringComponent {
       })
       .finally(() => {
         this.viewScroller.setOffset([120, 120]);
-        this.viewScroller.scrollToAnchor('products'); // Anchore Link
+        this.viewScroller.scrollToAnchor('products');
       });
   }
 }

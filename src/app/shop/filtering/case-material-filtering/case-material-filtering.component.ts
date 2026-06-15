@@ -1,44 +1,48 @@
 import { ViewportScroller } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { GET_CASE_MATERIALS } from '@config/index';
-import { GenericService } from '@shared/services/generic.service';
-import { ProductService } from 'src/app/shared/services/product.service';
+import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { loadFilters } from 'src/app/store/actions/filters.actions';
+import { selectFilterCaseMaterials } from 'src/app/store/selectors/filters.selectors';
 
 @Component({
   selector: 'app-case-material-filtering',
   templateUrl: './case-material-filtering.component.html',
   styleUrls: ['./case-material-filtering.component.scss'],
 })
-export class CaseMaterialFilteringComponent {
-  public caseMaterials: any[] = [];
+export class CaseMaterialFilteringComponent implements OnInit, OnDestroy {
+  public caseMaterials: string[] = [];
   public caseMaterial: string | null = null;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
-    public productService: ProductService,
     private route: ActivatedRoute,
     private router: Router,
     private viewScroller: ViewportScroller,
-    private genericService: GenericService
+    private store: Store
   ) {}
 
   ngOnInit(): void {
-    this.genericService.getObservable(GET_CASE_MATERIALS).subscribe({
-      next: (response) => {
-        const productCaseMaterials = response.data?.map(
-          (el: any) => el?.CaseMaterialName
-        );
-        this.caseMaterials = [...new Set(productCaseMaterials)];
-      },
-      error: (err) => {
-        this.caseMaterials = [];
-      },
-    });
-    this.route.queryParams.subscribe((params) => {
-      this.caseMaterial = params['caseMaterial']
-        ? params['caseMaterial']
-        : null;
-    });
+    this.store.dispatch(loadFilters());
+
+    this.store
+      .select(selectFilterCaseMaterials)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((caseMaterials) => (this.caseMaterials = caseMaterials));
+
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.caseMaterial = params['caseMaterial'] ? params['caseMaterial'] : null;
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   handleCaseMaterialRoute(event: any) {
@@ -54,7 +58,7 @@ export class CaseMaterialFilteringComponent {
       })
       .finally(() => {
         this.viewScroller.setOffset([120, 120]);
-        this.viewScroller.scrollToAnchor('products'); // Anchore Link
+        this.viewScroller.scrollToAnchor('products');
       });
   }
 }
