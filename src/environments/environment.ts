@@ -1,6 +1,7 @@
 // src/environments/environment.ts (development)
 export const environment = {
   production: false,
+  appEnv: 'local',
   apiBaseUrl: 'http://localhost:5000/api',
   socketBaseUrl: 'http://localhost:5000',
   imageUploadUrl: 'http://localhost:5000/upload',
