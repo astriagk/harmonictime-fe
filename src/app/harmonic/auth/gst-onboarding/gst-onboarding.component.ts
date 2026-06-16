@@ -1,17 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
 import {
   GST_CREATE_WITH_DOCS,
-  GST_ONBOARDING,
   GST_UPDATE_WITH_DOCS,
 } from 'src/app/config';
 import { INDIAN_STATES } from 'src/app/shared/constants/indian-states';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { loadUser } from 'src/app/store/actions/user.actions';
-import { firstValueFrom } from 'rxjs';
+import { loadGst } from 'src/app/store/actions/gst.actions';
+import { selectGstData, selectGstLoading } from 'src/app/store/selectors/gst.selectors';
+import { Subject, firstValueFrom } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 const GSTIN_PATTERN =
   /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -39,7 +41,7 @@ export interface DocSlot {
   templateUrl: './gst-onboarding.component.html',
   styleUrls: ['./gst-onboarding.component.scss'],
 })
-export class GstOnboardingComponent implements OnInit {
+export class GstOnboardingComponent implements OnInit, OnDestroy {
   gstForm!: FormGroup;
   formSubmitted = false;
   isSubmitting = false;
@@ -88,6 +90,8 @@ export class GstOnboardingComponent implements OnInit {
   existingGstId: string | null = null;
   removedKeys: string[] = [];
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private genericService: GenericService,
     private toastrService: ToastrService,
@@ -112,7 +116,33 @@ export class GstOnboardingComponent implements OnInit {
       State: new FormControl(null, [Validators.required]),
     });
 
-    this.loadExisting();
+    this.store.dispatch(loadGst({}));
+
+    this.store.select(selectGstLoading).pipe(takeUntil(this.destroy$)).subscribe((loading) => {
+      this.isLoading = loading;
+    });
+
+    this.store.select(selectGstData).pipe(takeUntil(this.destroy$)).subscribe((data) => {
+      if (data) {
+        this.existingGstId = data._id ?? null;
+        this.gstForm.patchValue({
+          GSTIN: data.GSTIN ?? null,
+          LegalBusinessName: data.LegalBusinessName ?? null,
+          TradeName: data.TradeName ?? null,
+          BusinessType: data.BusinessType ?? null,
+          RegisteredAddress: data.RegisteredAddress ?? null,
+          PinCode: data.PinCode ?? null,
+          State: data.State ?? null,
+        });
+        this.prefillDocSlots(data.Documents ?? []);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get GSTIN() {
@@ -135,31 +165,6 @@ export class GstOnboardingComponent implements OnInit {
   }
   get State() {
     return this.gstForm.get('State');
-  }
-
-  private loadExisting(): void {
-    this.genericService.getObservableToken(GST_ONBOARDING).subscribe({
-      next: (res) => {
-        const data = res?.data;
-        if (data) {
-          this.existingGstId = data._id ?? null;
-          this.gstForm.patchValue({
-            GSTIN: data.GSTIN ?? null,
-            LegalBusinessName: data.LegalBusinessName ?? null,
-            TradeName: data.TradeName ?? null,
-            BusinessType: data.BusinessType ?? null,
-            RegisteredAddress: data.RegisteredAddress ?? null,
-            PinCode: data.PinCode ?? null,
-            State: data.State ?? null,
-          });
-          this.prefillDocSlots(data.Documents ?? []);
-        }
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-      },
-    });
   }
 
   private prefillDocSlots(

@@ -22,6 +22,12 @@ export const selectCartLoading = createSelector(
   (state) => state.loading
 );
 
+// Select Loaded flag (used by the effect's re-fetch guard)
+export const selectCartLoaded = createSelector(
+  selectCartState,
+  (state) => state.loaded
+);
+
 export const isProductInCart = (productId: string) =>
   createSelector(selectCartItems, (cartItems) =>
     cartItems.some((prd) => prd.ProductID === productId)

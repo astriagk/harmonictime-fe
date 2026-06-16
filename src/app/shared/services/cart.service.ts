@@ -83,7 +83,7 @@ export class CartService {
                       this.toastrService.success(
                         `${payload.ProductName} added to cart`,
                       );
-                      this.store.dispatch(loadCart());
+                      this.store.dispatch(loadCart({ force: true }));
                     }),
                   );
               }),
@@ -244,7 +244,7 @@ export class CartService {
                 this.toastrService.success(
                   `${payload.ProductName} removed from cart`,
                 );
-                this.store.dispatch(loadCart());
+                this.store.dispatch(loadCart({ force: true }));
               },
               error: () => {
                 this.toastrService.error(
@@ -301,7 +301,7 @@ export class CartService {
   mergeGuestCart(userId: string) {
     const guestCart = this.getGuestCart();
     if (!guestCart.length) {
-      this.store.dispatch(loadCart());
+      this.store.dispatch(loadCart({}));
       return;
     }
     const requests = guestCart.map((item: any) =>
@@ -315,7 +315,7 @@ export class CartService {
     );
     forkJoin(requests).subscribe(() => {
       sessionStorage.removeItem(this.GUEST_CART_KEY);
-      this.store.dispatch(loadCart());
+      this.store.dispatch(loadCart({ force: true }));
     });
   }
 

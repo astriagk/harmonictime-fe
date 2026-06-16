@@ -62,7 +62,7 @@
                 <li>
                   <a class="cart cursor-pointer" routerLink="/buyer/cart">
                     <i class="fas fa-cart-plus"></i>
-                    <span class="cart-number-2">{{ cartItems.length }}</span>
+                    <span *ngIf="cartItems.length > 0" class="cart-number-2">{{ cartItems.length }}</span>
                   </a>
                   <app-mini-cart></app-mini-cart>
                 </li>

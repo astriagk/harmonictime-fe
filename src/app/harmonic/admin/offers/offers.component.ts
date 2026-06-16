@@ -1,12 +1,19 @@
 import { ViewportScroller } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
-import { OFFERS_ALL, OFFERS, OFFER_BY_ID, OFFER_STATUS } from 'src/app/config';
+import { OFFERS, OFFER_BY_ID, OFFER_STATUS } from 'src/app/config';
 import { GenericService } from 'src/app/shared/services/generic.service';
 import { ProductService } from 'src/app/shared/services/product.service';
-import { finalize } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
+import { loadAdminOffers, reloadAdminOffers, upsertAdminOffer } from 'src/app/store/actions/admin-offers.actions';
+import {
+  selectAdminOffers,
+  selectAdminOffersLoading,
+} from 'src/app/store/selectors/admin-offers.selectors';
 
 interface Offer {
   _id: string;
@@ -23,7 +30,7 @@ interface Offer {
   templateUrl: './offers.component.html',
   styleUrls: ['./offers.component.scss'],
 })
-export class AdminOffersComponent implements OnInit {
+export class AdminOffersComponent implements OnInit, OnDestroy {
   offers: Offer[] = [];
   paginationOffers: Offer[] = [];
   paginate: any = {};
@@ -42,6 +49,8 @@ export class AdminOffersComponent implements OnInit {
   confirmDeleteId: string | null = null;
   confirmDeleteName = '';
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private fb: FormBuilder,
     private genericService: GenericService,
@@ -50,16 +59,36 @@ export class AdminOffersComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private viewScroller: ViewportScroller,
+    private store: Store,
   ) {}
 
   ngOnInit(): void {
     this.initForm();
-    this.loadOffers();
 
-    this.route.queryParams.subscribe((params) => {
+    this.store.dispatch(loadAdminOffers());
+
+    this.store
+      .select(selectAdminOffersLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.loading = loading));
+
+    this.store
+      .select(selectAdminOffers)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((offers) => {
+        this.offers = offers as Offer[];
+        this.updatePagination();
+      });
+
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.pageNo = params['page'] ? Number(params['page']) : 1;
       this.updatePagination();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private initForm(offer?: Offer): void {
@@ -74,20 +103,6 @@ export class AdminOffersComponent implements OnInit {
       EndDate: [offer ? this.toDateInput(offer.EndDate) : '', Validators.required],
       IsActive: [offer?.IsActive ?? true],
     });
-  }
-
-  loadOffers(): void {
-    this.loading = true;
-    this.genericService
-      .getObservable(OFFERS_ALL)
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res) => {
-          this.offers = res?.data ?? [];
-          this.updatePagination();
-        },
-        error: () => this.toastr.error('Failed to load offers'),
-      });
   }
 
   updatePagination(): void {
@@ -143,21 +158,17 @@ export class AdminOffersComponent implements OnInit {
       StartDate: new Date(this.form.value.StartDate).toISOString(),
       EndDate: new Date(this.form.value.EndDate).toISOString(),
     };
-
     this.isSaving = true;
     this.formError = '';
-
     const request$ = this.editingOffer
       ? this.genericService.putObservable(`${OFFER_BY_ID}${this.editingOffer._id}`, payload)
       : this.genericService.postObservable(OFFERS, payload);
 
     request$.pipe(finalize(() => (this.isSaving = false))).subscribe({
       next: () => {
-        this.toastr.success(
-          this.editingOffer ? 'Offer updated successfully' : 'Offer created successfully',
-        );
+        this.toastr.success(this.editingOffer ? 'Offer updated successfully' : 'Offer created successfully');
         this.closeModal();
-        this.loadOffers();
+        this.store.dispatch(reloadAdminOffers());
       },
       error: (err) => {
         const msg = err?.error?.message ?? 'Something went wrong';
@@ -173,12 +184,12 @@ export class AdminOffersComponent implements OnInit {
       .patchObservable(OFFER_STATUS(offer._id), { IsActive: newStatus })
       .subscribe({
         next: () => {
-          offer.IsActive = newStatus;
+          this.store.dispatch(
+            upsertAdminOffer({ offer: { ...offer, IsActive: newStatus } }),
+          );
           this.toastr.success(newStatus ? 'Offer enabled' : 'Offer disabled');
         },
-        error: () => {
-          this.toastr.error('Failed to update offer status');
-        },
+        error: () => this.toastr.error('Failed to update offer status'),
       });
   }
 
@@ -203,8 +214,7 @@ export class AdminOffersComponent implements OnInit {
       .subscribe({
         next: () => {
           this.toastr.success('Offer deleted');
-          this.offers = this.offers.filter((o) => o._id !== id);
-          this.updatePagination();
+          this.store.dispatch(reloadAdminOffers());
         },
         error: () => this.toastr.error('Failed to delete offer'),
       });

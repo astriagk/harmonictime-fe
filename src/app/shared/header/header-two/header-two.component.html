@@ -45,7 +45,7 @@
                 <li>
                   <a class="cursor-pointer" class="cart">
                     <i class="ion-bag"></i> Cart
-                    <span
+                    <span *ngIf="cartService.totalPriceQuantity().quantity > 0"
                       >({{ cartService.totalPriceQuantity().quantity }})</span
                     >
                   </a>

@@ -10,6 +10,7 @@ import {
 export interface CartState {
   cart: any[];
   error: string | null;
+  loaded: boolean;
   loading: boolean;
 }
 
@@ -19,25 +20,31 @@ export interface CartState {
 export const initialState: CartState = {
   cart: [],
   error: null,
+  loaded: false,
   loading: true,
 };
 
 export const cartReducer = createReducer(
   initialState,
-  on(loadCart, (state) => ({
+  // `force` (after a mutation) always shows loading; a plain display dispatch
+  // only shows loading on the first, un-cached load.
+  on(loadCart, (state, { force }) => ({
     ...state,
-    loading: true,
+    loading: force ? true : !state.loaded,
+    loaded: force ? false : state.loaded,
     error: null,
   })),
   on(loadCartSuccess, (state, { cart }) => ({
     ...state,
     cart,
+    loaded: true,
     loading: false,
     error: null,
   })),
   on(loadCartFailure, (state, { error }) => ({
     ...state,
     cart: [],
+    loaded: false,
     loading: false,
     error,
   })),
@@ -46,6 +53,7 @@ export const cartReducer = createReducer(
   on(updateCart, (state, { cart }) => ({
     ...state,
     cart,
+    loaded: true,
     loading: false,
   })),
   // Patch a single item's quantity without triggering a loading state or re-fetch

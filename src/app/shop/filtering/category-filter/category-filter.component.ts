@@ -1,42 +1,48 @@
 import { ViewportScroller } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { GET_CATEGORIES } from '@config/index';
-import { GenericService } from '@shared/services/generic.service';
-import { ProductService } from 'src/app/shared/services/product.service';
+import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { loadFilters } from 'src/app/store/actions/filters.actions';
+import { selectFilterCategories } from 'src/app/store/selectors/filters.selectors';
 
 @Component({
   selector: 'app-category-filter',
   templateUrl: './category-filter.component.html',
   styleUrls: ['./category-filter.component.scss'],
 })
-export class CategoryFilterComponent {
-  public categories: any[] = [];
+export class CategoryFilterComponent implements OnInit, OnDestroy {
+  public categories: string[] = [];
   public category: string | null = null;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
-    public productService: ProductService,
     private route: ActivatedRoute,
     private router: Router,
     private viewScroller: ViewportScroller,
-    private genericService: GenericService
+    private store: Store
   ) {}
 
   ngOnInit(): void {
-    this.genericService.getObservable(GET_CATEGORIES).subscribe({
-      next: (response) => {
-        const productCategories = response.data?.map(
-          (el: any) => el?.CategoryName
-        );
-        this.categories = [...new Set(productCategories)];
-      },
-      error: (err) => {
-        this.categories = [];
-      },
-    });
-    this.route.queryParams.subscribe((params) => {
-      this.category = params['category'] ? params['category'] : null;
-    });
+    this.store.dispatch(loadFilters());
+
+    this.store
+      .select(selectFilterCategories)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((categories) => (this.categories = categories));
+
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.category = params['category'] ? params['category'] : null;
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   handleCategoryRoute(event: any) {
@@ -52,7 +58,7 @@ export class CategoryFilterComponent {
       })
       .finally(() => {
         this.viewScroller.setOffset([120, 120]);
-        this.viewScroller.scrollToAnchor('products'); // Anchore Link
+        this.viewScroller.scrollToAnchor('products');
       });
   }
 }

@@ -2,7 +2,10 @@
 <section class="cart-area pt-60 pb-60">
   <div class="container">
     <!-- Loading: shimmer placeholders for the cart rows -->
-    <div *ngIf="isLoading" class="table-content table-responsive">
+    <div
+      *ngIf="isLoading && cartItems.length === 0"
+      class="table-content table-responsive"
+    >
       <app-skeleton type="table-row" [count]="3"></app-skeleton>
     </div>
 
@@ -13,7 +16,7 @@
       actionLink="/buyer/products"
     ></app-empty-state>
 
-    <div *ngIf="!isLoading && cartItems.length > 0" class="row">
+    <div *ngIf="cartItems.length > 0" class="row">
       <div class="col-12">
         <div class="table-content table-responsive">
           <table class="table">

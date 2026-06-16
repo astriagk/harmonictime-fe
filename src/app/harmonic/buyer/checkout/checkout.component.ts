@@ -14,7 +14,6 @@ import {
   CHECK_AVAILABILITY,
   CHECKOUT_ITEM_ORDER,
   CREATE_PAYMENT_ORDER,
-  GET_ADDRESSES_BY_USER,
   LOGIN_USER,
   REGISTER_USER,
   VERIFY_PAYMENT_ORDER,
@@ -32,6 +31,9 @@ import {
   selectCartLoading,
 } from 'src/app/store/selectors/cart.selectors';
 import { loadCart } from 'src/app/store/actions/cart.actions';
+import { loadOrders } from 'src/app/store/actions/orders.actions';
+import { loadAddresses } from 'src/app/store/actions/addresses.actions';
+import { selectAddresses } from 'src/app/store/selectors/addresses.selectors';
 import { Router } from '@angular/router';
 import { environment } from '@env/environment';
 declare var Razorpay: any;
@@ -132,12 +134,16 @@ export class CheckoutComponent implements OnDestroy {
       const userId = this.userData?._id;
       if (userId && userId !== this.addressesLoadedFor) {
         this.addressesLoadedFor = userId;
-        this.loadSavedAddresses(userId);
+        // Reuse the shared addresses NgRx slice (same data as the account page).
+        this.store.dispatch(loadAddresses({ userId }));
         // Default the billing email to the account email if not already set.
         if (this.userData?.email && !this.checkoutForm?.get('email')?.value) {
           this.checkoutForm?.patchValue({ email: this.userData.email });
         }
       }
+    });
+    this.store.select(selectAddresses).subscribe((addresses) => {
+      this.savedAddresses = addresses ?? [];
     });
     this.store.select(selectCartItems).subscribe((state) => {
       if (state?.length) {
@@ -171,22 +177,6 @@ export class CheckoutComponent implements OnDestroy {
     );
 
     this.loadRazorpayScript();
-  }
-
-  // Load the user's saved addresses so they can pick one to prefill billing.
-  private loadSavedAddresses(userId: string) {
-    this.genericService
-      .getObservable(`${GET_ADDRESSES_BY_USER}${userId}`)
-      .subscribe({
-        next: (res: any) => {
-          this.savedAddresses = res?.data ?? res ?? [];
-          // Nothing is preselected — the user picks an address (or enters a new
-          // one) themselves.
-        },
-        error: () => {
-          this.savedAddresses = [];
-        },
-      });
   }
 
   // Fired when the user picks a saved address from the dropdown. '' = enter a
@@ -657,7 +647,9 @@ export class CheckoutComponent implements OnDestroy {
       );
 
       this.router.navigate(['/buyer/products']);
-      await this.store.dispatch(loadCart());
+      this.store.dispatch(loadCart({ force: true }));
+      const userId = this.userData?._id;
+      if (userId) this.store.dispatch(loadOrders({ userId, force: true }));
       await this.toastrService.success(
         'Payment and Checkout Completed Successfully!',
       );

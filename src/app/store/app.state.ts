@@ -1,6 +1,20 @@
 import { UserState } from './reducers/user.reducer';
 import { WishlistState } from './reducers/wishlist.reducer';
 import { GstState } from './reducers/gst.reducer';
+import { ProductsState } from './reducers/product.reducer';
+import { FiltersState } from './reducers/filters.reducer';
+import { SellerProductsState } from './reducers/seller-products.reducer';
+import { SellerOrdersState } from './reducers/seller-orders.reducer';
+import { AdminOffersState } from './reducers/admin-offers.reducer';
+import { AddressesState } from './reducers/addresses.reducer';
+import { WalletState } from './reducers/wallet.reducer';
+import { WalletItemsState } from './reducers/wallet-items.reducer';
+import { WithdrawalsState } from './reducers/withdrawals.reducer';
+import { BankAccountsState } from './reducers/bank-accounts.reducer';
+import { SellerOffersState } from './reducers/seller-offers.reducer';
+import { AdminUsersState } from './reducers/admin-users.reducer';
+import { AdminProductsState } from './reducers/admin-products.reducer';
+import { AdminWithdrawalsState } from './reducers/admin-withdrawals.reducer';
 
 export interface AppState {
   user: UserState;
@@ -8,6 +22,20 @@ export interface AppState {
   cart: any;
   orders: any;
   gst: GstState;
+  products: ProductsState;
+  filters: FiltersState;
+  sellerProducts: SellerProductsState;
+  sellerOrders: SellerOrdersState;
+  adminOffers: AdminOffersState;
+  addresses: AddressesState;
+  wallet: WalletState;
+  walletItems: WalletItemsState;
+  withdrawals: WithdrawalsState;
+  bankAccounts: BankAccountsState;
+  sellerOffers: SellerOffersState;
+  adminUsers: AdminUsersState;
+  adminProducts: AdminProductsState;
+  adminWithdrawals: AdminWithdrawalsState;
   // profile: ProfileState;
   // recentlyViewed: RecentlyViewedState;
   // offers: OfferState;

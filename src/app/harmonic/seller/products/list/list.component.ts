@@ -2,13 +2,23 @@ import { ViewportScroller } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { PRODUCT, UPDATE_PRODUCT_BY_ID, OFFERS, BULK_OFFER } from '@config/index';
+import { BULK_OFFER, UPDATE_PRODUCT_BY_ID } from '@config/index';
 import { GenericService } from '@shared/services/generic.service';
 import { UtilsService } from '@shared/services/utils.service';
 import { ToastrService } from 'ngx-toastr';
-import { filter, finalize, Subscription, switchMap } from 'rxjs';
+import { Subject } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
 import { ProductService } from 'src/app/shared/services/product.service';
-import { selectUserData } from 'src/app/store/selectors/user.selectors';
+import { loadSellerProducts } from 'src/app/store/actions/seller-products.actions';
+import {
+  selectSellerProducts,
+  selectSellerProductsLoading,
+} from 'src/app/store/selectors/seller-products.selectors';
+import { loadSellerOffers } from 'src/app/store/actions/seller-offers.actions';
+import {
+  selectSellerOffers,
+  selectSellerOffersLoading,
+} from 'src/app/store/selectors/seller-offers.selectors';
 
 interface Offer {
   _id: string;
@@ -32,16 +42,15 @@ export class ListComponent implements OnInit, OnDestroy {
   public pageSize = 10;
   public pageNo: number = 1;
   public loading = true;
-  private subscriptions: Subscription = new Subscription();
-  private userData: any;
 
-  // Offer modal state
   isOfferModalOpen = false;
   offers: Offer[] = [];
   offersLoading = false;
   selectedOfferId: string | null = null;
   selectedProductIds: Set<string> = new Set();
   isSavingOffer = false;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private store: Store,
@@ -55,49 +64,39 @@ export class ListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscriptions.add(
-      this.store
-        .select(selectUserData)
-        .pipe(
-          filter((state) => !!state?.user?.data),
-          switchMap((state) => {
-            this.userData = state.user.data;
-            return this.loadProducts();
-          }),
-        )
-        .subscribe({
-          next: (response) => {
-            this.orders = response?.data || [];
-            this.updatePagination();
-          },
-          error: (err) => console.error(`Error fetching product data:`, err),
-        }),
-    );
+    this.store.dispatch(loadSellerProducts({}));
 
-    this.subscriptions.add(
-      this.route.queryParams.subscribe((params) => {
-        this.pageNo = params['page'] ? Number(params['page']) : this.pageNo;
+    this.store
+      .select(selectSellerProductsLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.loading = loading));
+
+    this.store
+      .select(selectSellerProducts)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((products) => {
+        this.orders = products;
         this.updatePagination();
-      }),
-    );
-  }
+      });
 
-  private loadProducts() {
-    this.loading = true;
-    const url = `${PRODUCT}?UserID=${this.userData._id}&IsAvailable=all`;
-    return this.genericService.getObservable(url).pipe(
-      finalize(() => (this.loading = false)),
-    );
-  }
-
-  private reloadProducts(): void {
-    this.loadProducts().subscribe({
-      next: (response) => {
-        this.orders = response?.data || [];
-        this.updatePagination();
-      },
-      error: () => this.toastrService.error('Failed to refresh products'),
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.pageNo = params['page'] ? Number(params['page']) : this.pageNo;
+      this.updatePagination();
     });
+
+    this.store
+      .select(selectSellerOffers)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((offers) => (this.offers = offers as Offer[]));
+    this.store
+      .select(selectSellerOffersLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.offersLoading = loading));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   updatePagination(): void {
@@ -121,53 +120,31 @@ export class ListComponent implements OnInit, OnDestroy {
         queryParamsHandling: 'merge',
         skipLocationChange: false,
       })
-      .finally(() => {
-        this.viewScroller.setOffset([120, 120]);
-      });
+      .finally(() => this.viewScroller.setOffset([120, 120]));
   }
 
   toggleAvailability(product: any, event: Event): void {
     event.stopPropagation();
     const newValue = !product.IsAvailable;
-    product.IsAvailable = newValue;
-
-    this.subscriptions.add(
-      this.genericService
-        .putObservable(`${UPDATE_PRODUCT_BY_ID}${product._id}`, {
-          IsAvailable: newValue,
-        })
-        .subscribe({
-          next: () => {
-            this.toastrService.success(
-              newValue ? 'Product marked available.' : 'Product marked unavailable.',
-            );
-          },
-          error: (err) => {
-            console.error('Error updating availability:', err);
-            product.IsAvailable = !newValue;
-            this.toastrService.error('Failed to update availability.');
-          },
-        }),
-    );
+    this.genericService
+      .putObservable(`${UPDATE_PRODUCT_BY_ID}${product._id}`, { IsAvailable: newValue })
+      .subscribe({
+        next: () => {
+          this.toastrService.success(
+            newValue ? 'Product marked available.' : 'Product marked unavailable.',
+          );
+          this.store.dispatch(loadSellerProducts({ force: true }));
+        },
+        error: () => this.toastrService.error('Failed to update availability.'),
+      });
   }
-
-  // ── Offer modal ────────────────────────────────────────────────
 
   openOfferModal(): void {
     this.isOfferModalOpen = true;
     this.selectedOfferId = null;
     this.selectedProductIds = new Set();
-
-    if (this.offers.length === 0) {
-      this.offersLoading = true;
-      this.genericService
-        .getObservable(OFFERS)
-        .pipe(finalize(() => (this.offersLoading = false)))
-        .subscribe({
-          next: (res) => (this.offers = res?.data ?? []),
-          error: () => this.toastrService.error('Failed to load offers'),
-        });
-    }
+    // The slice's loaded-guard fetches once and serves cache on later opens.
+    this.store.dispatch(loadSellerOffers({}));
   }
 
   closeOfferModal(): void {
@@ -186,13 +163,11 @@ export class ListComponent implements OnInit, OnDestroy {
     } else {
       this.selectedProductIds.add(productId);
     }
-    // trigger change detection
     this.selectedProductIds = new Set(this.selectedProductIds);
   }
 
   toggleSelectAll(): void {
     const selectableIds = this.availableProducts.map((p) => p._id);
-
     if (this.selectedProductIds.size === selectableIds.length) {
       this.selectedProductIds = new Set();
     } else {
@@ -213,12 +188,10 @@ export class ListComponent implements OnInit, OnDestroy {
 
   applyOffer(): void {
     if (!this.selectedOfferId || this.selectedProductIds.size === 0) return;
-
     const payload: any = {
       OfferID: this.selectedOfferId,
       AssignProductIDs: Array.from(this.selectedProductIds),
     };
-
     this.isSavingOffer = true;
     this.genericService
       .putObservableToken(BULK_OFFER, payload)
@@ -228,22 +201,15 @@ export class ListComponent implements OnInit, OnDestroy {
           const count = res?.data?.assigned ?? this.selectedProductIds.size;
           this.toastrService.success(`Offer applied to ${count} product(s)`);
           this.closeOfferModal();
-          this.reloadProducts();
+          this.store.dispatch(loadSellerProducts({ force: true }));
         },
-        error: (err) => {
-          const msg = err?.error?.message ?? 'Failed to apply offer';
-          this.toastrService.error(msg);
-        },
+        error: (err) => this.toastrService.error(err?.error?.message ?? 'Failed to apply offer'),
       });
   }
 
   removeOffer(): void {
     if (this.selectedProductIds.size === 0) return;
-
-    const payload = {
-      RemoveProductIDs: Array.from(this.selectedProductIds),
-    };
-
+    const payload = { RemoveProductIDs: Array.from(this.selectedProductIds) };
     this.isSavingOffer = true;
     this.genericService
       .putObservableToken(BULK_OFFER, payload)
@@ -253,13 +219,18 @@ export class ListComponent implements OnInit, OnDestroy {
           const count = res?.data?.removed ?? this.selectedProductIds.size;
           this.toastrService.success(`Offer removed from ${count} product(s)`);
           this.closeOfferModal();
-          this.reloadProducts();
+          this.store.dispatch(loadSellerProducts({ force: true }));
         },
-        error: (err) => {
-          const msg = err?.error?.message ?? 'Failed to remove offer';
-          this.toastrService.error(msg);
-        },
+        error: (err) => this.toastrService.error(err?.error?.message ?? 'Failed to remove offer'),
       });
+  }
+
+  // Details page only exists for approved products that are still in stock.
+  // In-review / rejected products would 404 — the seller edits them instead.
+  // Status casing can vary by endpoint, so compare case-insensitively.
+  canViewDetails(product: any): boolean {
+    const status = (product?.ApprovalStatus ?? '').toString().trim().toLowerCase();
+    return status === 'approved' && product?.RemainingQuantity !== 0;
   }
 
   productOfferName(product: any): string | null {
@@ -272,9 +243,5 @@ export class ListComponent implements OnInit, OnDestroy {
 
   isCurrentOffer(product: any): boolean {
     return !!this.selectedOfferId && product?.Offer?._id === this.selectedOfferId;
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 }

@@ -1,16 +1,35 @@
 import { Injectable } from '@angular/core';
 import { Actions, ofType, createEffect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
-import { submitGst, submitGstSuccess, submitGstFailure } from '../actions/gst.actions';
+import { catchError, exhaustMap, filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import {
+  loadGst,
+  loadGstSuccess,
+  loadGstFailure,
+  submitGst,
+  submitGstSuccess,
+  submitGstFailure,
+} from '../actions/gst.actions';
+import { selectGstState } from '../selectors/gst.selectors';
 import { GenericService } from 'src/app/shared/services/generic.service';
+import { GST_ONBOARDING } from 'src/app/config';
 
 @Injectable()
 export class GstEffects {
-  constructor(
-    private actions$: Actions,
-    private genericService: GenericService
-  ) {}
+  loadGst$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(loadGst),
+      withLatestFrom(this.store.select(selectGstState)),
+      filter(([action, state]) => !!action.force || !state.loaded),
+      exhaustMap(() =>
+        this.genericService.getObservableToken(GST_ONBOARDING).pipe(
+          map((res: any) => loadGstSuccess({ data: res?.data ?? null })),
+          catchError((err) => of(loadGstFailure({ error: err })))
+        )
+      )
+    )
+  );
 
   submitGst$ = createEffect(() =>
     this.actions$.pipe(
@@ -23,4 +42,10 @@ export class GstEffects {
       )
     )
   );
+
+  constructor(
+    private actions$: Actions,
+    private store: Store,
+    private genericService: GenericService
+  ) {}
 }

@@ -49,6 +49,17 @@
                     aria-selected="false"
                     >Delivery & Returns</a
                   >
+                  <a
+                    class="nav-item nav-link"
+                    id="review-tab"
+                    data-bs-toggle="tab"
+                    href="#review"
+                    role="tab"
+                    aria-controls="review"
+                    aria-selected="false"
+                    (click)="loadReviews()"
+                    >Reviews<span *ngIf="reviewCount > 0"> ({{ reviewCount }})</span></a
+                  >
                 </div>
               </nav>
             </div>
@@ -174,6 +185,72 @@
                         }}</span>
                       </li>
                     </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="review" role="tabpanel">
+                <div class="product__details-review">
+                  <div class="postbox__comments">
+                    <div class="postbox__comment-title mb-30">
+                      <h3>
+                        Reviews<span *ngIf="reviewCount > 0">
+                          ({{ reviewCount }})</span
+                        >
+                      </h3>
+                    </div>
+                    <!-- Loading: shimmer review rows -->
+                    <app-skeleton
+                      *ngIf="!reviewsLoaded"
+                      type="list-row"
+                      [count]="3"
+                    ></app-skeleton>
+                    <div
+                      *ngIf="reviewsLoaded && reviews.length === 0"
+                      class="text-center pt-50"
+                    >
+                      <h3>No Reviews Found</h3>
+                    </div>
+                    <div class="latest-comments mb-30">
+                      <ul>
+                        <li *ngFor="let r of reviews">
+                          <div class="comments-box">
+                            <div class="comments-avatar">
+                              <img
+                                src="assets/img/blog/comments/avater-3.png"
+                                alt="user"
+                              />
+                            </div>
+                            <div class="comments-text">
+                              <div class="avatar-name">
+                                <h5>{{ r.Name }}</h5>
+                                <span *ngIf="r.CreatedAt || r.createdAt">
+                                  -
+                                  {{
+                                    r.CreatedAt || r.createdAt
+                                      | date: "mediumDate"
+                                  }}
+                                </span>
+                              </div>
+                              <div class="user-rating">
+                                <ul>
+                                  <li *ngFor="let s of stars">
+                                    <a class="cursor-pointer">
+                                      <i
+                                        class="fa-star"
+                                        [ngClass]="
+                                          s <= r.Rating ? 'fas' : 'fal'
+                                        "
+                                      ></i>
+                                    </a>
+                                  </li>
+                                </ul>
+                              </div>
+                              <p>{{ r.Comment }}</p>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>

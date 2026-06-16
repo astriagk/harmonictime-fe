@@ -16,6 +16,12 @@ export const selectOrdersLoading = createSelector(
   (state) => state.loading
 );
 
+// Select Loaded flag (used by the effect's re-fetch guard)
+export const selectOrdersLoaded = createSelector(
+  selectOrdersState,
+  (state) => state.loaded
+);
+
 // Select Error
 export const selectOrdersError = createSelector(
   selectOrdersState,

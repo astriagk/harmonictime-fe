@@ -1,17 +1,22 @@
 import { ViewportScroller } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   CREATE_SHIPMENT,
-  GET_SELLER_ORDERS,
   SELLER_ORDER_APPROVAL,
   UPDATE_SHIPMENT,
 } from '@config/index';
 import { Store } from '@ngrx/store';
 import { GenericService } from '@shared/services/generic.service';
 import { ToastrService } from 'ngx-toastr';
-import { finalize } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ProductService } from 'src/app/shared/services/product.service';
+import { loadSellerOrders, upsertSellerOrder } from 'src/app/store/actions/seller-orders.actions';
+import {
+  selectSellerOrders,
+  selectSellerOrdersLoading,
+} from 'src/app/store/selectors/seller-orders.selectors';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
 @Component({
@@ -19,15 +24,15 @@ import { selectUserData } from 'src/app/store/selectors/user.selectors';
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.scss'],
 })
-export class OrdersComponent {
+export class OrdersComponent implements OnInit, OnDestroy {
   public orders: any[] = [];
   paginationOrders: any = [];
 
-  public paginate: any = {}; // Pagination use only
+  public paginate: any = {};
   public pageSize = 10;
   public pageNo: number = 1;
   public userData: any = {};
-  public loading = true; // Show skeleton until the first orders response
+  public loading = true;
 
   public approvalFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   public readonly approvalFilters: { label: string; value: 'All' | 'Pending' | 'Approved' | 'Rejected' }[] = [
@@ -42,17 +47,12 @@ export class OrdersComponent {
     return this.orders.filter((o) => o.SellerApprovalStatus === this.approvalFilter);
   }
 
-  // Expandable detail rows
   public expandedOrderId: string | null = null;
-
-  // Approval state
   public isRejectionModalOpen = false;
   public rejectionOrder: any = null;
   public rejectionReason = '';
   public rejectionReasonError = '';
   public isSubmittingApproval = false;
-
-  // Tracking-ID modal state
   public isTrackingModalOpen = false;
   public selectedOrder: any = null;
   public courier = '';
@@ -61,11 +61,7 @@ export class OrdersComponent {
   public shipmentStatus = 'Shipped';
   public trackingError = '';
   public isSavingTracking = false;
-  // Set when the selected order already has a shipment, so the modal edits
-  // (PUT) the existing record instead of creating a new one.
   public editingShipmentId: string | null = null;
-  // Allowed by the backend (updateShipmentSchema). `value` is sent as-is;
-  // `label` is the human-readable text shown in the dropdown.
   public readonly shipmentStatuses = [
     { value: 'Pending', label: 'Pending' },
     { value: 'Shipped', label: 'Shipped' },
@@ -78,6 +74,8 @@ export class OrdersComponent {
     return this.shipmentStatuses.find(s => s.value === this.shipmentStatus)?.label ?? this.shipmentStatus ?? '—';
   }
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     public productService: ProductService,
     private router: Router,
@@ -89,30 +87,34 @@ export class OrdersComponent {
   ) {}
 
   ngOnInit(): void {
-    this.store.select(selectUserData).subscribe((state) => {
+    this.store.select(selectUserData).pipe(takeUntil(this.destroy$)).subscribe((state) => {
       this.userData = state?.user?.data;
-
-      if (this.userData?._id) {
-        // Returns every order containing at least one product this seller
-        // listed, with only this seller's line items per order, newest first.
-        const url = `${GET_SELLER_ORDERS}${this.userData._id}`;
-        this.genericService
-          .getObservable(url)
-          .pipe(finalize(() => (this.loading = false)))
-          .subscribe((response) => {
-            this.orders = response?.data || [];
-            this.refreshPagination(Number(+this.pageNo));
-          });
-      } else if (state) {
-        // Store has emitted but there's no logged-in seller — stop the skeleton.
-        this.loading = false;
-      }
     });
 
-    this.route.queryParams.subscribe((params) => {
+    this.store.dispatch(loadSellerOrders());
+
+    this.store
+      .select(selectSellerOrdersLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.loading = loading));
+
+    this.store
+      .select(selectSellerOrders)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((orders) => {
+        this.orders = orders;
+        this.refreshPagination(Number(+this.pageNo));
+      });
+
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.pageNo = params['page'] ? params['page'] : this.pageNo;
       this.refreshPagination(Number(+this.pageNo));
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   setApprovalFilter(value: 'All' | 'Pending' | 'Approved' | 'Rejected'): void {
@@ -140,13 +142,9 @@ export class OrdersComponent {
         queryParamsHandling: 'merge',
         skipLocationChange: false,
       })
-      .finally(() => {
-        this.viewScroller.setOffset([120, 120]);
-      });
+      .finally(() => this.viewScroller.setOffset([120, 120]));
   }
 
-  // True once the order has been shipped (a shipment exists for it). Used to
-  // switch the row action between "Add" and "Edit".
   isShipped(order: any): boolean {
     return !!order?.Shipment || order?.DeliveryStatus === 'Shipped';
   }
@@ -154,7 +152,6 @@ export class OrdersComponent {
   addTracking(order: any) {
     this.selectedOrder = order;
     const shipment = order?.Shipment;
-    // Pre-fill from the existing shipment so the seller edits instead of re-adds.
     this.editingShipmentId = shipment?._id ?? null;
     this.courier = shipment?.Courier ?? '';
     this.trackingId = shipment?.TrackingNumber ?? '';
@@ -184,12 +181,14 @@ export class OrdersComponent {
     const url = SELLER_ORDER_APPROVAL(this.userData._id, order._id);
     this.genericService.putObservable(url, { Status: 'Approved' }).subscribe({
       next: () => {
-        order.SellerApprovalStatus = 'Approved';
+        this.store.dispatch(
+          upsertSellerOrder({
+            order: { ...order, SellerApprovalStatus: 'Approved' },
+          }),
+        );
         this.toastrService.success('Order approved successfully.');
       },
-      error: () => {
-        this.toastrService.error('Failed to approve order.');
-      },
+      error: () => this.toastrService.error('Failed to approve order.'),
     });
   }
 
@@ -215,14 +214,19 @@ export class OrdersComponent {
     }
     this.isSubmittingApproval = true;
     const payload: any = { Status: 'Rejected' };
-    if (this.rejectionReason.trim()) {
-      payload.Reason = this.rejectionReason.trim();
-    }
+    if (this.rejectionReason.trim()) payload.Reason = this.rejectionReason.trim();
     const url = SELLER_ORDER_APPROVAL(this.userData._id, this.rejectionOrder._id);
     this.genericService.putObservable(url, payload).subscribe({
       next: () => {
-        this.rejectionOrder.SellerApprovalStatus = 'Rejected';
-        this.rejectionOrder.SellerRejectionReason = payload.Reason ?? null;
+        this.store.dispatch(
+          upsertSellerOrder({
+            order: {
+              ...this.rejectionOrder,
+              SellerApprovalStatus: 'Rejected',
+              SellerRejectionReason: payload.Reason ?? null,
+            },
+          }),
+        );
         this.toastrService.success('Order rejected.');
         this.closeRejectionModal();
       },
@@ -240,13 +244,10 @@ export class OrdersComponent {
       this.trackingError = 'Courier and tracking ID are required.';
       return;
     }
-
     const trackingUrl = this.trackingUrl.trim();
     this.isSavingTracking = true;
 
     if (this.editingShipmentId) {
-      // Editing an existing shipment — PUT the known fields. Changing
-      // ShipmentStatus also re-syncs the order's DeliveryStatus on the backend.
       const payload: any = {
         Courier: courier,
         TrackingNumber: trackingNumber,
@@ -258,21 +259,27 @@ export class OrdersComponent {
         .subscribe({
           next: () => {
             if (this.selectedOrder) {
-              this.selectedOrder.DeliveryStatus = this.shipmentStatus;
-              this.selectedOrder.Shipment = {
-                ...(this.selectedOrder.Shipment ?? {}),
-                _id: this.editingShipmentId,
-                Courier: courier,
-                TrackingNumber: trackingNumber,
-                TrackingURL: trackingUrl,
-                ShipmentStatus: this.shipmentStatus,
-              };
+              this.store.dispatch(
+                upsertSellerOrder({
+                  order: {
+                    ...this.selectedOrder,
+                    DeliveryStatus: this.shipmentStatus,
+                    Shipment: {
+                      ...(this.selectedOrder.Shipment ?? {}),
+                      _id: this.editingShipmentId,
+                      Courier: courier,
+                      TrackingNumber: trackingNumber,
+                      TrackingURL: trackingUrl,
+                      ShipmentStatus: this.shipmentStatus,
+                    },
+                  },
+                }),
+              );
             }
             this.toastrService.success('Tracking details updated successfully.');
             this.closeTracking();
           },
-          error: (error) => {
-            console.error('Error updating shipment:', error);
+          error: () => {
             this.toastrService.error('Failed to update tracking details.');
             this.isSavingTracking = false;
           },
@@ -287,29 +294,31 @@ export class OrdersComponent {
       TrackingNumber: trackingNumber,
       ShipmentStatus: this.shipmentStatus,
     };
-    if (trackingUrl) {
-      payload.TrackingURL = trackingUrl;
-    }
+    if (trackingUrl) payload.TrackingURL = trackingUrl;
 
     this.genericService.postObservable(CREATE_SHIPMENT, payload).subscribe({
       next: (response) => {
-        // Backend syncs the order's DeliveryStatus to the shipment status;
-        // reflect it locally so the seller sees the change immediately.
         if (this.selectedOrder) {
-          this.selectedOrder.DeliveryStatus = this.shipmentStatus;
-          this.selectedOrder.Shipment = {
-            _id: response?.data?._id,
-            Courier: courier,
-            TrackingNumber: trackingNumber,
-            TrackingURL: trackingUrl,
-            ShipmentStatus: this.shipmentStatus,
-          };
+          this.store.dispatch(
+            upsertSellerOrder({
+              order: {
+                ...this.selectedOrder,
+                DeliveryStatus: this.shipmentStatus,
+                Shipment: {
+                  _id: response?.data?._id,
+                  Courier: courier,
+                  TrackingNumber: trackingNumber,
+                  TrackingURL: trackingUrl,
+                  ShipmentStatus: this.shipmentStatus,
+                },
+              },
+            }),
+          );
         }
         this.toastrService.success('Tracking ID added successfully.');
         this.closeTracking();
       },
-      error: (error) => {
-        console.error('Error creating shipment:', error);
+      error: () => {
         this.toastrService.error('Failed to add tracking ID.');
         this.isSavingTracking = false;
       },

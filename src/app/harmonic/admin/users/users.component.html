@@ -8,9 +8,7 @@
     class="order-info__header d-flex justify-content-between align-items-center pt-40 pb-20"
   >
     <div class="d-flex align-items-center gap-20">
-      <h2 class="order-info__title mb-0">
-        {{ pageView === "customers" ? "Customers" : "Sellers" }}
-      </h2>
+      <h2 class="order-info__title mb-0">Users</h2>
       <ul class="nav nav-tabs admin-filter-tabs admin-view-tabs">
         <li class="nav-item">
           <a
@@ -56,7 +54,7 @@
 
   <!-- ==================== CUSTOMERS ==================== -->
   <ng-container *ngIf="pageView === 'customers'">
-    <div *ngIf="listLoading" class="order-list white-bg pt-40">
+    <div *ngIf="listLoading && users.length === 0" class="order-list white-bg pt-40">
       <app-skeleton type="table-row" [count]="8"></app-skeleton>
     </div>
 
@@ -66,7 +64,7 @@
     ></app-empty-state>
 
     <div
-      *ngIf="!listLoading && users.length > 0"
+      *ngIf="users.length > 0"
       class="order-list white-bg table-responsive pt-40"
     >
       <table class="table">
@@ -136,7 +134,7 @@
 
   <!-- ==================== SELLERS ==================== -->
   <ng-container *ngIf="pageView === 'sellers'">
-    <div *ngIf="listLoading" class="order-list white-bg pt-40">
+    <div *ngIf="listLoading && sellers.length === 0" class="order-list white-bg pt-40">
       <app-skeleton type="table-row" [count]="8"></app-skeleton>
     </div>
 
@@ -146,7 +144,7 @@
     ></app-empty-state>
 
     <div
-      *ngIf="!listLoading && sellers.length > 0"
+      *ngIf="sellers.length > 0"
       class="order-list white-bg table-responsive pt-40"
     >
       <table class="table">

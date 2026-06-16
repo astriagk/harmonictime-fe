@@ -1,22 +1,13 @@
 // add-edit.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { UserService } from '@shared/services/user.service';
 import {
-  GET_BRANDS,
-  GET_CASE_MATERIALS,
-  GET_CATEGORIES,
-  GET_COLLECTIONS,
-  GET_DELIVERY_OPTIONS,
-  GET_DIAL_COLORS,
-  GET_MOVEMENTS,
-  GET_PRODUCT_BY_ID,
-  GET_RECIPIENTS,
-  GET_STRAP_MATERIALS,
-  GET_WATCH_MARKERS,
   POST_PRODUCT,
   POST_PRODUCT_DESCRIPTION,
   POST_PRODUCT_DETAILS,
@@ -52,6 +43,25 @@ import {
 } from 'src/app/shared/types/product-d-t';
 import { AppState } from 'src/app/store/app.state';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
+import { loadFilters } from 'src/app/store/actions/filters.actions';
+import { loadSellerProducts } from 'src/app/store/actions/seller-products.actions';
+import { loadEditProduct } from 'src/app/store/actions/product.actions';
+import {
+  selectEditProduct,
+  selectEditProductLoading,
+} from 'src/app/store/selectors/product.selectors';
+import {
+  selectLookupBrands,
+  selectLookupCategories,
+  selectLookupCollections,
+  selectLookupDialColors,
+  selectLookupMovements,
+  selectLookupStrapMaterials,
+  selectLookupCaseMaterials,
+  selectLookupWatchMarkers,
+  selectLookupDeliveryOptions,
+  selectLookupRecipients,
+} from 'src/app/store/selectors/filters.selectors';
 import { catchError, concatMap, finalize, switchMap } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Observable, of } from 'rxjs';
@@ -95,7 +105,7 @@ interface LookupConfig {
   templateUrl: './add-edit.component.html',
   styleUrls: ['./add-edit.component.scss'],
 })
-export class AddEditComponent implements OnInit {
+export class AddEditComponent implements OnInit, OnDestroy {
   // Form groups
   basicProductInformation!: FormGroup;
   productInformation!: FormGroup;
@@ -158,6 +168,8 @@ export class AddEditComponent implements OnInit {
   CREATE_PRODUCT_RETURN_POLICY_URL = POST_PRODUCT_RETURN_POLICY;
   POST_UPLOAD_IMAGES = POST_UPLOAD_IMAGES;
   productData: any;
+
+  private destroy$ = new Subject<void>();
 
   // Inline "add new lookup" modal state
   isAddLookupModalOpen = false;
@@ -272,10 +284,30 @@ export class AddEditComponent implements OnInit {
   ngOnInit(): void {
     this.initializeForms();
     this.checkForEditMode();
-    this.initialApiCalls();
-    this.store.select(selectUserData).subscribe((state) => {
+    this.loadLookups();
+    this.store.select(selectUserData).pipe(takeUntil(this.destroy$)).subscribe((state) => {
       this.userData = state?.user?.data;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadLookups(): void {
+    this.store.dispatch(loadFilters());
+
+    this.store.select(selectLookupBrands).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.brands = v));
+    this.store.select(selectLookupCategories).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.categories = v));
+    this.store.select(selectLookupCollections).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.collections = v));
+    this.store.select(selectLookupDialColors).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.dialColors = v));
+    this.store.select(selectLookupMovements).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.movements = v));
+    this.store.select(selectLookupStrapMaterials).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.strapMaterials = v));
+    this.store.select(selectLookupCaseMaterials).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.caseMaterials = v));
+    this.store.select(selectLookupWatchMarkers).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.watchMarkers = v));
+    this.store.select(selectLookupDeliveryOptions).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.deliveryOptions = v));
+    this.store.select(selectLookupRecipients).pipe(takeUntil(this.destroy$)).subscribe((v) => (this.recipients = v));
   }
 
   private initializeForms(): void {
@@ -331,130 +363,82 @@ export class AddEditComponent implements OnInit {
     }
   }
 
-  private initialApiCalls(): void {
-    // Define a type for the target properties
-    type TargetKeys =
-      | 'brands'
-      | 'categories'
-      | 'collections'
-      | 'dialColors'
-      | 'movements'
-      | 'strapMaterials'
-      | 'caseMaterials'
-      | 'watchMarkers'
-      | 'deliveryOptions'
-      | 'recipients';
+  private loadProductData(): void {
+    if (!this.productId) return;
+    // Fetch through the product NgRx slice (authenticated edit endpoint).
+    this.store.dispatch(loadEditProduct({ id: this.productId }));
 
-    // Define mapping of URLs to variables
-    const apiMapping: { url: string; target: TargetKeys }[] = [
-      { url: GET_BRANDS, target: 'brands' },
-      { url: GET_CATEGORIES, target: 'categories' },
-      { url: GET_COLLECTIONS, target: 'collections' },
-      { url: GET_DIAL_COLORS, target: 'dialColors' },
-      { url: GET_MOVEMENTS, target: 'movements' },
-      { url: GET_STRAP_MATERIALS, target: 'strapMaterials' },
-      { url: GET_CASE_MATERIALS, target: 'caseMaterials' },
-      { url: GET_WATCH_MARKERS, target: 'watchMarkers' },
-      { url: GET_DELIVERY_OPTIONS, target: 'deliveryOptions' },
-      { url: GET_RECIPIENTS, target: 'recipients' },
-    ];
+    this.store
+      .select(selectEditProductLoading)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => (this.isLoadingProduct = loading));
 
-    // Iterate over the mapping to make API calls
-    apiMapping.forEach(({ url, target }) => {
-      this.genericService.getObservable(url).subscribe({
-        next: (response) => {
-          (this[target] as any) = response?.data; // If the type is fully known, this cast might not even be necessary
-        },
-        error: (err) => {
-          console.error(`Error fetching data for ${target}:`, err);
-        },
+    this.store
+      .select(selectEditProduct)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((product) => {
+        if (product) this.prefillEditForm(product);
       });
-    });
   }
 
-  private async loadProductData(): Promise<void> {
-    if (!this.productId) return;
-    try {
-      this.isLoadingProduct = true;
-      const url = GET_PRODUCT_BY_ID + `${this.productId}`;
-      this.genericService.getObservableToken(url).subscribe({
-        next: (response) => {
-          const data = response?.data[0];
-          this.productData = response?.data[0];
-          // In edit mode quantity can be 0 (no stock), so relax the min to 0.
-          this.basicProductInformation
-            .get('quantity')
-            ?.setValidators([Validators.required, Validators.min(0)]);
-          this.basicProductInformation
-            .get('quantity')
-            ?.updateValueAndValidity();
+  // Populate every step's form group + media from a loaded product (edit mode).
+  private prefillEditForm(data: any): void {
+    this.productData = data;
+    // In edit mode quantity can be 0 (no stock), so relax the min to 0.
+    this.basicProductInformation
+      .get('quantity')
+      ?.setValidators([Validators.required, Validators.min(0)]);
+    this.basicProductInformation.get('quantity')?.updateValueAndValidity();
 
-          this.basicProductInformation.setValue({
-            productName: data.ProductName,
-            brandId: data.Details.BrandId,
-            categoryId: data.Details.CategoryId,
-            collectionId: data.Details.CollectionId,
-            price: data.Price,
-            isPriceInclusiveOfTax: data.IsPriceInclusiveOfTax ?? null,
-            quantity: data.Quantity,
-            recipientId: data.Details.RecipientId,
-          });
+    this.basicProductInformation.setValue({
+      productName: data.ProductName,
+      brandId: data.Details.BrandId,
+      categoryId: data.Details.CategoryId,
+      collectionId: data.Details.CollectionId,
+      price: data.Price,
+      isPriceInclusiveOfTax: data.IsPriceInclusiveOfTax ?? null,
+      quantity: data.Quantity,
+      recipientId: data.Details.RecipientId,
+    });
 
-          this.productInformation.setValue({
-            dialColorId: data.Details.DialColorId,
-            diameter: data.Details.Diameter,
-            waterResistant: data.Details.WaterResistant,
-            movementId: data.Details.MovementId,
-            strapMaterialId: data.Details.StrapMaterialId,
-            caseMaterialId: data.Details.CaseMaterialId,
-            watchMarkersId: data.Details.WatchMarkerId,
-            manufacturerProductNumber: data.Details.ManufacturerProductNumber,
-            guarantee: data.Details.Guarantee,
-            deliveryOptionId: data.Details.DeliveryOptionID,
-          });
+    this.productInformation.setValue({
+      dialColorId: data.Details.DialColorId,
+      diameter: data.Details.Diameter,
+      waterResistant: data.Details.WaterResistant,
+      movementId: data.Details.MovementId,
+      strapMaterialId: data.Details.StrapMaterialId,
+      caseMaterialId: data.Details.CaseMaterialId,
+      watchMarkersId: data.Details.WatchMarkerId,
+      manufacturerProductNumber: data.Details.ManufacturerProductNumber,
+      guarantee: data.Details.Guarantee,
+      deliveryOptionId: data.Details.DeliveryOptionID,
+    });
 
-          this.productDescription.setValue({
-            shortTitle: data.Description.Title,
-            detailedDescription: data.Description.Content,
-            additionalDescription: data.Description.AdditionalDetails,
-          });
+    this.productDescription.setValue({
+      shortTitle: data.Description.Title,
+      detailedDescription: data.Description.Content,
+      additionalDescription: data.Description.AdditionalDetails,
+    });
 
-          this.deliveryAndReturns.setValue({
-            deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
-            returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
-          });
+    this.deliveryAndReturns.setValue({
+      deliveryInfo: data.DeliveryAndReturns.DeliveryInformation,
+      returnsPolicy: data.DeliveryAndReturns.ReturnsPolicy,
+    });
 
-          this.uploadedImages = data.Images.filter(
-            (el: any) => el.mediaType !== 'video',
-          ).map((el: any) => ({
-            url: el.ImageURL,
-            isPrimary: !!el.IsPrimary,
-            ...el,
-          }));
-          this.ensurePrimaryImage();
-          const videoEntry = data.Images.find(
-            (el: any) => el.mediaType === 'video',
-          );
-          if (videoEntry) {
-            this.uploadedVideo = {
-              url: videoEntry.ImageURL,
-              _id: videoEntry._id,
-            };
-          }
-          this.isLoadingProduct = false;
-        },
-        error: (err) => {
-          console.error('Error loading product:', err);
-          this.isLoadingProduct = false;
-        },
-      });
-      // Example of loading product data
-      // const product = await this.productService.getProduct(this.productId);
-      // this.patchFormValues(product);
-    } catch (error) {
-      this.isLoadingProduct = false;
-      console.error('Error loading product:', error);
-      // Handle error appropriately
+    this.uploadedImages = data.Images.filter(
+      (el: any) => el.mediaType !== 'video',
+    ).map((el: any) => ({
+      url: el.ImageURL,
+      isPrimary: !!el.IsPrimary,
+      ...el,
+    }));
+    this.ensurePrimaryImage();
+    const videoEntry = data.Images.find((el: any) => el.mediaType === 'video');
+    if (videoEntry) {
+      this.uploadedVideo = {
+        url: videoEntry.ImageURL,
+        _id: videoEntry._id,
+      };
     }
   }
 
@@ -834,7 +818,7 @@ export class AddEditComponent implements OnInit {
           const productDetailsPayload = {
             ProductID: productId,
             DialColorID: productData.dialColorId,
-            Diameter: productData.diameter,
+            Diameter: productData.diameter ?? '',
             WaterResistant: productData.waterResistant,
             MovementID: productData.movementId,
             StrapMaterialID: productData.strapMaterialId,
@@ -933,6 +917,7 @@ export class AddEditComponent implements OnInit {
             'Product created successfully! It will be visible once approved by admin.',
           );
           this.resetForm();
+          this.store.dispatch(loadSellerProducts({ force: true }));
           this.goToProductList();
         },
         error: (err) => {
@@ -980,7 +965,7 @@ export class AddEditComponent implements OnInit {
 
     const productDetailsPayload = {
       DialColorID: productData.dialColorId,
-      Diameter: productData.diameter,
+      Diameter: productData.diameter ?? '',
       WaterResistant: productData.waterResistant,
       MovementID: productData.movementId,
       StrapMaterialID: productData.strapMaterialId,
@@ -1147,6 +1132,7 @@ export class AddEditComponent implements OnInit {
         this.isSubmitting = false;
         this.toastrService.success('Product updated successfully!');
         this.resetForm();
+        this.store.dispatch(loadSellerProducts({ force: true }));
         this.goToProductList();
       });
   }

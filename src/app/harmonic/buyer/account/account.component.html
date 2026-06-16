@@ -222,18 +222,18 @@
                         >
                       </h4>
                     </div>
-                    <div class="profile__info-item" *ngIf="displayPhone">
+                    <div class="profile__info-item">
                       <p>Phone</p>
                       <h4 class="d-flex align-items-center" style="gap: 10px">
-                        {{ displayPhone }}
+                        {{ displayPhone || "—" }}
                         <span
-                          *ngIf="phoneVerified"
+                          *ngIf="displayPhone && phoneVerified"
                           class="verify-badge verify-badge--verified"
                         >
                           <i class="fas fa-check-circle"></i> Verified
                         </span>
                         <button
-                          *ngIf="!phoneVerified"
+                          *ngIf="displayPhone && !phoneVerified"
                           type="button"
                           class="os-btn"
                           style="
@@ -925,7 +925,10 @@
                 </div>
 
                 <!-- Loading: shimmer card placeholders -->
-                <div *ngIf="bankAccountsLoading" class="white-bg">
+                <div
+                  *ngIf="bankAccountsLoading"
+                  class="order__info-wrapper white-bg"
+                >
                   <app-skeleton type="profile-row" [count]="2"></app-skeleton>
                 </div>
 
