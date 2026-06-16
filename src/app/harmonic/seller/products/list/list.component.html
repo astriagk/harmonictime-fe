@@ -11,8 +11,8 @@
     </button>
   </header>
 
-  <!-- Loading: shimmer table rows -->
-  <div *ngIf="loading" class="order-list white-bg pt-40">
+  <!-- Loading: shimmer table rows (only on first load, keep data on refetch) -->
+  <div *ngIf="loading && orders.length === 0" class="order-list white-bg pt-40">
     <app-skeleton type="table-row" [count]="pageSize"></app-skeleton>
   </div>
 
@@ -45,19 +45,11 @@
         <ng-container *ngFor="let order of paginationOrders; let i = index">
           <tr
             [routerLink]="
-              !(
-                order.ApprovalStatus === 'Approved' &&
-                order.RemainingQuantity === 0
-              )
+              canViewDetails(order)
                 ? ['/seller/product-details', order._id]
                 : null
             "
-            [class.product-list__row]="
-              !(
-                order.ApprovalStatus === 'Approved' &&
-                order.RemainingQuantity === 0
-              )
-            "
+            [class.product-list__row]="canViewDetails(order)"
           >
             <td>{{ i + 1 }}</td>
             <td>{{ order.Details?.BrandName }}</td>

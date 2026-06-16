@@ -14,6 +14,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { UserEffects } from './store/effects/user.effects';
 import { appReducer } from './store/app.reducer';
+import { clearState } from './store/meta/clear-state.meta-reducer';
 import { environment } from '@env/environment';
 import { UserService } from '@shared/services/user.service';
 import { CartEffects } from './store/effects/cart.effects';
@@ -52,7 +53,7 @@ import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
       enableHtml: true,
       positionClass: 'toast-top-center',
     }),
-    StoreModule.forRoot(appReducer),
+    StoreModule.forRoot(appReducer, { metaReducers: [clearState] }),
     EffectsModule.forRoot([
       UserEffects,
       CartEffects,

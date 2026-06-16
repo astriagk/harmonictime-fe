@@ -3,8 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   loadUser,
-  loadUserSuccess,
-  loginUserFailure,
+  logout as logoutAction,
 } from 'src/app/store/actions/user.actions';
 import { GenericService } from './generic.service';
 import { UPDATE_USER, UPLOAD_SINGLE, USER, VERIFY_TOKEN } from '@config/index';
@@ -62,8 +61,7 @@ export class UserService {
     localStorage.clear();
     sessionStorage.clear();
     this.userDataSubject.next(null);
-    this.store.dispatch(loginUserFailure({ error: '' }));
-    this.store.dispatch(loadUserSuccess({ user: null }));
+    this.store.dispatch(logoutAction()); // resets entire NgRx store
   }
 
   uploadAndSaveAvatar(userId: string, file: File): Observable<string> {
