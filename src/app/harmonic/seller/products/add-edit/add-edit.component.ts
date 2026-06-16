@@ -818,7 +818,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
           const productDetailsPayload = {
             ProductID: productId,
             DialColorID: productData.dialColorId,
-            Diameter: productData.diameter,
+            Diameter: productData.diameter ?? '',
             WaterResistant: productData.waterResistant,
             MovementID: productData.movementId,
             StrapMaterialID: productData.strapMaterialId,
@@ -965,7 +965,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
 
     const productDetailsPayload = {
       DialColorID: productData.dialColorId,
-      Diameter: productData.diameter,
+      Diameter: productData.diameter ?? '',
       WaterResistant: productData.waterResistant,
       MovementID: productData.movementId,
       StrapMaterialID: productData.strapMaterialId,

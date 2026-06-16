@@ -43,3 +43,5 @@ export const userBlocked = createAction(
   '[User] Account Blocked',
   props<{ suspended: boolean }>()
 );
+
+export const logout = createAction('[Auth] Logout');

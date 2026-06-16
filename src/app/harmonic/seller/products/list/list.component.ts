@@ -225,6 +225,14 @@ export class ListComponent implements OnInit, OnDestroy {
       });
   }
 
+  // Details page only exists for approved products that are still in stock.
+  // In-review / rejected products would 404 — the seller edits them instead.
+  // Status casing can vary by endpoint, so compare case-insensitively.
+  canViewDetails(product: any): boolean {
+    const status = (product?.ApprovalStatus ?? '').toString().trim().toLowerCase();
+    return status === 'approved' && product?.RemainingQuantity !== 0;
+  }
+
   productOfferName(product: any): string | null {
     return product?.Offer?.OfferName ?? null;
   }
