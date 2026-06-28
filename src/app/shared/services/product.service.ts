@@ -79,10 +79,11 @@ export class ProductService {
     );
   }
 
-  // Sorting Filter
+  // Sorting Filter. Sort a copy — the source array may come straight from the
+  // (frozen) NgRx store, and Array.sort() mutates in place.
   public sortProducts(products: any[], payload: string): any {
     if (payload === 'low') {
-      return products.sort((a, b) => {
+      return [...products].sort((a, b) => {
         if (a.Price < b.Price) {
           return -1;
         } else if (a.Price > b.Price) {
@@ -91,7 +92,7 @@ export class ProductService {
         return 0;
       });
     } else if (payload === 'high') {
-      return products.sort((a, b) => {
+      return [...products].sort((a, b) => {
         if (a.Price > b.Price) {
           return -1;
         } else if (a.Price < b.Price) {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { of,Observable } from 'rxjs';
+import { of, Observable, Subject } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ProductService } from './product.service';
@@ -17,6 +17,10 @@ export class UtilsService {
   public videoUrl: string = 'https://www.youtube.com/embed/EW4ZYb3mCZk';
   public isVideoOpen: boolean = false;
   public isSearchOpen: boolean = false;
+  // Emits each time the search popup transitions to open, so listeners (e.g. the
+  // popup) can focus the input without polling change detection.
+  private searchOpenedSource = new Subject<void>();
+  public searchOpened$ = this.searchOpenedSource.asObservable();
   public isProductModalOpen: boolean = false;
   public openMobileMenus: boolean = false;
   public iframeElement: HTMLIFrameElement | null = null;
@@ -96,6 +100,9 @@ export class UtilsService {
 
   handleSearchOpen() {
     this.isSearchOpen = !this.isSearchOpen;
+    if (this.isSearchOpen) {
+      this.searchOpenedSource.next();
+    }
   }
 
   // handle Open Modal

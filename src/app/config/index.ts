@@ -43,6 +43,8 @@ export const CREATE_RECIPIENT = GET_RECIPIENTS;
 // products
 export const POST_PRODUCT = `${baseUrl}/products`;
 export const PRODUCT = `${baseUrl}/products`;
+// full-text search — returns the same shape as PRODUCT (GET). Append `?q=<term>`
+export const SEARCH_PRODUCTS = `${baseUrl}/products/search`;
 // append the product id: `${GET_PRODUCT_BY_ID}${id}`
 export const GET_PRODUCT_BY_ID = `${baseUrl}/products/`;
 // update editable fields of a single product (append the product id)

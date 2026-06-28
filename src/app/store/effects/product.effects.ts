@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { exhaustMap, map, catchError, filter, withLatestFrom } from 'rxjs/operators';
+import { exhaustMap, map, catchError, filter, withLatestFrom, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import {
   loadProducts,
+  searchProducts,
   loadProductsFailure,
   loadProductsSuccess,
   loadProductDetail,
@@ -14,26 +15,62 @@ import {
   loadEditProductSuccess,
   loadEditProductFailure,
 } from '../actions/product.actions';
-import { selectProductsLoaded, selectProductDetailId } from '../selectors/product.selectors';
+import {
+  selectProductsLoaded,
+  selectProductsSearchQuery,
+  selectProductDetailId,
+} from '../selectors/product.selectors';
 import { GenericService } from '@shared/services/generic.service';
-import { PRODUCT, GET_PRODUCT_BY_ID } from '@config/index';
+import { PRODUCT, SEARCH_PRODUCTS, GET_PRODUCT_BY_ID } from '@config/index';
 
 @Injectable()
 export class ProductEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadProducts),
-      withLatestFrom(this.store.select(selectProductsLoaded)),
-      filter(([, loaded]) => !loaded),
+      withLatestFrom(
+        this.store.select(selectProductsLoaded),
+        this.store.select(selectProductsSearchQuery)
+      ),
+      // Fetch the full catalog on first load, or when the current list is search
+      // results (searchQuery set) and we're switching back to "all products".
+      filter(([, loaded, searchQuery]) => !loaded || searchQuery !== null),
       exhaustMap(() =>
         this.genericService.getObservable(PRODUCT).pipe(
           map((response: any) =>
-            loadProductsSuccess({ products: response.data || [] })
+            loadProductsSuccess({ products: response.data || [], query: null })
           ),
           catchError((error) =>
             of(loadProductsFailure({ error: error.message }))
           )
         )
+      )
+    )
+  );
+
+  // Full-text search hits /products/search?q=. Same response shape as PRODUCT,
+  // so results land in the shared `products` state via loadProductsSuccess.
+  // switchMap cancels an in-flight search when a newer term arrives.
+  searchProducts$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(searchProducts),
+      withLatestFrom(this.store.select(selectProductsSearchQuery)),
+      // Skip if we're already showing results for this exact term.
+      filter(([action, currentQuery]) => action.query !== currentQuery),
+      switchMap(([action]) =>
+        this.genericService
+          .getObservable(`${SEARCH_PRODUCTS}?q=${encodeURIComponent(action.query)}`)
+          .pipe(
+            map((response: any) =>
+              loadProductsSuccess({
+                products: response.data || [],
+                query: action.query,
+              })
+            ),
+            catchError((error) =>
+              of(loadProductsFailure({ error: error.message }))
+            )
+          )
       )
     )
   );

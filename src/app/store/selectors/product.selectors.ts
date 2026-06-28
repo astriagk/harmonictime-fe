@@ -18,6 +18,11 @@ export const selectProductsLoaded = createSelector(
   (state) => state.loaded
 );
 
+export const selectProductsSearchQuery = createSelector(
+  selectProductsState,
+  (state) => state.searchQuery
+);
+
 export const selectProductsError = createSelector(
   selectProductsState,
   (state) => state.error
