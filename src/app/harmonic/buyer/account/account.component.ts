@@ -15,6 +15,7 @@ import {
   DELETE_ADDRESS,
   GST_ONBOARDING,
   ORDER_CHARGES,
+  roundMoney,
   SEND_MOBILE_OTP,
   TRACK_SHIPMENT,
   UPDATE_ADDRESS,
@@ -731,15 +732,17 @@ export class AccountComponent implements OnInit, OnDestroy {
       0,
     );
     return taxableSubtotal > 0
-      ? Math.round((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100)
+      ? roundMoney((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100)
       : 0;
   }
 
   // Subtotal = sum of (DisplayPrice × Quantity) across all items.
   get invoiceSubtotal(): number {
-    return (this.selectedOrder?.Products ?? []).reduce(
-      (sum, p) => sum + (p.DisplayPrice ?? 0) * (p.Quantity ?? 1),
-      0,
+    return roundMoney(
+      (this.selectedOrder?.Products ?? []).reduce(
+        (sum, p) => sum + (p.DisplayPrice ?? 0) * (p.Quantity ?? 1),
+        0,
+      ),
     );
   }
 
