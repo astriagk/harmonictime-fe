@@ -1,6 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
 import {
   loadProducts,
+  searchProducts,
   loadProductsFailure,
   loadProductsSuccess,
   loadProductDetail,
@@ -13,6 +14,9 @@ import {
 
 export interface ProductsState {
   products: any[];
+  // What `products` currently represents: a search term, or null for the full
+  // catalog. Drives whether a refetch is needed when toggling search on/off.
+  searchQuery: string | null;
   loaded: boolean;
   loading: boolean;
   error: string | null;
@@ -25,6 +29,7 @@ export interface ProductsState {
 
 export const initialState: ProductsState = {
   products: [],
+  searchQuery: null,
   loaded: false,
   loading: false,
   error: null,
@@ -40,13 +45,23 @@ export const productsReducer = createReducer(
 
   on(loadProducts, (state) => ({
     ...state,
-    loading: !state.loaded,
+    // Show loading on first load, or when switching back from search results.
+    loading: !state.loaded || state.searchQuery !== null,
     error: null,
   })),
 
-  on(loadProductsSuccess, (state, { products }) => ({
+  // Only flag loading when the term actually changes (mirrors the effect's
+  // skip-if-same-query guard), so a repeat dispatch can't leave it stuck on.
+  on(searchProducts, (state, { query }) => ({
+    ...state,
+    loading: state.searchQuery !== query,
+    error: null,
+  })),
+
+  on(loadProductsSuccess, (state, { products, query }) => ({
     ...state,
     products,
+    searchQuery: query ?? null,
     loaded: true,
     loading: false,
     error: null,

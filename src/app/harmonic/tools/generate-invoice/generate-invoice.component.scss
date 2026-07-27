@@ -1,0 +1,278 @@
+.gi-page {
+  padding: 24px;
+  background: #f4f4f4;
+  min-height: 100vh;
+  box-sizing: border-box;
+
+  @media (max-width: 600px) {
+    padding: 12px;
+  }
+
+  // On wide screens lock the page to the viewport so each column scrolls on its
+  // own (see .gi-form / .gi-preview) instead of the whole page moving together.
+  @media (min-width: 901px) {
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+.gi-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 460px) 1fr;
+  gap: 24px;
+  align-items: start;
+
+  // Stack the form above the preview once there isn't room side by side.
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+
+  // Fill the locked page height so the two columns can scroll independently.
+  @media (min-width: 901px) {
+    height: 100%;
+    align-items: stretch;
+  }
+}
+
+.gi-form,
+.gi-invoice-card {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 20px;
+
+  @media (max-width: 600px) {
+    padding: 14px;
+    min-width: 0; // let the panel shrink inside the grid instead of overflowing
+  }
+}
+
+// Independent vertical scroll for the two columns on wide screens.
+.gi-form,
+.gi-preview {
+  @media (min-width: 901px) {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+}
+
+.gi-form__heading {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.gi-hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #777;
+}
+
+.gi-section {
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  overflow: hidden;
+
+  &__head {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f7f7f7;
+    border: none;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+    cursor: pointer;
+  }
+
+  &--open &__head {
+    background: #eef0f2;
+    color: #222;
+  }
+
+  &__body {
+    padding: 14px;
+  }
+
+  .gi-chevron {
+    transition: transform 0.15s ease;
+    font-size: 12px;
+  }
+
+  &--open .gi-chevron {
+    transform: rotate(180deg);
+  }
+}
+
+.gi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  // One field per row on phones so labels/inputs aren't cramped.
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    font-weight: 500;
+    color: #444;
+    gap: 4px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 7px 9px;
+    font-size: 14px;
+    width: 100%;
+    background: #fff;
+
+    &:focus {
+      outline: none;
+      border-color: #888;
+    }
+  }
+}
+
+.gi-full {
+  grid-column: 1 / -1;
+}
+
+.gi-check {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+
+  input {
+    width: auto;
+  }
+}
+
+.gi-item {
+  border: 1px dashed #d5d5d5;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.gi-item__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+// Read-only hint showing the derived discount / final price for an item.
+.gi-item__derived {
+  flex-direction: row !important;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2e7d32;
+  background: #f1f8f1;
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+
+.gi-remove {
+  border: none;
+  background: none;
+  color: #c0392b;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.gi-add {
+  border: 1px dashed #999;
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.gi-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: #000;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Preview column — just a wrapper holding the two cards (action + invoice).
+.gi-preview {
+  min-width: 0;
+}
+
+// Card 1: the action bar. Sticky at the top so the download button is always
+// reachable no matter how far the invoice card scrolls.
+.gi-actions-card {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+
+  .gi-actions__label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+  }
+}
+
+// Card 2: the invoice sheet. Scrolls horizontally on narrow screens so the
+// fixed capture width is preserved (needed for the PDF to match account).
+.gi-invoice-card {
+  overflow-x: auto;
+
+  // Capture the invoice at the EXACT width the account invoice uses, so
+  // html2canvas → A4 yields identical font size / spacing / everything. The
+  // account invoice is captured inside an 800px modal (modal-lg) whose
+  // product__modal-inner adds 40px padding each side over a 1px content border:
+  // 800 − 2 − 80 = 718px. Natural height (no min-height) matches account too.
+  .invoice {
+    width: 718px;
+    max-width: 718px;
+    margin: 0 auto;
+  }
+}

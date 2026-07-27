@@ -15,6 +15,7 @@ import {
   DELETE_ADDRESS,
   GST_ONBOARDING,
   ORDER_CHARGES,
+  roundMoney,
   SEND_MOBILE_OTP,
   TRACK_SHIPMENT,
   UPDATE_ADDRESS,
@@ -666,6 +667,28 @@ export class AccountComponent implements OnInit, OnDestroy {
     return addresses.find((a: any) => a?.IsDefault) ?? addresses[0] ?? null;
   }
 
+  // The bill-to address as one flowing line, so the Billed To block reads the
+  // same way as Billed By (which prints the company address as a single line)
+  // instead of a stack of one-field paragraphs.
+  get clientAddressLine(): string {
+    const addr = this.clientAddress;
+    if (!addr) {
+      return '';
+    }
+    const street = [
+      addr.AddressLine1,
+      addr.AddressLine2,
+      addr.City,
+      addr.State,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    const withPostal = addr.PostalCode
+      ? `${street} - ${addr.PostalCode}`
+      : street;
+    return addr.Country ? `${withPostal}, ${addr.Country}` : withPostal;
+  }
+
   // Display name for the profile/header. Buyers register with only an email, so
   // the name often lives on their default address rather than the user record —
   // fall back to it (and tolerate either casing the profile API might use).
@@ -701,7 +724,8 @@ export class AccountComponent implements OnInit, OnDestroy {
   // dropped). Failure is non-fatal — the invoice falls back to the brand name.
   private async preloadInvoiceLogo(): Promise<void> {
     try {
-      const response = await fetch('assets/logo/logo.png');
+      // Name-less logo variant, matching the internal generate-invoice tool.
+      const response = await fetch('assets/logo/logo-no-name.png');
       const blob = await response.blob();
       this.companyLogoDataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -731,15 +755,17 @@ export class AccountComponent implements OnInit, OnDestroy {
       0,
     );
     return taxableSubtotal > 0
-      ? Math.round((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100)
+      ? roundMoney((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100)
       : 0;
   }
 
   // Subtotal = sum of (DisplayPrice × Quantity) across all items.
   get invoiceSubtotal(): number {
-    return (this.selectedOrder?.Products ?? []).reduce(
-      (sum, p) => sum + (p.DisplayPrice ?? 0) * (p.Quantity ?? 1),
-      0,
+    return roundMoney(
+      (this.selectedOrder?.Products ?? []).reduce(
+        (sum, p) => sum + (p.DisplayPrice ?? 0) * (p.Quantity ?? 1),
+        0,
+      ),
     );
   }
 

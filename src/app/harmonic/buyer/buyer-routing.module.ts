@@ -9,6 +9,10 @@ import { BuyerLayoutComponent } from 'src/app/shared/layout/buyer-layout/buyer-l
 import { AccountComponent } from './account/account.component';
 import { BuyerChatPageComponent } from './chat/buyer-chat-page.component';
 
+// Note: these routes carry no `title` property. The document title is set from
+// `data.seo` by SeoService (via AppComponent) so that the title, description,
+// canonical and OG tags are always written together by one owner — Angular's
+// TitleStrategy would otherwise race it and win on some navigations.
 const routes: Routes = [
   {
     path: '',
@@ -22,37 +26,47 @@ const routes: Routes = [
       {
         path: 'products',
         component: ListComponent,
-        title: 'Products',
+        data: {
+          seo: {
+            title: 'Shop Pre-Owned & Vintage Luxury Watches',
+            description:
+              'Browse authenticated pre-owned and vintage watches on Krono2 — Rolex, Omega, Seiko and more, from verified sellers with secure payments.',
+          },
+        },
       },
       {
+        // Title and description are built from the loaded product, so the
+        // component owns the head here — see DetailsComponent.
         path: 'product-details/:id',
         component: DetailsComponent,
-        title: 'Product Details',
+        data: { seo: { managedByComponent: true } },
       },
+      // Everything below is signed-in or transactional: kept out of the index
+      // to match the Disallow rules in robots.txt.
       {
         path: 'cart',
         component: CartComponent,
-        title: 'Cart',
+        data: { seo: { title: 'Your Cart', noIndex: true } },
       },
       {
         path: 'wishlist',
         component: WishlistComponent,
-        title: 'Wishlist',
+        data: { seo: { title: 'Your Wishlist', noIndex: true } },
       },
       {
         path: 'checkout',
         component: CheckoutComponent,
-        title: 'Checkout',
+        data: { seo: { title: 'Checkout', noIndex: true } },
       },
       {
         path: 'account',
         component: AccountComponent,
-        title: 'Account',
+        data: { seo: { title: 'Your Account', noIndex: true } },
       },
       {
         path: 'chat',
         component: BuyerChatPageComponent,
-        title: 'My Messages',
+        data: { seo: { title: 'Messages', noIndex: true } },
       },
     ],
   },
