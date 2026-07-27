@@ -226,6 +226,7 @@
                       <p>Phone</p>
                       <h4 class="d-flex align-items-center" style="gap: 10px">
                         {{ displayPhone || "—" }}
+                        <!-- Phone verification hidden for now (badge + Verify button)
                         <span
                           *ngIf="displayPhone && phoneVerified"
                           class="verify-badge verify-badge--verified"
@@ -246,6 +247,7 @@
                         >
                           Verify
                         </button>
+                        -->
                       </h4>
                     </div>
                     <div
@@ -1258,6 +1260,9 @@
               <div class="invoice__col">
                 <h6 class="invoice__label">Billed By</h6>
                 <p class="invoice__text invoice__name">{{ company.name }}</p>
+                <p class="invoice__text invoice__legal">
+                  By {{ company.legalName }}
+                </p>
                 <p class="invoice__text">{{ company.address }}</p>
                 <p class="invoice__text">{{ company.email }}</p>
                 <p class="invoice__text">{{ company.phone }}</p>
@@ -1268,16 +1273,8 @@
                   <p class="invoice__text invoice__name">
                     {{ addr.FirstName }} {{ addr.LastName }}
                   </p>
-                  <p class="invoice__text" *ngIf="addr.AddressLine1">
-                    {{ addr.AddressLine1
-                    }}{{ addr.AddressLine2 ? ", " + addr.AddressLine2 : "" }}
-                  </p>
-                  <p class="invoice__text">
-                    {{ addr.City }}{{ addr.City && addr.State ? ", " : "" }}
-                    {{ addr.State }} {{ addr.PostalCode }}
-                  </p>
-                  <p class="invoice__text" *ngIf="addr.Country">
-                    {{ addr.Country }}
+                  <p class="invoice__text" *ngIf="clientAddressLine">
+                    {{ clientAddressLine }}
                   </p>
                   <p class="invoice__text" *ngIf="userData?.email">
                     {{ userData.email }}
@@ -1316,6 +1313,12 @@
                 <h6 class="invoice__label">INVOICE #</h6>
                 <span class="invoice__text invoice__number">
                   {{ selectedOrder.OrderID || selectedOrder._id | uppercase }}
+                </span>
+              </div>
+              <div class="invoice__meta-row" *ngIf="company.gstNumber">
+                <h6 class="invoice__label">GSTIN</h6>
+                <span class="invoice__text invoice__number">
+                  {{ company.gstNumber }}
                 </span>
               </div>
             </div>

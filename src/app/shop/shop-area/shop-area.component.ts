@@ -8,7 +8,7 @@ import { normalizeDialColor } from '@shared/constants/dial-colors';
 import { ProductService } from 'src/app/shared/services/product.service';
 import { UtilsService } from 'src/app/shared/services/utils.service';
 import { CartService } from '@shared/services/cart.service';
-import { loadProducts } from 'src/app/store/actions/product.actions';
+import { loadProducts, searchProducts } from 'src/app/store/actions/product.actions';
 import {
   selectProducts,
   selectProductsLoading,
@@ -171,7 +171,20 @@ export class ShopAreaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.store.dispatch(loadProducts());
+    // Drive the source list off the `q` param: a search term fetches search
+    // results, otherwise the full catalog. Re-fires on every query-param change
+    // (e.g. searching a new term, or clearing the search), and the effects skip
+    // any redundant refetch.
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        const q = (params['q'] || '').trim();
+        if (q) {
+          this.store.dispatch(searchProducts({ query: q }));
+        } else {
+          this.store.dispatch(loadProducts());
+        }
+      });
 
     this.store
       .select(selectProductsLoading)
@@ -182,18 +195,18 @@ export class ShopAreaComponent implements OnInit, OnDestroy {
       .select(selectProducts)
       .pipe(takeUntil(this.destroy$))
       .subscribe((products) => {
-        if (products.length) {
-          this.productsInitial = products;
-          this.paginate = this.productService.getPager(
-            products.length,
-            Number(+this.pageNo),
-            this.pageSize
-          );
-          this.products = products.slice(
-            this.paginate.startIndex,
-            this.paginate.endIndex + 1
-          );
-        }
+        // Always reflect the latest list, including an empty result set so a
+        // search with no matches clears the previous products.
+        this.productsInitial = products;
+        this.paginate = this.productService.getPager(
+          products.length,
+          Number(+this.pageNo),
+          this.pageSize
+        );
+        this.products = products.slice(
+          this.paginate.startIndex,
+          this.paginate.endIndex + 1
+        );
       });
   }
 

@@ -8,6 +8,7 @@ import {
   ORDER_CHARGES,
   UPDATE_CART,
   USER_CART,
+  roundMoney,
   withPlatformMarkup,
 } from '@config/index';
 import { GenericService } from './generic.service';
@@ -25,7 +26,11 @@ import {
 } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectCartItems } from 'src/app/store/selectors/cart.selectors';
-import { loadCart, patchCartItemQty, updateCart } from 'src/app/store/actions/cart.actions';
+import {
+  loadCart,
+  patchCartItemQty,
+  updateCart,
+} from 'src/app/store/actions/cart.actions';
 import { Router } from '@angular/router';
 import { selectUserData } from 'src/app/store/selectors/user.selectors';
 
@@ -106,14 +111,21 @@ export class CartService {
   updateCartItemQuantity(cartItem: any, newQty: number) {
     const previousQty = cartItem.Quantity || 1;
     // Optimistic: update the store instantly so the UI responds without a reload
-    this.store.dispatch(patchCartItemQty({ cartItemId: cartItem._id, quantity: newQty }));
+    this.store.dispatch(
+      patchCartItemQty({ cartItemId: cartItem._id, quantity: newQty }),
+    );
     this.genericService
       .putObservable(`${UPDATE_CART}${cartItem._id}`, { Quantity: newQty })
       .subscribe({
         next: () => {},
         error: (err) => {
           // Revert the optimistic update if the server rejects it
-          this.store.dispatch(patchCartItemQty({ cartItemId: cartItem._id, quantity: previousQty }));
+          this.store.dispatch(
+            patchCartItemQty({
+              cartItemId: cartItem._id,
+              quantity: previousQty,
+            }),
+          );
           const message = err?.error?.message || 'Failed to update quantity.';
           this.toastrService.error(message);
         },
@@ -153,11 +165,14 @@ export class CartService {
         const base = cartItem.DisplayPrice;
         const offer = cartItem.Offer;
         const qty = cartItem.Quantity || 1;
-        const price = (offer?.IsActive && base)
-          ? base * (1 - offer.DiscountPercentage / 100)
-          : base;
+        // Round the per-unit price to paise first, then multiply, so each line
+        // total the buyer sees adds up exactly to this subtotal (round-then-sum).
+        const price =
+          offer?.IsActive && base
+            ? roundMoney(base * (1 - offer.DiscountPercentage / 100))
+            : base;
         if (price) {
-          cartTotal.total += price * qty;
+          cartTotal.total = roundMoney(cartTotal.total + price * qty);
           cartTotal.quantity += qty;
         }
         return cartTotal;
@@ -172,7 +187,10 @@ export class CartService {
       const { DisplayPrice, Offer, Quantity } = cartItem;
       const qty = Quantity || 1;
       if (DisplayPrice && Offer?.IsActive) {
-        savings += (DisplayPrice - DisplayPrice * (1 - Offer.DiscountPercentage / 100)) * qty;
+        const offerPrice = roundMoney(
+          DisplayPrice * (1 - Offer.DiscountPercentage / 100),
+        );
+        savings = roundMoney(savings + (DisplayPrice - offerPrice) * qty);
       }
       return savings;
     }, 0);
@@ -183,19 +201,23 @@ export class CartService {
   computeCheckoutSummary(cartItems: any) {
     const subtotal = this.computeCartTotal(cartItems).total;
     const offerDiscount = this.computeOfferDiscount(cartItems);
-    const taxableSubtotal = (cartItems as any[]).reduce((total: number, cartItem: any) => {
-      if (cartItem.IsPriceInclusiveOfTax) return total;
-      const base = cartItem.DisplayPrice;
-      const offer = cartItem.Offer;
-      const qty = cartItem.Quantity || 1;
-      const price = (offer?.IsActive && base)
-        ? base * (1 - offer.DiscountPercentage / 100)
-        : base;
-      return total + (price || 0) * qty;
-    }, 0);
-    const gst = Math.round((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100);
+    const taxableSubtotal = (cartItems as any[]).reduce(
+      (total: number, cartItem: any) => {
+        if (cartItem.IsPriceInclusiveOfTax) return total;
+        const base = cartItem.DisplayPrice;
+        const offer = cartItem.Offer;
+        const qty = cartItem.Quantity || 1;
+        const price =
+          offer?.IsActive && base
+            ? roundMoney(base * (1 - offer.DiscountPercentage / 100))
+            : base;
+        return roundMoney(total + (price || 0) * qty);
+      },
+      0,
+    );
+    const gst = roundMoney((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100);
     const gstPercent = ORDER_CHARGES.gstPercent;
-    const grandTotal = subtotal + gst;
+    const grandTotal = roundMoney(subtotal + gst);
     return { subtotal, offerDiscount, gst, gstPercent, grandTotal };
   }
 

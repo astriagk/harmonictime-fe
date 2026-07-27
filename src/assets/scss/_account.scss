@@ -404,8 +404,15 @@
 
 .invoice {
   background: $white;
-  color: $body-text-color;
+  // Printed on white paper, so the site's light grey body text washes out —
+  // the invoice keeps its own darker text scale throughout.
+  color: $black-soft;
   padding: 8px 16px 16px;
+
+  // Bootstrap's muted grey is too faint once printed.
+  .text-muted {
+    color: $black-soft !important;
+  }
 
   &__head {
     margin-bottom: 16px;
@@ -485,7 +492,7 @@
     margin-bottom: 3px;
     font-size: 13px;
     line-height: 1.5;
-    color: $body-text-color;
+    color: $black-3;
     overflow-wrap: anywhere;
   }
 
@@ -493,6 +500,23 @@
     font-size: 15px;
     font-weight: 600;
     color: $heading-color;
+    margin-bottom: 6px;
+
+    // The trade-name line belongs to the name above it, so it hugs it.
+    + .invoice__legal {
+      margin-top: -4px;
+    }
+  }
+
+  // "By Astria GK" — Krono² is one of several brands run by the entity, so the
+  // line stays subordinate to the brand name it sits under. Declared after
+  // __text/__name so it wins when combined with them on the same element.
+  &__legal {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    line-height: 1.4;
+    color: $black-soft;
     margin-bottom: 6px;
   }
 
@@ -520,7 +544,7 @@
     tbody td {
       padding: 10px 14px;
       font-size: 14px;
-      color: $black-soft;
+      color: $black-3;
       border-bottom: 1px solid $border;
       vertical-align: middle;
     }
@@ -528,7 +552,7 @@
 
   &__breakdown-label {
     font-size: 12px;
-    color: $body-text-color;
+    color: $black-soft;
     padding-top: 4px !important;
     padding-bottom: 4px !important;
     border-bottom: none !important;
@@ -541,7 +565,7 @@
 
   &__breakdown-add {
     font-size: 12px;
-    color: $body-text-color;
+    color: $black-soft;
     border-bottom: none !important;
     padding-top: 4px !important;
     padding-bottom: 4px !important;
@@ -563,7 +587,7 @@
     justify-content: space-between;
     padding: 8px 0;
     font-size: 14px;
-    color: $black-soft;
+    color: $black-3;
 
     &--grand {
       margin-top: 6px;
@@ -582,7 +606,7 @@
     font-size: 13px;
     font-style: italic;
     text-align: center;
-    color: $body-text-color;
+    color: $black-soft;
   }
 }
 

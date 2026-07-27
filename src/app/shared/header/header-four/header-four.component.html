@@ -33,14 +33,14 @@
             </div>
             <div class="header__action">
               <ul>
-                <!-- <li>
+                <li>
                   <a
                     (click)="utilsService.handleSearchOpen()"
                     class="search-toggle cursor-pointer"
                   >
                     <i class="fas fa-search"></i>
                   </a>
-                </li> -->
+                </li>
                 <li *ngIf="!token">
                   <button
                     class="profile__info-btn"
@@ -51,7 +51,11 @@
                   </button>
                 </li>
                 <li *ngIf="token">
-                  <a [routerLink]="chatRoute" class="cursor-pointer" title="Messages">
+                  <a
+                    [routerLink]="chatRoute"
+                    class="cursor-pointer"
+                    title="Messages"
+                  >
                     <i class="fas fa-comment-dots"></i>
                   </a>
                 </li>
@@ -62,7 +66,9 @@
                 <li>
                   <a class="cart cursor-pointer" routerLink="/buyer/cart">
                     <i class="fas fa-cart-plus"></i>
-                    <span *ngIf="cartItems.length > 0" class="cart-number-2">{{ cartItems.length }}</span>
+                    <span *ngIf="cartItems.length > 0" class="cart-number-2">{{
+                      cartItems.length
+                    }}</span>
                   </a>
                   <app-mini-cart></app-mini-cart>
                 </li>

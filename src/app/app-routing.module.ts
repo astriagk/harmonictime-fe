@@ -46,6 +46,15 @@ const routes: Routes = [
     loadChildren: () =>
       import('./harmonic/admin/admin.module').then((m) => m.AdminModule),
   },
+  // Internal, unlisted tool — reached only by typing the URL. Not in any menu.
+  {
+    path: 'generate-invoice',
+    loadComponent: () =>
+      import(
+        './harmonic/tools/generate-invoice/generate-invoice.component'
+      ).then((m) => m.GenerateInvoiceComponent),
+    title: 'Generate Invoice',
+  },
   {
     path: '**',
     component: NotFoundComponent,

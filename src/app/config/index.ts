@@ -43,6 +43,8 @@ export const CREATE_RECIPIENT = GET_RECIPIENTS;
 // products
 export const POST_PRODUCT = `${baseUrl}/products`;
 export const PRODUCT = `${baseUrl}/products`;
+// full-text search — returns the same shape as PRODUCT (GET). Append `?q=<term>`
+export const SEARCH_PRODUCTS = `${baseUrl}/products/search`;
 // append the product id: `${GET_PRODUCT_BY_ID}${id}`
 export const GET_PRODUCT_BY_ID = `${baseUrl}/products/`;
 // update editable fields of a single product (append the product id)
@@ -230,3 +232,12 @@ export const withPlatformMarkup = (price: number): number =>
   price
     ? Math.ceil(price + (price * ORDER_CHARGES.platformPercent) / 100)
     : price;
+
+// Single rounding rule for every money amount: round to the nearest paise
+// (2 decimals). The number the buyer SEES (always rendered with 2 decimals)
+// must equal the number they are CHARGED, so every computed amount — line
+// totals, GST, grand total — passes through this before being displayed or
+// sent to the payment gateway. The EPSILON guard avoids float artefacts like
+// 1.005 rounding down to 1.00.
+export const roundMoney = (value: number): number =>
+  Math.round((value + Number.EPSILON) * 100) / 100;
