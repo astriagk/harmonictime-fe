@@ -10,7 +10,10 @@
       </p>
 
       <!-- Billed By -->
-      <div class="gi-section" [class.gi-section--open]="openSections['billedBy']">
+      <div
+        class="gi-section"
+        [class.gi-section--open]="openSections['billedBy']"
+      >
         <button
           type="button"
           class="gi-section__head"
@@ -21,22 +24,57 @@
         </button>
         <div class="gi-section__body" *ngIf="openSections['billedBy']">
           <div class="gi-grid">
-            <label>Name<input type="text" [(ngModel)]="billedBy.name" /></label>
             <label
-              >Email<input type="text" [(ngModel)]="billedBy.email"
+              >Name
+              <select
+                [(ngModel)]="billedBy.name"
+                (ngModelChange)="onBrandChange()"
+              >
+                <option *ngFor="let b of brands" [value]="b.name">
+                  {{ b.name }}
+                </option>
+              </select>
+            </label>
+            <label
+              >Legal entity<input type="text" [(ngModel)]="billedBy.legalName"
             /></label>
+            <label
+              >Email
+              <select [(ngModel)]="billedBy.email">
+                <option *ngFor="let e of brandEmails" [value]="e">
+                  {{ e }}
+                </option>
+              </select>
+            </label>
+            <label
+              >Logo
+              <select
+                [(ngModel)]="billedBy.logo"
+                (ngModelChange)="preloadInvoiceLogo()"
+              >
+                <option *ngFor="let l of logoOptions" [value]="l.path">
+                  {{ l.label }}
+                </option>
+              </select>
+            </label>
             <label class="gi-full"
               >Address<input type="text" [(ngModel)]="billedBy.address"
             /></label>
             <label
               >Phone<input type="text" [(ngModel)]="billedBy.phone"
             /></label>
+            <label
+              >GSTIN<input type="text" [(ngModel)]="billedBy.gstNumber"
+            /></label>
           </div>
         </div>
       </div>
 
       <!-- Billed To -->
-      <div class="gi-section" [class.gi-section--open]="openSections['billedTo']">
+      <div
+        class="gi-section"
+        [class.gi-section--open]="openSections['billedTo']"
+      >
         <button
           type="button"
           class="gi-section__head"
@@ -84,7 +122,10 @@
       </div>
 
       <!-- Invoice details -->
-      <div class="gi-section" [class.gi-section--open]="openSections['details']">
+      <div
+        class="gi-section"
+        [class.gi-section--open]="openSections['details']"
+      >
         <button
           type="button"
           class="gi-section__head"
@@ -99,24 +140,60 @@
               >Issued on<input type="date" [(ngModel)]="meta.issuedOn"
             /></label>
             <label
-              >Payment status<input
-                type="text"
-                [(ngModel)]="meta.paymentStatus"
-            /></label>
-            <label
               >Payment type
-              <select [(ngModel)]="meta.paymentType">
+              <select
+                [(ngModel)]="meta.paymentType"
+                (ngModelChange)="onPaymentTypeChange()"
+              >
                 <option *ngFor="let t of paymentTypes" [value]="t">
                   {{ t }}
                 </option>
               </select>
             </label>
             <label
-              >Invoice # (Order ID)<input
-                type="text"
-                [(ngModel)]="meta.invoiceNumber"
-                placeholder="e.g. ORD-1024"
+              >Payment status
+              <select [(ngModel)]="meta.paymentStatus">
+                <option *ngFor="let s of paymentStatuses" [value]="s">
+                  {{ s }}
+                </option>
+              </select>
+            </label>
+            <label
+              >Invoice no.<input
+                type="number"
+                min="1"
+                [(ngModel)]="meta.sequence"
+                placeholder="1"
             /></label>
+            <label class="gi-full gi-item__derived">
+              Invoice # {{ invoiceNumber }} — prefix follows the business, 2607
+              follows the issue date; you only set the running number.
+            </label>
+
+            <!-- Cheque reference — only asked for when it applies. -->
+            <ng-container *ngIf="isCheque">
+              <label
+                >Cheque no.<input
+                  type="text"
+                  [(ngModel)]="meta.chequeNumber"
+                  placeholder="e.g. 004512"
+              /></label>
+              <label
+                >Cheque bank<input
+                  type="text"
+                  [(ngModel)]="meta.chequeBank"
+                  placeholder="e.g. HDFC Bank"
+              /></label>
+              <label
+                >Cheque date<input type="date" [(ngModel)]="meta.chequeDate"
+              /></label>
+              <p
+                class="gi-item__derived gi-full"
+                *ngIf="meta.paymentStatus === 'Paid'"
+              >
+                Marked Paid against a cheque — only do this once it has cleared.
+              </p>
+            </ng-container>
           </div>
         </div>
       </div>
@@ -245,144 +322,161 @@
       <!-- Card 2: the invoice itself -->
       <div class="gi-invoice-card">
         <div #invoiceContent class="invoice">
-        <!-- Header -->
-        <div
-          class="invoice__head d-flex justify-content-between align-items-center"
-        >
-          <h2 class="invoice__title">Invoice</h2>
-          <img
-            *ngIf="companyLogoDataUrl"
-            [src]="companyLogoDataUrl"
-            [alt]="billedBy.name"
-            class="invoice__logo"
-          />
-          <span *ngIf="!companyLogoDataUrl" class="invoice__brand">
-            {{ billedBy.name }}
-          </span>
-        </div>
-        <hr class="invoice__rule" />
-
-        <!-- Parties -->
-        <div class="invoice__parties d-flex justify-content-between">
-          <div class="invoice__col">
-            <h6 class="invoice__label">Billed By</h6>
-            <p class="invoice__text invoice__name">{{ billedBy.name }}</p>
-            <p class="invoice__text" [innerHTML]="billedByAddressHtml"></p>
-            <p class="invoice__text">{{ billedBy.email }}</p>
-            <p class="invoice__text">{{ billedBy.phone }}</p>
-          </div>
-          <div class="invoice__col">
-            <h6 class="invoice__label">Billed To</h6>
-            <p class="invoice__text invoice__name">
-              {{ billedTo.firstName }} {{ billedTo.lastName }}
-            </p>
-            <p class="invoice__text" *ngIf="billedTo.addressLine1">
-              {{ billedTo.addressLine1
-              }}{{ billedTo.addressLine2 ? ", " + billedTo.addressLine2 : "" }}
-            </p>
-            <p class="invoice__text">
-              {{ billedTo.city }}{{ billedTo.city && billedTo.state ? ", " : "" }}
-              {{ billedTo.state }} {{ billedTo.postalCode }}
-            </p>
-            <p class="invoice__text" *ngIf="billedTo.country">
-              {{ billedTo.country }}
-            </p>
-            <p class="invoice__text" *ngIf="billedTo.email">
-              {{ billedTo.email }}
-            </p>
-            <p class="invoice__text" *ngIf="billedTo.phone">
-              {{ billedTo.phone }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Meta -->
-        <div class="invoice__meta">
-          <div class="invoice__meta-row">
-            <h6 class="invoice__label">ISSUED ON</h6>
-            <span class="invoice__text">
-              {{ meta.issuedOn | date: "mediumDate" }}
+          <!-- Header -->
+          <div
+            class="invoice__head d-flex justify-content-between align-items-center"
+          >
+            <h2 class="invoice__title">Invoice</h2>
+            <img
+              *ngIf="companyLogoDataUrl"
+              [src]="companyLogoDataUrl"
+              [alt]="billedBy.name"
+              class="invoice__logo"
+            />
+            <span *ngIf="!companyLogoDataUrl" class="invoice__brand">
+              {{ billedBy.name }}
             </span>
           </div>
-          <div class="invoice__meta-row">
-            <h6 class="invoice__label">PAYMENT STATUS</h6>
-            <span class="invoice__text">{{ meta.paymentStatus }}</span>
-          </div>
-          <div class="invoice__meta-row" *ngIf="meta.paymentType">
-            <h6 class="invoice__label">PAYMENT TYPE</h6>
-            <span class="invoice__text">{{ meta.paymentType }}</span>
-          </div>
-          <div class="invoice__meta-row">
-            <h6 class="invoice__label">INVOICE #</h6>
-            <span class="invoice__text invoice__number">
-              {{ meta.invoiceNumber | uppercase }}
-            </span>
-          </div>
-        </div>
+          <hr class="invoice__rule" />
 
-        <!-- Items -->
-        <table class="table invoice__items">
-          <thead>
-            <tr>
-              <th>ITEM DESCRIPTION</th>
-              <th class="text-end">MRP</th>
-              <th class="text-end">OFFER</th>
-              <th class="text-center">QTY</th>
-              <th class="text-end">AMOUNT</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of items">
-              <td>{{ item.productName }}</td>
-              <td class="text-end">{{ rowMrp(item) | currency: "INR" }}</td>
-              <td class="text-end invoice__breakdown-deduct">
-                <ng-container *ngIf="unitDiscount(item) > 0; else noOffer">
-                  − {{ unitDiscount(item) | currency: "INR" }}
-                  <small
-                    class="d-block"
-                    style="font-size: 10px"
-                    *ngIf="item.offerPercentage"
-                    >{{ item.offerPercentage }}% off</small
-                  >
+          <!-- Parties -->
+          <div class="invoice__parties d-flex justify-content-between">
+            <div class="invoice__col">
+              <h6 class="invoice__label">Billed By</h6>
+              <p class="invoice__text invoice__name">{{ billedBy.name }}</p>
+              <p
+                class="invoice__text invoice__legal"
+                *ngIf="billedBy.legalName"
+              >
+                By {{ billedBy.legalName }}
+              </p>
+              <p class="invoice__text" [innerHTML]="billedByAddressHtml"></p>
+              <p class="invoice__text">{{ billedBy.email }}</p>
+              <p class="invoice__text">{{ billedBy.phone }}</p>
+            </div>
+            <div class="invoice__col">
+              <h6 class="invoice__label">Billed To</h6>
+              <p class="invoice__text invoice__name">
+                {{ billedTo.firstName }} {{ billedTo.lastName }}
+              </p>
+              <p class="invoice__text" [innerHTML]="billedToAddressHtml"></p>
+              <p class="invoice__text" *ngIf="billedTo.email">
+                {{ billedTo.email }}
+              </p>
+              <p class="invoice__text" *ngIf="billedTo.phone">
+                {{ billedTo.phone }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Meta -->
+          <div class="invoice__meta">
+            <div class="invoice__meta-row">
+              <h6 class="invoice__label">ISSUED ON</h6>
+              <span class="invoice__text">
+                {{ meta.issuedOn | date: "mediumDate" }}
+              </span>
+            </div>
+            <div class="invoice__meta-row">
+              <h6 class="invoice__label">PAYMENT STATUS</h6>
+              <span class="invoice__text">{{ meta.paymentStatus }}</span>
+            </div>
+            <div class="invoice__meta-row" *ngIf="meta.paymentType">
+              <h6 class="invoice__label">PAYMENT TYPE</h6>
+              <span class="invoice__text">{{ meta.paymentType }}</span>
+            </div>
+            <div
+              class="invoice__meta-row"
+              *ngIf="isCheque && meta.chequeNumber"
+            >
+              <h6 class="invoice__label">CHEQUE NO.</h6>
+              <span class="invoice__text invoice__number">
+                {{ meta.chequeNumber }}
+                <ng-container *ngIf="meta.chequeBank">
+                  — {{ meta.chequeBank }}
                 </ng-container>
-                <ng-template #noOffer>—</ng-template>
-              </td>
-              <td class="text-center">{{ item.quantity ?? 1 }}</td>
-              <td class="text-end">
-                <strong>{{ rowAmount(item) | currency: "INR" }}</strong>
-                <small
-                  *ngIf="item.isPriceInclusiveOfTax"
-                  class="d-block text-muted"
-                  style="font-size: 10px"
-                  >incl. GST</small
-                >
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <ng-container *ngIf="meta.chequeDate">
+                  , dated {{ meta.chequeDate | date: "mediumDate" }}
+                </ng-container>
+              </span>
+            </div>
+            <div class="invoice__meta-row">
+              <h6 class="invoice__label">INVOICE #</h6>
+              <span class="invoice__text invoice__number">
+                {{ invoiceNumber }}
+              </span>
+            </div>
+            <div class="invoice__meta-row" *ngIf="billedBy.gstNumber">
+              <h6 class="invoice__label">GSTIN</h6>
+              <span class="invoice__text invoice__number">
+                {{ billedBy.gstNumber }}
+              </span>
+            </div>
+          </div>
 
-        <!-- Totals -->
-        <div class="invoice__totals">
-          <div class="invoice__totals-row">
-            <span>Subtotal</span>
-            <span>{{ invoiceSubtotal | currency: "INR" }}</span>
-          </div>
-          <div class="invoice__totals-row" *ngIf="gstAmount > 0">
-            <span>GST ({{ gstPercent }}%)</span>
-            <span>+ {{ gstAmount | currency: "INR" }}</span>
-          </div>
-          <div class="invoice__totals-row invoice__totals-row--grand">
-            <span>Total Amount Paid</span>
-            <span>{{ invoiceTotal | currency: "INR" }}</span>
-          </div>
-        </div>
+          <!-- Items -->
+          <table class="table invoice__items">
+            <thead>
+              <tr>
+                <th>ITEM DESCRIPTION</th>
+                <th class="text-end">MRP</th>
+                <th class="text-end">OFFER</th>
+                <th class="text-center">QTY</th>
+                <th class="text-end">AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items">
+                <td>{{ item.productName }}</td>
+                <td class="text-end">{{ rowMrp(item) | currency: "INR" }}</td>
+                <td class="text-end invoice__breakdown-deduct">
+                  <ng-container *ngIf="unitDiscount(item) > 0; else noOffer">
+                    − {{ unitDiscount(item) | currency: "INR" }}
+                    <small
+                      class="d-block"
+                      style="font-size: 10px"
+                      *ngIf="item.offerPercentage"
+                      >{{ item.offerPercentage }}% off</small
+                    >
+                  </ng-container>
+                  <ng-template #noOffer>—</ng-template>
+                </td>
+                <td class="text-center">{{ item.quantity ?? 1 }}</td>
+                <td class="text-end">
+                  <strong>{{ rowAmount(item) | currency: "INR" }}</strong>
+                  <small
+                    *ngIf="item.isPriceInclusiveOfTax"
+                    class="d-block text-muted"
+                    style="font-size: 10px"
+                    >incl. GST</small
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-        <!-- Footer note sits at the end of the invoice, below the totals -->
-        <p class="invoice__footer-note">
-          Thank you for shopping with {{ billedBy.name }}. We appreciate your
-          purchase. If you have any questions regarding this invoice, feel free
-          to contact us at {{ billedBy.email }}.
-        </p>
+          <!-- Totals -->
+          <div class="invoice__totals">
+            <div class="invoice__totals-row">
+              <span>Subtotal</span>
+              <span>{{ invoiceSubtotal | currency: "INR" }}</span>
+            </div>
+            <div class="invoice__totals-row" *ngIf="gstAmount > 0">
+              <span>GST ({{ gstPercent }}%)</span>
+              <span>+ {{ gstAmount | currency: "INR" }}</span>
+            </div>
+            <div class="invoice__totals-row invoice__totals-row--grand">
+              <span>Total Amount Paid</span>
+              <span>{{ invoiceTotal | currency: "INR" }}</span>
+            </div>
+          </div>
+
+          <!-- Footer note sits at the end of the invoice, below the totals -->
+          <p class="invoice__footer-note">
+            Thank you for shopping with {{ billedBy.name }}. We appreciate your
+            purchase. If you have any questions regarding this invoice, feel
+            free to contact us at {{ billedBy.email }}.
+          </p>
         </div>
       </div>
     </div>

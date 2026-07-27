@@ -2,9 +2,61 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Krono²</title>
+    <!--
+      Default head tags. These are what a crawler sees before Angular boots, so
+      they must stand on their own. SeoService overwrites title/description/
+      canonical/OG per route once the app is running — see
+      src/app/shared/services/seo.service.ts.
+
+      "Krono2" (ASCII) leads the title because that is what people type and what
+      Google indexes; "Krono²" is carried as the stylised form in the JSON-LD
+      alternateName below.
+    -->
+    <title>
+      Krono2 — Buy Premium Pre-Owned & Vintage Watches Online | Krono²
+    </title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Krono2 (Krono²) — a curated marketplace for authentic pre-owned and vintage luxury watches. Verified sellers, secure payments and pan-India delivery."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Krono² by Astria GK" />
+    <link rel="canonical" href="https://krono2.com/" />
+
+    <!-- Open Graph — controls how shared links render on WhatsApp, LinkedIn, Slack -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Krono²" />
+    <meta
+      property="og:title"
+      content="Krono2 — Buy Premium Pre-Owned & Vintage Watches Online"
+    />
+    <meta
+      property="og:description"
+      content="Krono2 (Krono²) — a curated marketplace for authentic pre-owned and vintage luxury watches. Verified sellers, secure payments and pan-India delivery."
+    />
+    <meta property="og:url" content="https://krono2.com/" />
+    <meta
+      property="og:image"
+      content="https://krono2.com/assets/logo/logo.png"
+    />
+    <meta property="og:locale" content="en_IN" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Krono2 — Buy Premium Pre-Owned & Vintage Watches Online"
+    />
+    <meta
+      name="twitter:description"
+      content="Krono2 (Krono²) — a curated marketplace for authentic pre-owned and vintage luxury watches. Verified sellers, secure payments and pan-India delivery."
+    />
+    <meta
+      name="twitter:image"
+      content="https://krono2.com/assets/logo/logo.png"
+    />
+
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
@@ -15,6 +67,66 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
+
+    <!--
+      Organization + WebSite structured data. The alternateName list is the
+      specific fix for Google answering "krono2" with "Did you mean: kronos 2" —
+      it declares the brand as an entity and ties the ASCII and stylised
+      spellings together.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://krono2.com/#organization",
+            "name": "Krono2",
+            "alternateName": [
+              "Krono²",
+              "Krono 2",
+              "Krono Square",
+              "Krono Squared",
+              "Krono2 Watches"
+            ],
+            "legalName": "Astria GK",
+            "url": "https://krono2.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://krono2.com/assets/logo/logo.png"
+            },
+            "description": "Krono2 is a curated marketplace for authentic pre-owned and vintage luxury watches.",
+            "email": "krono2@astriagk.com",
+            "telephone": "+91-88673-47448",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "No. 12, 1st Floor, Pipeline, Srinagar",
+              "addressLocality": "Bangalore",
+              "addressRegion": "Karnataka",
+              "postalCode": "560026",
+              "addressCountry": "IN"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "krono2@astriagk.com",
+              "telephone": "+91-88673-47448",
+              "areaServed": "IN",
+              "availableLanguage": ["en"]
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://krono2.com/#website",
+            "name": "Krono2",
+            "alternateName": "Krono²",
+            "url": "https://krono2.com/",
+            "publisher": { "@id": "https://krono2.com/#organization" },
+            "inLanguage": "en-IN"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <app-root></app-root>

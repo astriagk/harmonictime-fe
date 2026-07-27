@@ -1,0 +1,19 @@
+# Krono² — https://krono2.com
+# Served from the domain root; registered in angular.json under build assets.
+
+User-agent: *
+Allow: /
+
+# Signed-in and transactional areas: nothing here is useful in an index, and
+# most of it 302s to /auth for a crawler anyway.
+Disallow: /auth
+Disallow: /seller
+Disallow: /admin
+Disallow: /buyer/cart
+Disallow: /buyer/wishlist
+Disallow: /buyer/checkout
+Disallow: /buyer/account
+Disallow: /buyer/chat
+Disallow: /generate-invoice
+
+Sitemap: https://krono2.com/sitemap.xml

@@ -50,17 +50,35 @@ const routes: Routes = [
   {
     path: 'sell',
     component: SellComponent,
-    title: 'Sell',
+    data: {
+      seo: {
+        title: 'Sell Your Watch',
+        description:
+          'Sell your pre-owned or vintage watch on Krono2. List with a verified seller account, reach genuine collectors and get paid securely.',
+      },
+    },
   },
   {
     path: 'contact',
     component: ContactComponent,
-    title: 'Contact',
+    data: {
+      seo: {
+        title: 'Contact Us',
+        description:
+          'Get in touch with the Krono2 team about an order, a listing or selling your watch. Bangalore-based support for buyers and sellers across India.',
+      },
+    },
   },
   {
     path: 'policy/:slug',
     component: PolicyComponent,
-    title: 'Information',
+    data: {
+      seo: {
+        title: 'Policies & Information',
+        description:
+          'Krono2 policies and information — shipping, returns, privacy and terms for buying and selling watches on the marketplace.',
+      },
+    },
   },
 ];
 

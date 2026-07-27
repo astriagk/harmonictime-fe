@@ -3,7 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ORDER_CHARGES, roundMoney } from '@config/index';
-import { companyDetails } from '@shared/constants/companyDetails';
+import {
+  businessBrands,
+  companyDetails,
+  invoiceLogoOptions,
+} from '@shared/constants/companyDetails';
 
 // A single invoice line item — mirrors the fields the real invoice pulls off
 // each order Product (see buyer/account invoice modal).
@@ -36,12 +40,22 @@ export class GenerateInvoiceComponent implements OnInit {
   public companyLogoDataUrl: string | null = null;
   public isDownloading = false;
 
+  // The businesses we can bill under, and the logos that can be stamped on the
+  // invoice. Name/email/logo are picked from these lists; everything else in
+  // Billed By is shared across the brands (one entity, one GSTIN).
+  public readonly brands = businessBrands;
+  public readonly logoOptions = invoiceLogoOptions;
+  public readonly brandEmails = businessBrands.map((b) => b.email);
+
   // --- Billed By (company) — prefilled from the app constant, editable -------
   public billedBy = {
     name: companyDetails.name,
+    legalName: companyDetails.legalName,
     address: companyDetails.address,
     email: companyDetails.email,
     phone: companyDetails.phone,
+    gstNumber: companyDetails.gstNumber,
+    logo: businessBrands[0].logo,
   };
 
   // --- Billed To (client) — normally from the user's default address --------
@@ -63,7 +77,14 @@ export class GenerateInvoiceComponent implements OnInit {
     issuedOn: new Date().toISOString().substring(0, 10),
     paymentStatus: 'Paid',
     paymentType: 'UPI',
-    invoiceNumber: '',
+    // Only the running number is keyed in; the brand prefix and the YYMM come
+    // from the Billed By brand and the issue date — see invoiceNumber.
+    sequence: 1,
+    // Cheque reference — only meaningful when paymentType is Cheque. Kept so a
+    // bank credit can be matched back to the invoice months later.
+    chequeNumber: '',
+    chequeBank: '',
+    chequeDate: '',
   };
 
   // --- Line items -----------------------------------------------------------
@@ -76,9 +97,45 @@ export class GenerateInvoiceComponent implements OnInit {
     'Net Banking',
     'Cash',
     'Cash on Delivery',
+    'Cheque',
     'Bank Transfer',
     'Wallet',
   ];
+
+  // A cheque isn't money until it clears, so the status has to be able to say
+  // so — printing "Paid" against an uncleared cheque hands the buyer a receipt
+  // for a payment we may never receive.
+  public readonly paymentStatuses = [
+    'Paid',
+    'Pending',
+    'Awaiting Clearance',
+    'Unpaid',
+    'Refunded',
+  ];
+
+  // Invoice number: BRAND-YYMM-SEQ, e.g. KR-2607-0001 (Krono², July 2026, #1).
+  // The prefix follows the selected business and the YYMM follows the issue
+  // date, so the only thing to key in is the running number for that month.
+  get invoiceNumber(): string {
+    const brand = this.brands.find((b) => b.name === this.billedBy.name);
+    const prefix = brand?.invoicePrefix ?? 'INV';
+    // Parse as plain Y-M-D: `new Date('2026-07-01')` is UTC midnight, which in
+    // a negative-offset zone lands on the previous month.
+    const [year, month] = (this.meta.issuedOn ?? '').split('-');
+    const yymm = year && month ? `${year.slice(-2)}${month}` : '';
+    const seq = String(Math.max(1, this.meta.sequence || 1)).padStart(4, '0');
+    return [prefix, yymm, seq].filter(Boolean).join('-');
+  }
+
+  get isCheque(): boolean {
+    return this.meta.paymentType === 'Cheque';
+  }
+
+  // Cheque payments default to Awaiting Clearance; flip back to Paid once the
+  // funds land. Any other method is assumed settled at the point of sale.
+  onPaymentTypeChange(): void {
+    this.meta.paymentStatus = this.isCheque ? 'Awaiting Clearance' : 'Paid';
+  }
 
   // Whether GST is added to this invoice at all (global toggle).
   public includeGst = true;
@@ -111,12 +168,39 @@ export class GenerateInvoiceComponent implements OnInit {
     this.preloadInvoiceLogo();
   }
 
-  // Format the company address for the invoice header: raise ordinal suffixes
-  // (1st → 1ˢᵗ) and keep the trailing "City - pincode" segment on one line so
-  // it never wraps. Address is our own trusted string, so bypassing the
-  // sanitizer for the small amount of markup we inject is safe.
+  // Picking a business swaps the brand's own email and logo in with it. Both
+  // remain editable afterwards, so an unusual pairing is still possible.
+  onBrandChange(): void {
+    const brand = this.brands.find((b) => b.name === this.billedBy.name);
+    if (!brand) {
+      return;
+    }
+    this.billedBy.email = brand.email;
+    this.billedBy.logo = brand.logo;
+    this.preloadInvoiceLogo();
+  }
+
   get billedByAddressHtml(): SafeHtml {
-    const addr = this.billedBy.address ?? '';
+    return this.formatAddressHtml(this.billedBy.address ?? '');
+  }
+
+  // The bill-to address as one flowing line, formatted exactly like Billed By
+  // rather than as a stack of one-field paragraphs.
+  get billedToAddressHtml(): SafeHtml {
+    const t = this.billedTo;
+    const street = [t.addressLine1, t.addressLine2, t.city, t.state]
+      .filter(Boolean)
+      .join(', ');
+    const withPostal = t.postalCode ? `${street} - ${t.postalCode}` : street;
+    const line = t.country ? `${withPostal}, ${t.country}` : withPostal;
+    return this.formatAddressHtml(line);
+  }
+
+  // Format an address for the invoice: raise ordinal suffixes (1st → 1ˢᵗ) and
+  // keep the trailing "City - pincode" segment on one line so it never wraps.
+  // Everything is escaped first, so bypassing the sanitizer for the small
+  // amount of markup we inject afterwards is safe.
+  private formatAddressHtml(addr: string): SafeHtml {
     const esc = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -241,7 +325,7 @@ export class GenerateInvoiceComponent implements OnInit {
       const renderHeight = Math.min(imgHeight, pageHeight - margin * 2);
 
       pdf.addImage(imgData, 'PNG', margin, margin, usableWidth, renderHeight);
-      pdf.save(`invoice-${this.meta.invoiceNumber || 'manual'}.pdf`);
+      pdf.save(`invoice-${this.invoiceNumber}.pdf`);
     } catch (error) {
       console.error('Error generating invoice PDF:', error);
     } finally {
@@ -249,13 +333,17 @@ export class GenerateInvoiceComponent implements OnInit {
     }
   }
 
-  // Preload the same-origin brand logo as a base64 data URL so it survives the
-  // html2canvas capture (cross-origin images are dropped). Non-fatal: falls
-  // back to the brand name.
-  private async preloadInvoiceLogo(): Promise<void> {
+  // Preload the selected same-origin logo as a base64 data URL so it survives
+  // the html2canvas capture (cross-origin images are dropped). Non-fatal, and
+  // an empty selection is a valid choice: both fall back to the brand name.
+  async preloadInvoiceLogo(): Promise<void> {
+    const path = this.billedBy.logo;
+    if (!path) {
+      this.companyLogoDataUrl = null;
+      return;
+    }
     try {
-      // This internal invoice uses the name-less logo variant specifically.
-      const response = await fetch('assets/logo/logo-no-name.png');
+      const response = await fetch(path);
       const blob = await response.blob();
       this.companyLogoDataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
