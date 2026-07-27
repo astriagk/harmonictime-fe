@@ -90,8 +90,54 @@ export class DetailsComponent implements OnInit, OnDestroy {
       type: 'product',
     });
 
+    const site = environment.siteUrl.replace(/\/$/, '');
+
+    // Product + BreadcrumbList in one @graph: the product data drives the rich
+    // result, the breadcrumb drives the "krono2.com › products › …" trail that
+    // replaces the raw URL in search listings.
     this.seo.setStructuredData({
       '@context': 'https://schema.org',
+      '@graph': [
+        this.productSchema(product, { name, brand, image, path, price, site }),
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${site}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Watches',
+              item: `${site}/buyer/products`,
+            },
+            // The last crumb is the current page, so per Google's guidance it
+            // carries no `item` URL.
+            { '@type': 'ListItem', position: 3, name },
+          ],
+        },
+      ],
+    });
+  }
+
+  /** The Product node of the page's structured data. */
+  private productSchema(
+    product: any,
+    ctx: {
+      name: string;
+      brand?: string;
+      image: string;
+      path: string;
+      price: number | null;
+      site: string;
+    }
+  ): Record<string, unknown> {
+    const { name, brand, image, path, price, site } = ctx;
+
+    return {
       '@type': 'Product',
       name,
       ...(brand ? { brand: { '@type': 'Brand', name: brand } } : {}),
@@ -115,11 +161,11 @@ export class DetailsComponent implements OnInit, OnDestroy {
               // The catalogue tracks no stock level — a listing is live until
               // it sells, so anything with a page is buyable.
               availability: 'https://schema.org/InStock',
-              url: `${environment.siteUrl.replace(/\/$/, '')}${path}`,
+              url: `${site}${path}`,
             },
           }
         : {}),
-    });
+    };
   }
 
   /** The price a buyer actually pays — the same discount the page displays. */
