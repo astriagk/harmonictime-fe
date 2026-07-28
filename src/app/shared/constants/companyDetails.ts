@@ -9,7 +9,7 @@ export const companyDetails = {
   legalName: 'Astria GK',
   email: environment.supportEmail,
   address: 'NO. 12, 1st Floor, Pipeline, Srinagar, Bangalore - 560026',
-  phone: '(+91) 88673 47448',
+  phone: '(+91) 8861237563',
   gstNumber: '29CKDPG8193B2Z2',
   description:
     'Discover a curated collection of pre-owned and vintage watches, perfect for collectors and enthusiasts. We specialize in sourcing high-quality, authentic timepieces, ensuring trust and excellence in every purchase. Explore timeless craftsmanship with confidence.',
