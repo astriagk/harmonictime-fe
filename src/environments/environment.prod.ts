@@ -5,9 +5,9 @@ export const environment = {
   // Public origin, used to build canonical/OG URLs. Always the live domain —
   // a canonical pointing at localhost or a preview host is worse than none.
   siteUrl: 'https://krono2.com',
-  apiBaseUrl: 'https://api.krono2.astriagk.com/api',
-  socketBaseUrl: 'https://api.krono2.astriagk.com',
-  imageUploadUrl: 'https://api.krono2.astriagk.com/upload',
+  apiBaseUrl: 'https://api.krono2.com/api',
+  socketBaseUrl: 'https://api.krono2.com',
+  imageUploadUrl: 'https://api.krono2.com/upload',
   // TODO: replace with the live Razorpay key before going live with real payments
   razorpayKeyId: 'rzp_live_TI6DQccrtn8eJK',
   companyLogoUrl:
