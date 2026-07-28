@@ -33,8 +33,11 @@ export const userReducer = createReducer(
   initialState,
 
   // Login Actions
+  // `data` and `error` are cleared here so a component that dispatches and then
+  // subscribes can't pick up the previous attempt's result as its own.
   on(loginUser, (state) => ({
     ...state,
+    data: [],
     loading: true,
     error: null,
   })),

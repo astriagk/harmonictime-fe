@@ -1,0 +1,23 @@
+.google-signin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  // GSI renders a fixed-width button inside an iframe-like shadow root, so it
+  // can't be stretched with width: 100% — centre it instead.
+  &__btn {
+    display: flex;
+    justify-content: center;
+    min-height: 44px; // reserves the space before GSI paints, avoiding a jump
+  }
+
+  &__status,
+  &__hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+    color: #757575;
+  }
+}

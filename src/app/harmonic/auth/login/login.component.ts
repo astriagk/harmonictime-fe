@@ -92,13 +92,15 @@ export class LoginComponent implements OnDestroy {
           filter((state: any) => !!state?.data?.token),
           take(1)
         )
-        .subscribe((state: any) => {
-          localStorage.setItem('token', JSON.stringify(state?.data?.token));
+        .subscribe(() => {
+          // The session is already stored by the loginUser$ effect, and
+          // mergeGuestCartOnLogin$ owns the redirect — it has to merge the guest
+          // cart first and it honours _pendingRedirect. Navigating here would
+          // race it and always land on /buyer/products.
           this.isSubmitting = false;
           this.toastrService.success('Login successful!');
           this.loginForm.reset();
           this.formSubmitted = false;
-          this.router.navigate(['/buyer/products']);
         });
     }
   }

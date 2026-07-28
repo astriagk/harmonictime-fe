@@ -64,12 +64,22 @@
             >
               {{ isSubmitting ? "Logging in..." : "Login Now" }}
             </button>
-
-            <div class="or-divide"><span>or</span></div>
-            <a routerLink="/auth/register" class="os-btn os-btn-black w-100"
-              >Register Now</a
-            >
           </form>
+
+          <p class="auth-alt">
+            Don't have an account?
+            <a routerLink="/auth/register">Register</a>
+          </p>
+
+          <!--
+            Outside the <form> on purpose: the button GSI renders is a real
+            <button>, and inside a form it would submit it.
+          -->
+          <div class="or-divide"><span>or</span></div>
+          <app-google-signin-button
+            text="continue_with"
+            hint="Fastest way in — no password or verification email needed."
+          ></app-google-signin-button>
         </div>
       </div>
     </div>
