@@ -107,11 +107,24 @@
             >
               {{ isSubmitting ? "Registering..." : "Register Now" }}
             </button>
-            <div class="or-divide"><span>or</span></div>
-            <a routerLink="/auth/login" class="os-btn os-btn-black w-100"
-              >Login Now</a
-            >
           </form>
+
+          <p class="auth-alt">
+            Already have an account?
+            <a routerLink="/auth/login">Login</a>
+          </p>
+
+          <!-- Outside the <form>: GSI renders a real button that would submit it. -->
+          <div class="or-divide"><span>or</span></div>
+          <!--
+            Same account shape as the form above (individual), and Google has
+            already verified the address — so this path skips the verification
+            email entirely.
+          -->
+          <app-google-signin-button
+            text="signup_with"
+            hint="Fastest way to sign up — no password or verification email needed."
+          ></app-google-signin-button>
         </div>
       </div>
     </div>

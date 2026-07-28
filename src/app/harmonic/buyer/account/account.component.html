@@ -1078,17 +1078,32 @@
                   class="order__info-top d-flex justify-content-between align-items-center"
                 >
                   <h3 class="order__info-title">GST Details</h3>
-                  <button
-                    type="button"
-                    class="os-btn os-btn-black"
-                    (click)="openGstModal()"
-                  >
-                    <i
-                      class="fa"
-                      [ngClass]="gstDetails ? 'fa-pen-to-square' : 'fa-plus'"
-                    ></i>
-                    {{ gstDetails ? "Edit GST Details" : "Add GST Details" }}
-                  </button>
+                  <div class="d-flex" style="gap: 10px">
+                    <!-- Documents can't be edited in the modal below (it posts
+                         JSON), so this is the permanent route to the upload
+                         page. Without it the only way in is the verification
+                         banner, which the seller can dismiss. -->
+                    <button
+                      *ngIf="gstDetails"
+                      type="button"
+                      class="os-btn"
+                      [class.os-btn-black]="needsDocumentAction"
+                      (click)="manageDocuments()"
+                    >
+                      <i class="fa fa-file-arrow-up"></i> Manage Documents
+                    </button>
+                    <button
+                      type="button"
+                      class="os-btn os-btn-black"
+                      (click)="openGstModal()"
+                    >
+                      <i
+                        class="fa"
+                        [ngClass]="gstDetails ? 'fa-pen-to-square' : 'fa-plus'"
+                      ></i>
+                      {{ gstDetails ? "Edit GST Details" : "Add GST Details" }}
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Loading -->
@@ -1113,22 +1128,25 @@
                           <i class="fa fa-file-invoice"></i>
                           {{ gstDetails.LegalBusinessName }}
                         </h4>
-                        <span
-                          class="verify-badge"
-                          [ngClass]="{
-                            'verify-badge--verified': gstDetails.IsVerified,
-                            'verify-badge--unverified': !gstDetails.IsVerified,
-                          }"
-                        >
+                        <span class="verify-badge" [ngClass]="sellerStatusClass">
                           <i class="fa fa-circle"></i>
-                          {{
-                            gstDetails.IsVerified
-                              ? "Verified"
-                              : "Pending Verification"
-                          }}
+                          {{ sellerStatusLabel }}
                         </span>
                       </div>
                       <div class="account-card__body">
+                        <!-- What the admin asked for. Shown here as well as in
+                             the sitewide banner, because that banner is
+                             dismissible and this card is where a seller looks
+                             when they come to fix their details. -->
+                        <div
+                          *ngIf="sellerVerificationNote && needsDocumentAction"
+                          class="verify-notice mb-20"
+                        >
+                          <i class="fas fa-circle-exclamation mr-5"></i>
+                          <strong>Action needed:</strong>
+                          {{ sellerVerificationNote }}
+                        </div>
+
                         <div class="account-card__row">
                           <span>GSTIN</span>
                           <strong>{{ gstDetails.GSTIN }}</strong>
@@ -1167,6 +1185,24 @@
                                 : ""
                             }}{{ gstDetails.PinCode }}</strong
                           >
+                        </div>
+
+                        <!-- Uploaded documents. Read-only here; replacing one
+                             happens on the upload page via Manage Documents. -->
+                        <div class="account-card__row" *ngIf="gstDocuments.length">
+                          <span>Documents</span>
+                          <strong class="d-block">
+                            <a
+                              *ngFor="let doc of gstDocuments"
+                              [href]="doc.url"
+                              target="_blank"
+                              rel="noopener"
+                              class="d-block"
+                            >
+                              <i class="fa fa-file-lines mr-5"></i>
+                              {{ docTypeLabel(doc.documentType) }}
+                            </a>
+                          </strong>
                         </div>
                       </div>
                     </div>
