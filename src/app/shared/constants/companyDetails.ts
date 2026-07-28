@@ -8,7 +8,8 @@ export const companyDetails = {
   // entity that legally issues the document.
   legalName: 'Astria GK',
   email: environment.supportEmail,
-  address: 'NO. 12, 1st Floor, Pipeline, Srinagar, Bangalore - 560026',
+  address:
+    'No.12, 1st Floor, Kalappa Block, Srinagara, Pipeline, Bangalore - 560026',
   phone: '(+91) 8861237563',
   gstNumber: '29CKDPG8193B2Z2',
   description:
