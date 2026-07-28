@@ -13,9 +13,17 @@ export const registerUserFailure = createAction(
   props<{ error: string }>()
 );
 
+// One action for every credential exchange that ends in a session. `url` picks
+// the endpoint: LOGIN_USER takes email/password, GOOGLE_LOGIN takes a Google ID
+// token. Both responses carry the same session payload, so the effects and the
+// downstream navigation are shared.
+export type LoginCredentials =
+  | { email: string; password: string }
+  | { idToken: string };
+
 export const loginUser = createAction(
   '[User] Login',
-  props<{ url: string; payload: { email: string; password: number } }>()
+  props<{ url: string; payload: LoginCredentials }>()
 );
 export const loginUserSuccess = createAction(
   '[User] Login Success',

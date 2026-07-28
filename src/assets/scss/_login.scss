@@ -114,6 +114,25 @@
     }
   }
 
+/* ── Auth footer: the alternate action (register / login) as a quiet link, so
+      the page carries only two real buttons — password and Google. ── */
+.auth-alt {
+  margin: 25px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: $body-text-color;
+
+  a {
+    color: $theme-color;
+    font-weight: 500;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
 /* ── Auth password-reveal toggle (login / register / forgot / reset) ── */
 .auth-input {
   position: relative;

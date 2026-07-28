@@ -35,6 +35,13 @@ export const selectSellerVerificationStatus = createSelector(
   (state: UserState) => (state.user?.data?.sellerVerificationStatus as string | null) ?? null
 );
 
+// The admin's note attached to a reject/request-info decision. This is the only
+// place the seller is told *what* to fix, so it travels with the status above.
+export const selectSellerVerificationNote = createSelector(
+  selectUserState,
+  (state: UserState) => (state.user?.data?.sellerVerificationNote as string | null) ?? null
+);
+
 export const selectIsLoggedIn = createSelector(
   selectUserState,
   (state: UserState) => !!state.user?.data

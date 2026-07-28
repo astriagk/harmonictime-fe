@@ -4,6 +4,19 @@
 ></app-breadcrumb-three>
 <section class="coupon-area pt-60" *ngIf="!isLoading && cartItems.length > 0">
   <div class="container">
+    <!--
+      One button covers both accordions below: /auth/google signs in an existing
+      account and creates one otherwise. Signing in here keeps the user on
+      checkout — mergeGuestCartOnLogin$ skips its redirect on this route.
+    -->
+    <div class="row" *ngIf="!userData">
+      <div class="col-12 mb-30">
+        <app-google-signin-button
+          text="continue_with"
+          hint="Fastest way to check out — no password or verification email needed."
+        ></app-google-signin-button>
+      </div>
+    </div>
     <div class="row">
       <div class="col-md-6">
         <div class="coupon-accordion" *ngIf="!userData">

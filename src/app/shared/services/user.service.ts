@@ -10,6 +10,7 @@ import { UPDATE_USER, UPLOAD_SINGLE, USER, VERIFY_TOKEN } from '@config/index';
 import { BehaviorSubject, Observable, map, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { ChatService } from './chat.service';
+import { GoogleAuthService } from './google-auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +21,7 @@ export class UserService {
     private store: Store,
     private genericService: GenericService,
     private chatService: ChatService,
+    private googleAuth: GoogleAuthService,
     private router: Router,
   ) {}
 
@@ -58,6 +60,9 @@ export class UserService {
 
   logout() {
     this.chatService.disconnect();
+    // Otherwise GSI silently re-signs the same Google account back in on the
+    // next visit to the login page, which reads as "logout didn't work".
+    this.googleAuth.disableAutoSelect();
     localStorage.clear();
     sessionStorage.clear();
     this.userDataSubject.next(null);

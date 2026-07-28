@@ -27,4 +27,7 @@ export const environment = {
     'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/email_logo/e3c6f4fc-2a25-4e74-b663-ac1d403cd98e-1779438937075',
   gstPercent: 18,
   supportEmail: 'support@krono2.com',
+  // See the note in environment.ts. Must match GOOGLE_CLIENT_ID on the backend.
+  googleClientId:
+    '627728704433-5dtk5jppao27ush6d122mrs2d4s2nvi3.apps.googleusercontent.com',
 };

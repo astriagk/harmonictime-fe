@@ -19,6 +19,7 @@ import { GenericService } from 'src/app/shared/services/generic.service';
 import { UserService } from '@shared/services/user.service';
 import { CartService } from '@shared/services/cart.service';
 import { WishlistService } from '@shared/services/wishlist.service';
+import { persistSession } from '@shared/utils/session';
 import { Store } from '@ngrx/store';
 
 @Injectable()
@@ -51,15 +52,7 @@ export class UserEffects {
       mergeMap((action) =>
         this.genericService.postObservable(action.url, action.payload).pipe(
           map((result: any) => {
-            if (result?.data?.token) {
-              localStorage.setItem('token', JSON.stringify(result.data.token));
-            }
-            if (result?.data?.refreshToken) {
-              localStorage.setItem(
-                'refreshToken',
-                JSON.stringify(result.data.refreshToken),
-              );
-            }
+            persistSession(result?.data);
             return loginUserSuccess({ data: result.data });
           }),
           catchError((err) => {
@@ -128,8 +121,18 @@ export class UserEffects {
           const onBlockedPage = this.router.url.startsWith(
             '/auth/account-blocked',
           );
+          // Signing in from the checkout accordions must leave the user on
+          // checkout so they can finish the order. The redirect the sign-in
+          // asked for is dropped rather than kept, since it belongs to this
+          // sign-in — left behind it would hijack some later, unrelated login.
           const onCheckout = this.router.url.startsWith('/buyer/checkout');
-          if ((action.skipNavigation && !onBlockedPage) || onCheckout) return;
+          if (onCheckout) {
+            localStorage.removeItem('_pendingGstRedirect');
+            localStorage.removeItem('_pendingRedirect');
+            return;
+          }
+          if (action.skipNavigation && !onBlockedPage) return;
+
           const pendingGst = localStorage.getItem('_pendingGstRedirect');
           const pendingRedirect = localStorage.getItem('_pendingRedirect');
           if (pendingGst) {

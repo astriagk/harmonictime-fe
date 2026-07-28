@@ -1,0 +1,7 @@
+<div class="google-signin" [class.d-none]="!available">
+  <!-- GSI renders its own button into this element. -->
+  <div #googleBtn class="google-signin__btn"></div>
+
+  <p class="google-signin__status" *ngIf="signingIn">Signing you in…</p>
+  <p class="google-signin__hint" *ngIf="hint && !signingIn">{{ hint }}</p>
+</div>

@@ -9,6 +9,10 @@ export const VERIFY_TOKEN = `${baseUrl}/auth/verify-token`;
 export const CONFIRM_EMAIL = `${baseUrl}/auth/confirm-email`;
 export const RESEND_VERIFICATION = `${baseUrl}/auth/resend-verification`;
 export const UPDATE_UNVERIFIED_EMAIL = `${baseUrl}/auth/update-unverified-email`;
+// Google Sign-In — POST { idToken }. Returns the same shape as CONFIRM_EMAIL
+// (token, refreshToken, userId, email, accountType, roles, redirectTo) plus
+// isNewUser/linked, so it flows through the same login effects.
+export const GOOGLE_LOGIN = `${baseUrl}/auth/google`;
 export const USER = `${baseUrl}/users/profile`;
 // password reset — request an OTP by email, then submit the OTP + new password
 export const VERIFY_EMAIL = `${baseUrl}/auth/verify-email`;

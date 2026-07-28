@@ -29,8 +29,11 @@
   <div class="seller-verify-banner__body">
     <i class="fas fa-triangle-exclamation seller-verify-banner__icon"></i>
     <span class="seller-verify-banner__text">{{ sellerVerificationNote }}</span>
-    <a [routerLink]="sellerVerificationStatus === 'Pending' ? '/buyer/account' : '/auth/gst-onboarding'"
-       class="seller-verify-banner__link">
+    <!-- Always the onboarding page: it edits the GST fields *and* the uploaded
+         documents, whereas /buyer/account can only edit the fields. A note on a
+         Pending seller usually asks for a document, so sending them to the
+         account page left them with no way to comply. -->
+    <a routerLink="/auth/gst-onboarding" class="seller-verify-banner__link">
       {{ sellerVerificationStatus === 'Pending' ? 'Update now' : 'Resubmit' }}
     </a>
   </div>

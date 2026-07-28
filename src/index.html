@@ -73,6 +73,7 @@
     />
     <link rel="apple-touch-icon" href="assets/logo/logo-no-name.png" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://accounts.google.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
       rel="stylesheet"
@@ -141,6 +142,13 @@
         ]
       }
     </script>
+
+    <!--
+      Google Identity Services. Loaded async, so `window.google` is not
+      guaranteed to exist when a component initialises — GoogleAuthService
+      waits for it (see shared/services/google-auth.service.ts).
+    -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <app-root></app-root>

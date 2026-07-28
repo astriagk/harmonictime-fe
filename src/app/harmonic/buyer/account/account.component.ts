@@ -6,6 +6,7 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   BANK_ACCOUNTS,
@@ -47,6 +48,8 @@ import {
   selectOrdersLoading,
 } from 'src/app/store/selectors/orders.selectors';
 import {
+  selectSellerVerificationNote,
+  selectSellerVerificationStatus,
   selectUserData,
   selectUserLoading,
 } from 'src/app/store/selectors/user.selectors';
@@ -147,6 +150,13 @@ export class AccountComponent implements OnInit, OnDestroy {
   public isGstModalOpen = false;
   public savingGst = false;
 
+  // Admin's verification decision on this seller. `IsVerified` on the GST record
+  // only says approved/not, so it can't distinguish "waiting on admin" from
+  // "admin asked for something" — this status and note carry that, and are what
+  // tell the seller their documents need attention.
+  public sellerVerificationStatus: string | null = null;
+  public sellerVerificationNote: string | null = null;
+
   // Generic confirmation modal — set pendingAction to the fn to run on confirm.
   public confirmModalOpen = false;
   public confirmModalMessage = '';
@@ -209,6 +219,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     private genericService: GenericService,
     private userService: UserService,
     private cdr: ChangeDetectorRef,
+    private router: Router,
   ) {}
 
   // --- Address book ----------------------------------------------------------
@@ -1156,6 +1167,83 @@ export class AccountComponent implements OnInit, OnDestroy {
       .select(selectGstLoading)
       .pipe(takeUntil(this.destroy$))
       .subscribe((loading) => (this.gstLoading = loading));
+
+    this.store
+      .select(selectSellerVerificationStatus)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((status) => (this.sellerVerificationStatus = status));
+    this.store
+      .select(selectSellerVerificationNote)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((note) => (this.sellerVerificationNote = note));
+  }
+
+  // --- Seller verification -------------------------------------------------
+
+  /** Documents live on the GST record; both this page and the upload page read it. */
+  get gstDocuments(): { url: string; key: string; documentType: string }[] {
+    return this.gstDetails?.Documents ?? [];
+  }
+
+  /**
+   * True when the admin has asked for changes and the seller must act.
+   *
+   * There is no distinct "info requested" status — the admin's `request-info`
+   * action leaves the seller on `Pending` and attaches a note, and a note is
+   * only ever written by reject/request-info (both require one). So a note on
+   * a pending seller is the signal that someone is waiting on them.
+   */
+  get needsDocumentAction(): boolean {
+    if (this.sellerVerificationStatus === 'Rejected') return true;
+    return (
+      this.sellerVerificationStatus === 'Pending' && !!this.sellerVerificationNote
+    );
+  }
+
+  /** Badge text for the GST card — the real decision, not just verified/not. */
+  get sellerStatusLabel(): string {
+    switch (this.sellerVerificationStatus) {
+      case 'Approved':
+        return 'Verified';
+      case 'Rejected':
+        return 'Rejected';
+      case 'Resubmitted':
+        return 'Resubmitted — Under Review';
+      case 'Pending':
+        return this.sellerVerificationNote
+          ? 'Information Requested'
+          : 'Pending Verification';
+      default:
+        // No status yet: fall back to whatever the GST record itself says.
+        return this.gstDetails?.IsVerified ? 'Verified' : 'Pending Verification';
+    }
+  }
+
+  get sellerStatusClass(): string {
+    if (this.sellerVerificationStatus === 'Approved' || this.gstDetails?.IsVerified)
+      return 'verify-badge--verified';
+    if (this.needsDocumentAction) return 'verify-badge--failed';
+    return 'verify-badge--unverified';
+  }
+
+  /** Human label for a document slot; mirrors the upload page's slot labels. */
+  docTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      GSTCertificate: 'GST Certificate',
+      PANCard: 'PAN Card',
+      AddressProof: 'Address Proof',
+      Other: 'Cancelled Cheque / Bank Statement',
+    };
+    return map[type] ?? type;
+  }
+
+  /**
+   * Send the seller to the upload page. Documents can only be added or replaced
+   * there — the GST modal on this page edits the text fields and posts JSON, so
+   * it has no way to carry a file.
+   */
+  manageDocuments(): void {
+    this.router.navigate(['/auth/gst-onboarding']);
   }
 
   ngOnDestroy(): void {
