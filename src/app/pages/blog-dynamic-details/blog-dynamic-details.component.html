@@ -1,13 +1,18 @@
 <!-- header start -->
-<app-header-one [white_bg]="true"></app-header-one>
+<app-header-four></app-header-four>
 <!-- header end -->
 
 <main>
+  <!-- breadcrumb start -->
+  <app-breadcrumb-three
+    [title]="blog?.title || 'Blog Details'"
+    subtitle="Blog"
+  ></app-breadcrumb-three>
+  <!-- breadcrumb end -->
 
   <!-- blog details area start -->
   <app-blog-details-area [blog]="blog!"></app-blog-details-area>
   <!-- blog details area end -->
-
 </main>
 
 <!-- footer start -->

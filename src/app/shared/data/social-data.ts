@@ -6,7 +6,7 @@ export type ISocial =  {
 
 const social_links:ISocial[] = [
   {
-    link: "https://www.instagram.com/harmonic_time/",
+    link: "https://www.instagram.com/krono.square/",
     icon: "fab fa-instagram",
     name: "Instagram",
   },

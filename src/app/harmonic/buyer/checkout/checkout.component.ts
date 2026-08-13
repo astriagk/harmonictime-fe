@@ -443,9 +443,30 @@ export class CheckoutComponent implements OnDestroy {
     });
   }
 
+  // Labels used to name the offending fields in the invalid-submit toast. The
+  // keys match both the control names and the input ids, so the same map drives
+  // the scroll-to-first-error below.
+  private readonly checkoutFieldLabels: Record<string, string> = {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    country: 'Country',
+    address: 'Address',
+    city: 'Town / City',
+    state: 'State / County',
+    zipCode: 'Postcode / Zip',
+    phone: 'Phone',
+    email: 'Email Address',
+  };
+
   async onSubmit() {
     this.formSubmitted = true;
-    if (!this.checkoutForm.valid || this.placingOrder) {
+    if (this.placingOrder) {
+      return;
+    }
+    if (!this.checkoutForm.valid) {
+      // On mobile the inline red text sits below the fold, so surface the same
+      // information as a toast and jump to the first offending field.
+      this.reportInvalidCheckoutForm();
       return;
     }
 
@@ -461,6 +482,39 @@ export class CheckoutComponent implements OnDestroy {
       await this.payNow();
     } finally {
       this.placingOrder = false;
+    }
+  }
+
+  private reportInvalidCheckoutForm() {
+    this.checkoutForm.markAllAsTouched();
+
+    const invalidNames = Object.keys(this.checkoutForm.controls).filter(
+      (name) => this.checkoutForm.get(name)?.invalid,
+    );
+
+    const labels = invalidNames.map(
+      (name) => this.checkoutFieldLabels[name] ?? name,
+    );
+
+    if (labels.length) {
+      const shown = labels.slice(0, 3).join(', ');
+      const rest = labels.length - 3;
+      this.toastrService.error(
+        rest > 0
+          ? `Please check ${shown} and ${rest} more field${rest > 1 ? 's' : ''}.`
+          : `Please check ${shown}.`,
+        'Billing details incomplete',
+      );
+    } else {
+      this.toastrService.error('Please check your billing details.');
+    }
+
+    const firstInvalid = invalidNames.length
+      ? (document.getElementById(invalidNames[0]) as HTMLElement | null)
+      : null;
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstInvalid.focus({ preventScroll: true });
     }
   }
 
