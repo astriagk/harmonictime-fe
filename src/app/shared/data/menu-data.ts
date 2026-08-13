@@ -38,6 +38,11 @@ const menuData: IMenuType[] = [
     hasDropdown: false,
   },
   {
+    link: '/pages/blog-no-sidebar',
+    title: 'Blog',
+    hasDropdown: false,
+  },
+  {
     link: '/pages/contact',
     title: 'Contact',
   },
@@ -74,6 +79,10 @@ export const mobile_menus: IMobileMenu[] = [
   {
     title: 'Sell',
     link: '/pages/sell',
+  },
+  {
+    title: 'Blog',
+    link: '/pages/blog-no-sidebar',
   },
   {
     title: 'Contact',
