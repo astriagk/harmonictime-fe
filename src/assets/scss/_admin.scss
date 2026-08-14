@@ -365,3 +365,408 @@
   width: 100%;
   color: $black-soft-2;
 }
+
+/* ── Blog list table (admin/blogs/list) ── */
+.admin-blogs__thumb {
+  width: 60px;
+  height: 42px;
+  object-fit: cover;
+  border: 1px solid $border;
+}
+
+// The table is auto-layout, so the Title column was claiming whatever a long
+// headline needed and leaving Status, Published and Actions to wrap into
+// unreadable slivers. Capping the title is what gives those columns their room
+// back — a percentage alone is only a hint in auto layout, so the cap goes on a
+// block box inside the cell, which the browser does honour.
+.admin-blogs__title-col {
+  width: 28%;
+}
+
+.admin-blogs__title {
+  max-width: 320px;
+  // Wrap rather than clamp: an admin scanning the list needs to read the whole
+  // headline. Long unbroken strings still have to break somewhere.
+  overflow-wrap: anywhere;
+}
+
+.admin-blogs__slug {
+  display: block;
+  max-width: 320px;
+  // The slug is a reference, not something to read in full — one line, clipped.
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Short, fixed-shape columns: a date, a pill and three icons should never wrap.
+.admin-blogs__nowrap {
+  white-space: nowrap;
+}
+
+/* ── Blog create / edit form (admin/blogs/add-edit) ── */
+// Only what the global styles don't already provide: the section cards, the
+// small helper text, and Quill's chrome. Every field here is a stock
+// `.checkout-form-list` / `.country-select` control, so none of them are
+// restyled locally.
+.blog-form {
+  // Room for the sticky action bar so the last field is never trapped under it.
+  padding-bottom: 40px;
+
+  // Same card treatment as `.account-card` (_account.scss) and
+  // `.checkout__card`: 1px border, 4px radius, and a shadow that deepens on
+  // hover over .3s.
+  &__card {
+    padding: 30px;
+    background: $white;
+    border: 1px solid $border;
+    border-radius: 4px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 24px rgba($black, 0.05);
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: 0 10px 30px rgba($black, 0.08);
+    }
+
+    &--collapsible {
+      padding: 0;
+    }
+  }
+
+  &__section-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: $heading-color;
+    margin-bottom: 25px;
+  }
+
+  &__section-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-row-gap: 2px;
+    align-items: center;
+    padding: 20px 30px;
+
+    &:hover .blog-form__section-title {
+      color: $theme-color;
+    }
+  }
+
+  // A closed section still says where it stands.
+  &__section-summary {
+    grid-column: 1;
+    font-size: 12px;
+    color: $black-soft-3;
+    line-height: 1.5;
+  }
+
+  &__chevron {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    font-size: 16px;
+    color: $black-soft-3;
+    padding-left: 15px;
+  }
+
+  // Error marker on a closed header; colour comes from .text-danger.
+  &__dot {
+    font-size: 6px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  // A rejection from the API, not from our own validators. It borrows the
+  // standard card and `.text-danger` (there is no danger token in
+  // _variables.scss), and adds only the red rule down the side that separates
+  // "the server said no" from an ordinary field message.
+  &__server-error {
+    border-left: 3px solid #dc3545;
+
+    .blog-form__section-title i {
+      margin-right: 6px;
+    }
+  }
+
+  &__server-status {
+    margin: 12px 0 0;
+    font-size: 14px;
+    color: $black-soft;
+  }
+
+  &__server-list {
+    margin: 12px 0;
+    padding-left: 18px;
+    list-style: disc;
+
+    li {
+      font-size: 14px;
+      line-height: 24px;
+      color: $black-soft;
+    }
+
+    strong {
+      color: $heading-color;
+    }
+  }
+
+  &__section-body {
+    padding: 25px 30px 30px;
+    border-top: 1px solid $border;
+  }
+
+  // The global rule gives textareas `padding: 0 0 0 10px`, so the first line
+  // sits against the top border while inputs centre theirs.
+  textarea {
+    padding: 12px 10px;
+    height: 110px;
+    line-height: 22px;
+  }
+
+  &__slug {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  &__slug-url {
+    color: $black-soft-3;
+    word-break: break-all;
+
+    strong {
+      color: $black-soft;
+      font-weight: 500;
+    }
+  }
+
+  &__link {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    color: $heading-color;
+    white-space: nowrap;
+
+    i {
+      margin-right: 5px;
+    }
+
+    &:hover {
+      color: $theme-color;
+    }
+  }
+
+  // ── Repeatable body sections ─────────────────────────────────────────────
+  &__block {
+    padding-top: 25px;
+    margin-bottom: 25px;
+    border-top: 1px solid $border;
+
+    &:first-child {
+      padding-top: 0;
+      border-top: none;
+    }
+  }
+
+  &__block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  &__block-no {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: $black-soft-3;
+  }
+
+  &__block-action {
+    margin-left: 15px;
+    font-size: 14px;
+    color: $black-soft-2;
+
+    &:hover {
+      color: $theme-color;
+    }
+
+    &.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+  }
+
+  // Chosen tags, listed under the select that adds them.
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 10px;
+      font-size: 12px;
+      color: $black-soft;
+      background-color: $grey;
+      border: 1px solid $border;
+    }
+
+    a:hover {
+      color: $theme-color;
+    }
+  }
+
+  &__hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: $black-soft-3;
+    line-height: 1.6;
+  }
+
+  &__warn {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: $theme-color;
+  }
+
+  &__check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    cursor: pointer;
+    color: $black-soft-2;
+
+    input {
+      width: auto;
+      margin-right: 10px;
+    }
+  }
+
+  &__preview {
+    display: block;
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border: 1px solid $border;
+    border-radius: 4px; // matches the card corners
+    margin-bottom: 10px;
+  }
+
+  // The file input is hidden and the <label> carries the button styling, so it
+  // needs the pointer and the label margin reset that os-btn doesn't supply.
+  &__upload-btn {
+    margin-bottom: 0;
+    cursor: pointer;
+    padding: 0 25px;
+  }
+
+  &__remove {
+    margin-left: 15px;
+    font-size: 13px;
+    color: $black-soft-3;
+
+    &:hover {
+      color: $theme-color;
+    }
+  }
+
+  &__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 15px 20px;
+    background: $white;
+    border: 1px solid $border;
+    border-radius: 4px;
+    // Same shadow as the cards, thrown upward since the bar is pinned below.
+    box-shadow: 0 -6px 24px rgba($black, 0.08);
+  }
+
+  &__status {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  @media #{$xs} {
+    &__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  // ── Quill ────────────────────────────────────────────────────────────────
+  // Full width, and pulled onto the same border/font tokens the rest of the
+  // page uses so it doesn't read as a bolted-on widget. These live in the
+  // global sheet, so no ::ng-deep is needed to reach Quill's own markup.
+  quill-editor {
+    display: block;
+    width: 100%;
+  }
+
+  .ql-toolbar.ql-snow,
+  .ql-container.ql-snow {
+    width: 100%;
+    border: 1px solid $border;
+    border-radius: 0;
+    font-family: $pop;
+  }
+
+  .ql-toolbar.ql-snow {
+    border-bottom: 0;
+    // Keep the formatting buttons in reach on a long article.
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background-color: $white;
+  }
+
+  .ql-container.ql-snow {
+    font-size: 14px;
+  }
+
+  .ql-editor {
+    min-height: 480px;
+    color: $black-soft-2;
+    line-height: 24px;
+  }
+
+  .ql-editor.ql-blank::before {
+    color: $black-soft-3;
+    font-style: normal;
+  }
+
+  .ql-snow .ql-stroke {
+    stroke: $black-soft;
+  }
+
+  .ql-snow .ql-fill {
+    fill: $black-soft;
+  }
+
+  .ql-snow.ql-toolbar button:hover .ql-stroke,
+  .ql-snow.ql-toolbar button.ql-active .ql-stroke {
+    stroke: $theme-color;
+  }
+
+  .ql-snow.ql-toolbar button:hover .ql-fill,
+  .ql-snow.ql-toolbar button.ql-active .ql-fill {
+    fill: $theme-color;
+  }
+}

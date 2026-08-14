@@ -223,6 +223,13 @@ export const OFFERS_ALL = `${baseUrl}/offers/all`; // GET all incl. disabled
 export const OFFER_BY_ID = `${baseUrl}/offers/`; // append offerId (GET/PUT/DELETE)
 export const OFFER_STATUS = (id: string) => `${baseUrl}/offers/${id}/status`; // PATCH
 
+// blog — see spec/blog-api.md
+export const BLOGS = `${baseUrl}/blogs`; // GET published list (paginated), POST create
+export const BLOG_BY_ID = `${baseUrl}/blogs/`; // append slug or id (GET/PUT/DELETE)
+export const BLOGS_ADMIN = `${baseUrl}/blogs/admin/list`; // GET all incl. drafts
+export const BLOG_CATEGORIES = `${baseUrl}/blogs/categories`; // GET label/slug/count
+export const BLOG_RELATED = (slug: string) => `${baseUrl}/blogs/${slug}/related`; // GET
+
 // order charges applied on top of the cart subtotal at checkout
 export const ORDER_CHARGES = {
   gstPercent: environment.gstPercent, // % — configured per environment

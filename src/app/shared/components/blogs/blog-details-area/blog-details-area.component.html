@@ -1,76 +1,43 @@
 <section class="blog__area pt-55">
   <div class="container">
     <div class="row">
-      <div class="col-xl-9 col-lg-8">
-        <div class="postbox__title mb-55">
-          <h1>
-            <a [routerLink]="['/pages/blog']">{{ blog.title }}</a>
-          </h1>
+      <!-- NOTE: blog sidebar is currently disabled (see the commented-out
+           sidebar column at the bottom of this row), so the post content spans
+           the full width. To bring the sidebar back, restore the original
+           classes on the line below and un-comment the sidebar column. -->
+      <!-- WITH SIDEBAR: <div class="col-xl-9 col-lg-8"> -->
+      <!-- WITHOUT SIDEBAR (active): -->
+      <div class="col-xl-12 col-lg-12">
+        <div class="postbox__title mb-30">
+          <h1>{{ blog.Title }}</h1>
           <div class="blog__meta">
             <span
-              >By <a href="#">{{ blog.author }}</a></span
+              >By <a href="#">{{ blog.Author }}</a></span
             >
-            <span>/ {{ blog.date }}</span>
+            <span>/ {{ blog.PublishedAt | date: "dd MMM, yyyy" }}</span>
+            <span *ngIf="blog.Category">/ {{ blog.Category }}</span>
           </div>
         </div>
-        <div class="postbox__thumb w-img">
-          <img src="/assets/img/blog/blog-big.jpg" alt="" />
+        <div class="postbox__thumb w-img" *ngIf="heroImage">
+          <img [src]="heroImage" [alt]="blog.Title" />
         </div>
+        <!-- Article body — an ordered list of sections, each some text and
+             optionally an image beneath it. This reproduces the static page's
+             layout (text, then a full-width image, then more text) with the
+             author choosing where each picture sits. -->
         <div class="postbox__wrapper mb-70">
-          <div class="postbox__text mt-65">
-            <p>
-              Diga, Koma and Torus are three kitchen utensils designed for
-              <span class="highlight theme">Ommo</span>, a new design-oriented
-              brand introduced at the Ambiente show in February 2016.
-              <span class="highlight"
-                >Minimalist approach, bright colors, stainless steel and matte
-                plastic</span
-              >, abstract shapes and curved lines are the defining features of
-              these products designed to be extremely functional, user-friendly
-              and fun.
-            </p>
-          </div>
-          <div class="postbox__text">
-            <p>
-              Diga is a two-color melamine salad bowl where vegetables can be
-              washed, drained and served. The disk at the bottom of the bowl can
-              be turned counterclockwise to drain water when washing vegetables
-              and it can be turned clockwise to lock the drain and hold
-              condiments in the bowl when serving.
-            </p>
-          </div>
-          <article class="postbox format-quote mt-45 mb-50">
-            <div class="postbox__quote">
-              <blockquote>
-                <p>
-                  <i class="fas fa-quote-right"></i> Many desktop publishing
-                  packages and web page editors now use Lorem Ipsum as their
-                  default model text, and a search for 'lorem ipsum' will
-                  uncover many web sites still in their infancy.
-                </p>
-              </blockquote>
+          <ng-container *ngFor="let section of sections">
+            <h2 class="postbox__section-heading" *ngIf="section.Heading">
+              {{ section.Heading }}
+            </h2>
+            <div class="postbox__text" [innerHTML]="section.Html"></div>
+            <div class="postbox__details-img w-img mb-60" *ngIf="section.Image">
+              <img [src]="section.Image" [alt]="section.Caption || blog.Title" />
+              <span class="postbox__caption" *ngIf="section.Caption">
+                {{ section.Caption }}
+              </span>
             </div>
-          </article>
-          <div class="postbox__details-img w-img mb-60">
-            <img src="/assets/img/blog/blog-details-sm.jpg" alt="" />
-          </div>
-          <div class="postbox__text">
-            <p>
-              Koma and Torus are two tea infusers, each with an original design
-              and a concealed function. Koma has a round base and a long
-              stainless steel-trimmed handle which offers a comfortable grip and
-              allows.
-            </p>
-          </div>
-          <div class="postbox__text">
-            <p>
-              And the brushed steel cover opens and closes at the touch of a
-              finger to easily fill and empty the infuser. The perfect way to
-              enjoy brewing tea. Torus is donut-shaped and can cling to any cup.
-              It is accompanied by a case that can contain up to three different
-              diffusers and can be used for dry storage of loose tea.
-            </p>
-          </div>
+          </ng-container>
         </div>
         <div class="postbox__share mb-95">
           <div class="row">
@@ -90,51 +57,62 @@
               </div>
             </div>
             <div class="col-xl-6 col-lg-6 col-md-6">
-              <div class="postbox__tag f-right">
+              <div
+                class="postbox__tag f-right"
+                *ngIf="blog.Tags && blog.Tags.length"
+              >
                 <span>Tags :</span>
-                <a href="#">Furniture,</a>
-                <a href="#">Erentheme,</a>
-                <a href="#">Chair, </a>
-                <a href="#">Decor</a>
+                <!-- The separator sits outside the link so the comma is not
+                     part of the tag's hover target, and the space after it is
+                     non-breaking — Angular strips whitespace-only text nodes
+                     between elements, so a plain space would vanish. -->
+                <ng-container
+                  *ngFor="let tag of blog.Tags; let last = last"
+                >
+                  <a class="cursor-pointer">{{ tag }}</a
+                  ><span class="postbox__tag-sep" *ngIf="!last">,&nbsp;</span>
+                </ng-container>
               </div>
             </div>
           </div>
         </div>
-        <div class="postbox__related-title">
-          <h3>You Might Also Like</h3>
-        </div>
-        <div class="postbox__related-item">
-          <div class="row">
-            <div
-              *ngFor="let b of related_blogs"
-              class="col-xl-6 col-lg-6 col-md-6"
-            >
-              <div class="blog__item mb-30">
-                <div class="blog__thumb fix">
-                  <a
-                    [routerLink]="['/pages/blog-details', blog.id]"
-                    class="w-img"
-                  >
-                    <img [src]="b.img" alt="blog" />
-                  </a>
-                </div>
-                <div class="blog__content">
-                  <h4>
-                    <a [routerLink]="['/pages/blog-details', blog.id]">{{
-                      b.title
-                    }}</a>
-                  </h4>
-                  <div class="blog__meta">
-                    <span
-                      >By <a href="#">{{ b.author }}</a></span
+        <ng-container *ngIf="related_blogs.length">
+          <div class="postbox__related-title">
+            <h3>You Might Also Like</h3>
+          </div>
+          <div class="postbox__related-item">
+            <div class="row">
+              <div
+                *ngFor="let b of related_blogs"
+                class="col-xl-6 col-lg-6 col-md-6"
+              >
+                <div class="blog__item mb-30">
+                  <div class="blog__thumb fix">
+                    <a
+                      [routerLink]="['/pages/blog-details', linkFor(b)]"
+                      class="w-img"
                     >
-                    <span>/ {{ b.date }}</span>
+                      <img [src]="b.Image" [alt]="b.Title" />
+                    </a>
+                  </div>
+                  <div class="blog__content">
+                    <h4>
+                      <a [routerLink]="['/pages/blog-details', linkFor(b)]">{{
+                        b.Title
+                      }}</a>
+                    </h4>
+                    <div class="blog__meta">
+                      <span
+                        >By <a href="#">{{ b.Author }}</a></span
+                      >
+                      <span>/ {{ b.PublishedAt | date: "dd MMM, yyyy" }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </ng-container>
         <!-- <div class="postbox__line mt-65"></div> -->
         <!-- <div class="postbox__comments pt-90">
           <div class="postbox__comment-title mb-30">
@@ -217,6 +195,9 @@
         <!-- blog reply form end -->
         <!-- </div> -->
       </div>
+      <!-- blog sidebar column - DISABLED.
+           To re-enable: un-comment the block below AND change the content
+           column above back to "col-xl-9 col-lg-8". -->
       <!-- <div class="col-xl-3 col-lg-4"> -->
       <!-- blog sidebar start -->
       <!-- <app-blog-sidebar></app-blog-sidebar> -->

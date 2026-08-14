@@ -15,6 +15,7 @@ import { SellerOffersState } from './reducers/seller-offers.reducer';
 import { AdminUsersState } from './reducers/admin-users.reducer';
 import { AdminProductsState } from './reducers/admin-products.reducer';
 import { AdminWithdrawalsState } from './reducers/admin-withdrawals.reducer';
+import { AdminBlogsState } from './reducers/admin-blogs.reducer';
 
 export interface AppState {
   user: UserState;
@@ -36,6 +37,7 @@ export interface AppState {
   adminUsers: AdminUsersState;
   adminProducts: AdminProductsState;
   adminWithdrawals: AdminWithdrawalsState;
+  adminBlogs: AdminBlogsState;
   // profile: ProfileState;
   // recentlyViewed: RecentlyViewedState;
   // offers: OfferState;

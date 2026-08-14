@@ -11,8 +11,24 @@
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a routerLink="/">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">
-                  {{ subtitle }}
+                <li
+                  class="breadcrumb-item"
+                  [class.active]="!current"
+                  [attr.aria-current]="current ? null : 'page'"
+                >
+                  <a *ngIf="current && subtitleLink" [routerLink]="subtitleLink">{{
+                    subtitle
+                  }}</a>
+                  <ng-container *ngIf="!current || !subtitleLink">{{
+                    subtitle
+                  }}</ng-container>
+                </li>
+                <li
+                  *ngIf="current"
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                >
+                  {{ current }}
                 </li>
               </ol>
             </nav>

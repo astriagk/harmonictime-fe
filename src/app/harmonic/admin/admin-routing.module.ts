@@ -6,6 +6,8 @@ import { RolesComponent } from './roles/roles.component';
 import { ApprovePaymentsComponent } from './approve-payments/approve-payments.component';
 import { AdminOffersComponent } from './offers/offers.component';
 import { AdminProductsComponent } from './products/products.component';
+import { AdminBlogsComponent } from './blogs/list/list.component';
+import { AdminBlogFormComponent } from './blogs/add-edit/add-edit.component';
 
 const routes: Routes = [
   {
@@ -36,6 +38,21 @@ const routes: Routes = [
         path: 'products',
         component: AdminProductsComponent,
         title: 'Product Moderation',
+      },
+      {
+        path: 'blogs',
+        component: AdminBlogsComponent,
+        title: 'Manage Blogs',
+      },
+      {
+        path: 'blogs/new',
+        component: AdminBlogFormComponent,
+        title: 'Add Blog Post',
+      },
+      {
+        path: 'blogs/:id/edit',
+        component: AdminBlogFormComponent,
+        title: 'Edit Blog Post',
       },
     ],
   },
