@@ -35,6 +35,7 @@ import { SellerOffersEffects } from './store/effects/seller-offers.effects';
 import { AdminUsersEffects } from './store/effects/admin-users.effects';
 import { AdminProductsEffects } from './store/effects/admin-products.effects';
 import { AdminWithdrawalsEffects } from './store/effects/admin-withdrawals.effects';
+import { AdminBlogsEffects } from './store/effects/admin-blogs.effects';
 import { TitleStrategy } from '@angular/router';
 import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
 
@@ -74,6 +75,7 @@ import { PageTitleStrategy } from './shared/strategies/page-title.strategy';
       AdminUsersEffects,
       AdminProductsEffects,
       AdminWithdrawalsEffects,
+      AdminBlogsEffects,
     ]),
     StoreDevtoolsModule.instrument({
       maxAge: 25,

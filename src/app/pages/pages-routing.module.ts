@@ -43,7 +43,7 @@ const routes: Routes = [
     title: 'Blog Details',
   },
   {
-    path: 'blog-details/:id',
+    path: 'blog-details/:slug',
     component: BlogDynamicDetailsComponent,
     title: 'Blog Details',
   },

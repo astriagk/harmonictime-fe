@@ -5,7 +5,22 @@
 <main>
 
   <!-- blog details area start -->
-  <app-blog-details-area [blog]="blog"></app-blog-details-area>
+  <div *ngIf="loading" class="container pt-55">
+    <app-skeleton type="hero" [count]="1"></app-skeleton>
+    <app-skeleton type="text" [count]="6"></app-skeleton>
+  </div>
+
+  <app-empty-state
+    *ngIf="!loading && !blog"
+    message="No Blog Posts Yet"
+    actionLabel="Browse The Blog"
+    actionLink="/pages/blog-3-col"
+  ></app-empty-state>
+
+  <app-blog-details-area
+    *ngIf="!loading && blog"
+    [blog]="blog"
+  ></app-blog-details-area>
   <!-- blog details area end -->
 
 </main>

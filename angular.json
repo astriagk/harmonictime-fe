@@ -40,6 +40,7 @@
             ],
             "styles": [
               "@angular/material/prebuilt-themes/indigo-pink.css",
+              "node_modules/quill/dist/quill.snow.css",
               "src/styles.scss"
             ],
             "stylePreprocessorOptions": {
@@ -49,6 +50,9 @@
             },
             "scripts": [
               "./node_modules/bootstrap/dist/js/bootstrap.min.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "quill"
             ]
           },
           "configurations": {
@@ -123,6 +127,7 @@
             ],
             "styles": [
               "@angular/material/prebuilt-themes/indigo-pink.css",
+              "node_modules/quill/dist/quill.snow.css",
               "src/styles.scss"
             ],
             "scripts": []

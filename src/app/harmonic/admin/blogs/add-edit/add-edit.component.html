@@ -1,0 +1,496 @@
+<app-breadcrumb-three
+  [title]="isEditing ? 'Edit Blog Post' : 'New Blog Post'"
+  subtitle="Admin"
+></app-breadcrumb-three>
+
+<section class="order-info container blog-form">
+  <header class="order-info__header pt-40 pb-20">
+    <h2 class="order-info__title">
+      {{ isEditing ? "Edit Blog Post" : "New Blog Post" }}
+    </h2>
+  </header>
+
+  <div *ngIf="isLoadingBlog" class="white-bg blog-form__card">
+    <app-skeleton type="table-row" [count]="6"></app-skeleton>
+  </div>
+
+  <form *ngIf="!isLoadingBlog" [formGroup]="form" (ngSubmit)="publish()">
+    <!-- ══ 0. Server rejection ══════════════════════════════════════════
+         A 400 from the API is not the author's mistake to guess at. Say who
+         rejected the post, with what status, and list every Joi detail —
+         including the ones whose key has no input of its own to render under.
+    -->
+    <div
+      *ngIf="errorSource === 'server'"
+      class="white-bg blog-form__card blog-form__server-error"
+    >
+      <h4 class="blog-form__section-title text-danger mb-0">
+        <i class="fal fa-exclamation-triangle"></i>
+        Rejected by the server
+      </h4>
+      <p class="blog-form__server-status">{{ serverStatus }}</p>
+
+      <ul class="blog-form__server-list" *ngIf="serverErrorList.length">
+        <li *ngFor="let e of serverErrorList">
+          <strong>{{ e.field }}</strong> — {{ e.message }}
+        </li>
+      </ul>
+
+      <small class="blog-form__hint">
+        Nothing above is a problem with what you typed unless it names a field
+        you filled in. If it reports an unknown or missing field, the API schema
+        is out of step with this form — send this message to the backend.
+      </small>
+    </div>
+
+    <!-- ══ 1. Article ═══════════════════════════════════════════════════
+         Required throughout, so it is always open and comes first. -->
+    <div class="white-bg blog-form__card">
+      <h4 class="blog-form__section-title">Article</h4>
+
+      <div class="row">
+        <!-- Title (with its slug) and Excerpt sit side by side; the editor
+             below gets the full 12 columns. -->
+        <div class="col-lg-6">
+          <div class="checkout-form-list blog-form__title-field">
+            <label>Title <span class="required">*</span></label>
+            <input
+              type="text"
+              formControlName="Title"
+              placeholder="e.g. How To Spot A Fake Submariner"
+            />
+            <span *ngIf="invalid('Title')" class="text-danger">
+              Title is required (3–200 characters)
+            </span>
+            <span *ngIf="serverErrors['Title']" class="text-danger">
+              Server: {{ serverErrors["Title"] }}
+            </span>
+
+            <!-- The slug is derived from the title; only surface the field when
+                 someone actually wants to override it. -->
+            <div class="blog-form__slug">
+              <span class="blog-form__slug-url">
+                /pages/blog-details/<strong>{{
+                  form.get("Slug")?.value || "your-slug"
+                }}</strong>
+              </span>
+              <a class="cursor-pointer blog-form__link" (click)="showSlug = !showSlug">
+                {{ showSlug ? "Done" : "Edit" }}
+              </a>
+            </div>
+            <ng-container *ngIf="showSlug">
+              <input
+                type="text"
+                formControlName="Slug"
+                placeholder="auto-generated-from-title"
+                class="mt-10"
+              />
+              <span *ngIf="invalid('Slug')" class="text-danger">
+                Use lowercase letters, numbers and hyphens only (max 120)
+              </span>
+              <span *ngIf="slugChanged" class="blog-form__warn">
+                Changing the slug breaks the existing URL and any links to it.
+              </span>
+              <span *ngIf="serverErrors['Slug']" class="text-danger">
+                Server: {{ serverErrors["Slug"] }}
+              </span>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="checkout-form-list">
+            <label>Excerpt <span class="required">*</span></label>
+            <textarea
+              formControlName="Excerpt"
+              placeholder="Short teaser shown on the blog grid."
+            ></textarea>
+            <small
+              class="blog-form__hint"
+              [class.text-danger]="excerptLength > 400"
+            >
+              {{ excerptLength }} / 400 characters
+            </small>
+            <span *ngIf="invalid('Excerpt')" class="text-danger">
+              An excerpt is required (10–400 characters)
+            </span>
+            <span *ngIf="serverErrors['Excerpt']" class="text-danger">
+              Server: {{ serverErrors["Excerpt"] }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 2. Body ══════════════════════════════════════════════════════
+         An ordered list of blocks. Each is some text plus, optionally, one
+         image shown directly beneath it — so a picture sits with the copy it
+         belongs to instead of every image piling up at the top. -->
+    <div class="white-bg blog-form__card">
+      <h4 class="blog-form__section-title">Body</h4>
+
+      <span *ngIf="serverErrors['Sections']" class="text-danger d-block mb-15">
+        Server: {{ serverErrors["Sections"] }}
+      </span>
+
+      <div formArrayName="Sections">
+        <div
+          class="blog-form__block"
+          *ngFor="let section of sections.controls; let i = index"
+          [formGroupName]="i"
+        >
+          <div class="blog-form__block-head">
+            <span class="blog-form__block-no">Section {{ i + 1 }}</span>
+            <span>
+              <a
+                class="blog-form__block-action cursor-pointer"
+                title="Move up"
+                [class.disabled]="i === 0"
+                (click)="moveSection(i, -1)"
+                ><i class="fal fa-arrow-up"></i
+              ></a>
+              <a
+                class="blog-form__block-action cursor-pointer"
+                title="Move down"
+                [class.disabled]="i === sections.length - 1"
+                (click)="moveSection(i, 1)"
+                ><i class="fal fa-arrow-down"></i
+              ></a>
+              <a
+                class="blog-form__block-action cursor-pointer"
+                title="Remove section"
+                [class.disabled]="sections.length === 1"
+                (click)="removeSection(i)"
+                ><i class="fal fa-trash-alt"></i
+              ></a>
+            </span>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="checkout-form-list">
+                <label>Sub-heading</label>
+                <input
+                  type="text"
+                  formControlName="Heading"
+                  placeholder="Optional — e.g. The dial"
+                />
+                <span *ngIf="sectionInvalid(i, 'Heading')" class="text-danger">
+                  Keep the sub-heading under 200 characters
+                </span>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="checkout-form-list">
+                <label>Text <span class="required">*</span></label>
+                <quill-editor
+                  formControlName="Content"
+                  [modules]="quillModules"
+                  placeholder="Write this part of the article…"
+                ></quill-editor>
+                <span
+                  *ngIf="sectionInvalid(i, 'Content')"
+                  class="text-danger"
+                >
+                  This section needs some text
+                </span>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="checkout-form-list mb-0">
+                <label>Image</label>
+                <img
+                  *ngIf="section.get('Image')?.value"
+                  [src]="section.get('Image')?.value"
+                  alt="Section image preview"
+                  class="blog-form__preview"
+                />
+                <div class="d-flex align-items-center">
+                  <label class="os-btn blog-form__upload-btn">
+                    {{ sectionUploading === i ? "Uploading…" : "Choose Image" }}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/jpg"
+                      hidden
+                      [disabled]="sectionUploading === i"
+                      (change)="onSectionImageSelected($event, i)"
+                    />
+                  </label>
+                  <a
+                    *ngIf="section.get('Image')?.value"
+                    class="cursor-pointer blog-form__remove"
+                    (click)="clearSectionImage(i)"
+                    >Remove</a
+                  >
+                </div>
+                <small class="blog-form__hint">
+                  Optional. Shown full width under this section's text.
+                </small>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="checkout-form-list mb-0">
+                <label>Caption</label>
+                <input
+                  type="text"
+                  formControlName="Caption"
+                  placeholder="Optional caption under the image"
+                />
+                <span *ngIf="sectionInvalid(i, 'Caption')" class="text-danger">
+                  Keep the caption under 200 characters
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a class="cursor-pointer blog-form__link" (click)="addSection()">
+        <i class="fal fa-plus"></i> Add another section
+      </a>
+    </div>
+
+    <!-- ══ 3. Organise ══════════════════════════════════════════════════
+         Three short fields, so three columns. -->
+    <div class="white-bg blog-form__card">
+      <h4 class="blog-form__section-title">Organise</h4>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-6">
+          <!-- `.country-select` + native <select>, the same markup the GST
+               onboarding form uses; all styling comes from that wrapper. -->
+          <div class="country-select mb-0">
+            <label for="blogCategory"
+              >Category <span class="required">*</span></label
+            >
+            <select id="blogCategory" formControlName="Category">
+              <option value="" disabled>Select a category</option>
+              <option *ngFor="let c of categories" [value]="c">
+                {{ c }}
+              </option>
+            </select>
+            <span *ngIf="invalid('Category')" class="text-danger">
+              Category is required
+            </span>
+            <span *ngIf="serverErrors['Category']" class="text-danger">
+              Server: {{ serverErrors["Category"] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+          <div class="checkout-form-list mb-0">
+            <label>Author <span class="required">*</span></label>
+            <input type="text" formControlName="Author" placeholder="Author name" />
+            <span *ngIf="invalid('Author')" class="text-danger">
+              Author is required
+            </span>
+            <span *ngIf="serverErrors['Author']" class="text-danger">
+              Server: {{ serverErrors["Author"] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+          <!-- Native select, identical markup to Category. Tags are
+               multi-value, so picking one adds it to the list below and the
+               select resets ready for the next. -->
+          <div class="country-select mb-0">
+            <label for="blogTags">Tags</label>
+            <select
+              id="blogTags"
+              #tagSelect
+              (change)="addTag(tagSelect.value); tagSelect.value = ''"
+            >
+              <option value="" disabled selected>Select a tag</option>
+              <option *ngFor="let t of availableTags" [value]="t">
+                {{ t }}
+              </option>
+            </select>
+            <ul class="blog-form__tags" *ngIf="selectedTags.length">
+              <li *ngFor="let tag of selectedTags">
+                {{ tag }}
+                <a
+                  class="cursor-pointer"
+                  [title]="'Remove ' + tag"
+                  (click)="removeTag(tag)"
+                  ><i class="fal fa-times"></i
+                ></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4. Cover ═════════════════════════════════════════════════════
+         The one image that is not part of a section: the card thumbnail and
+         the article's hero. Required, so this section stays open. -->
+    <div class="white-bg blog-form__card">
+      <h4 class="blog-form__section-title">Cover Image</h4>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="checkout-form-list mb-0">
+            <label>Cover <span class="required">*</span></label>
+            <img
+              *ngIf="form.get('Image')?.value"
+              [src]="form.get('Image')?.value"
+              alt="Cover preview"
+              class="blog-form__preview"
+            />
+            <div class="d-flex align-items-center">
+              <label class="os-btn blog-form__upload-btn">
+                {{ coverUploading ? "Uploading…" : "Choose Image" }}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg"
+                  hidden
+                  [disabled]="coverUploading"
+                  (change)="onCoverSelected($event)"
+                />
+              </label>
+              <a
+                *ngIf="form.get('Image')?.value"
+                class="cursor-pointer blog-form__remove"
+                (click)="clearCover()"
+                >Remove</a
+              >
+            </div>
+            <small class="blog-form__hint">
+              Shown on the blog grid and at the top of the article. JPG or PNG,
+              up to 5 MB.
+            </small>
+            <span *ngIf="invalid('Image')" class="text-danger">
+              A cover image is required
+            </span>
+            <span *ngIf="serverErrors['Image']" class="text-danger">
+              Server: {{ serverErrors["Image"] }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 5. Publish ═══════════════════════════════════════════════════
+         No required field, so it collapses. -->
+    <div class="white-bg blog-form__card blog-form__card--collapsible">
+      <a class="blog-form__section-head cursor-pointer" (click)="toggleSection('publish')">
+        <span class="blog-form__section-title mb-0">
+          Publish
+          <i *ngIf="sectionHasError('publish')" class="fas fa-circle blog-form__dot text-danger"></i>
+        </span>
+        <span class="blog-form__section-summary">{{ publishSummary }}</span>
+        <i class="fal blog-form__chevron"
+           [class.fa-angle-down]="!openSections.publish"
+           [class.fa-angle-up]="openSections.publish"></i>
+      </a>
+      <div class="blog-form__section-body" *ngIf="openSections.publish">
+        <div class="row">
+          <div class="col-md-6">
+            <label class="blog-form__check">
+              <input
+                type="checkbox"
+                [checked]="scheduleEnabled"
+                (change)="toggleSchedule()"
+              />
+              <span>Schedule for later</span>
+            </label>
+            <div class="checkout-form-list mb-0 mt-15" *ngIf="scheduleEnabled">
+              <input type="date" formControlName="PublishedAt" />
+              <small class="blog-form__hint">
+                The post stays off the blog until this moment.
+              </small>
+            </div>
+            <p class="blog-form__hint mt-10" *ngIf="!scheduleEnabled">
+              Publishing stamps the current date and time.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 6. SEO ═══════════════════════════════════════════════════════ -->
+    <div class="white-bg blog-form__card blog-form__card--collapsible">
+      <a class="blog-form__section-head cursor-pointer" (click)="toggleSection('seo')">
+        <span class="blog-form__section-title mb-0">
+          SEO
+          <i *ngIf="sectionHasError('seo')" class="fas fa-circle blog-form__dot text-danger"></i>
+        </span>
+        <span class="blog-form__section-summary">{{ seoSummary }}</span>
+        <i class="fal blog-form__chevron"
+           [class.fa-angle-down]="!openSections.seo"
+           [class.fa-angle-up]="openSections.seo"></i>
+      </a>
+      <div class="blog-form__section-body" *ngIf="openSections.seo" formGroupName="Seo">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="checkout-form-list mb-0">
+              <label>Meta Title</label>
+              <input
+                type="text"
+                formControlName="MetaTitle"
+                placeholder="Defaults to the post title"
+              />
+              <span *ngIf="invalid('Seo.MetaTitle')" class="text-danger">
+                Keep the meta title under 200 characters
+              </span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="checkout-form-list mb-0">
+              <label>Meta Description</label>
+              <textarea
+                formControlName="MetaDescription"
+                placeholder="Defaults to the excerpt"
+              ></textarea>
+              <span *ngIf="invalid('Seo.MetaDescription')" class="text-danger">
+                Keep the meta description under 400 characters
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Sticky actions ═══════════════════════════════════════════════
+         Cancel doubles as "back to list", so the header needs no link. -->
+    <div class="blog-form__actions white-bg">
+      <span class="blog-form__status">
+        <span *ngIf="formError" class="text-danger">
+          <strong *ngIf="errorSource === 'server'">Server:</strong>
+          {{ formError }}
+        </span>
+        <span *ngIf="!formError && form.dirty" class="blog-form__hint">
+          Unsaved changes
+        </span>
+      </span>
+      <span class="d-flex align-items-center">
+        <button
+          type="button"
+          class="os-btn mr-10"
+          (click)="cancel()"
+          [disabled]="isSubmitting"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="os-btn mr-10"
+          (click)="saveDraft()"
+          [disabled]="isSubmitting"
+        >
+          {{ isSubmitting ? "Saving…" : "Save Draft" }}
+        </button>
+        <button type="submit" class="os-btn os-btn-black" [disabled]="isSubmitting">
+          {{ isSubmitting ? "Saving…" : "Publish" }}
+        </button>
+      </span>
+    </div>
+  </form>
+</section>

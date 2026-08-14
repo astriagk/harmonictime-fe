@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import IBlogType from 'src/app/shared/types/blog-d-t';
+import { IBlogCard } from 'src/app/shared/types/blog-d-t';
 
 @Component({
   selector: 'app-blog-postbox-item',
@@ -7,9 +7,15 @@ import IBlogType from 'src/app/shared/types/blog-d-t';
   styleUrls: ['./blog-postbox-item.component.scss'],
 })
 export class BlogPostboxItemComponent {
-  @Input() blog!: IBlogType;
+  @Input() blog!: IBlogCard;
   @Input() cls?: string;
   @Input() title_cls: boolean = true;
+
+  // The detail route resolves by slug, falling back to the id for posts saved
+  // before slugs existed.
+  get blogLink(): string {
+    return this.blog?.Slug || this.blog?._id;
+  }
 
   getClass() {
     let dynamicClass = '';
