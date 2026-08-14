@@ -627,6 +627,37 @@
     }
   }
 
+  // "＋ Add new category / tag" — the escape hatch under each picker, for a
+  // value the dropdown has never seen.
+  &__add-new {
+    margin-top: 10px;
+  }
+
+  // The input takes the full column width, exactly like every other field, and
+  // its two buttons sit on their own row beneath it.
+  &__add-row {
+    margin-top: 10px;
+  }
+
+  // The input is wrapped in a stock `.checkout-form-list`, so it inherits the
+  // same 45px height and #eaedff border as every other field on the page —
+  // nothing about the box itself is restyled here.
+  &__add-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  // `.os-btn` is built for the 50px action bar. At field scale it wants the
+  // input's height and far less side padding, the same adjustment
+  // `__upload-btn` above makes.
+  &__add-btn {
+    flex: 0 0 auto;
+    height: 45px;
+    line-height: 41px; // 45px less the 2px border top and bottom
+    padding: 0 22px;
+  }
+
   &__hint {
     display: block;
     margin-top: 6px;
