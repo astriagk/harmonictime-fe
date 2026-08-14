@@ -279,6 +279,44 @@
             <span *ngIf="serverErrors['Category']" class="text-danger">
               Server: {{ serverErrors["Category"] }}
             </span>
+
+            <!-- The list only knows categories that have been used before, so
+                 there has to be a way in for the first post of a new one. -->
+            <a
+              *ngIf="!showNewCategory"
+              class="cursor-pointer blog-form__link blog-form__add-new"
+              (click)="showNewCategory = true"
+            >
+              <i class="fal fa-plus"></i> Add new category
+            </a>
+            <div *ngIf="showNewCategory" class="blog-form__add-row">
+              <div class="checkout-form-list mb-0 blog-form__add-field">
+                <input
+                  type="text"
+                  [(ngModel)]="newCategory"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="e.g. Watch Photography"
+                  maxlength="120"
+                  (keydown.enter)="$event.preventDefault(); addNewCategory()"
+                />
+              </div>
+              <div class="blog-form__add-actions">
+                <button
+                  type="button"
+                  class="os-btn os-btn-black blog-form__add-btn"
+                  (click)="addNewCategory()"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  class="os-btn blog-form__add-btn"
+                  (click)="showNewCategory = false; newCategory = ''"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -322,6 +360,42 @@
                 ></a>
               </li>
             </ul>
+
+            <a
+              *ngIf="!showNewTag"
+              class="cursor-pointer blog-form__link blog-form__add-new"
+              (click)="showNewTag = true"
+            >
+              <i class="fal fa-plus"></i> Add new tag
+            </a>
+            <div *ngIf="showNewTag" class="blog-form__add-row">
+              <div class="checkout-form-list mb-0 blog-form__add-field">
+                <input
+                  type="text"
+                  [(ngModel)]="newTag"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="e.g. Moonswatch"
+                  maxlength="50"
+                  (keydown.enter)="$event.preventDefault(); addNewTag()"
+                />
+              </div>
+              <div class="blog-form__add-actions">
+                <button
+                  type="button"
+                  class="os-btn os-btn-black blog-form__add-btn"
+                  (click)="addNewTag()"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  class="os-btn blog-form__add-btn"
+                  (click)="showNewTag = false; newTag = ''"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

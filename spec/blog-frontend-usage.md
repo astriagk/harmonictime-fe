@@ -152,6 +152,24 @@ Returns `{ items, total, page, limit }`. Only published posts whose
 
 `IBlogCategory[]` for a category filter/sidebar. Counts published posts only.
 
+### `GET /api/blogs/tags` — **not built yet**
+
+The tag equivalent of `/categories`: every distinct tag in use, so the editor's
+picker grows as authors coin new ones instead of being frozen to the seed list
+in `shared/data/blog-options.ts`.
+
+```json
+{ "message": "Tags retrieved successfully",
+  "data": [ { "Tag": "Rolex", "Count": 12 }, { "Tag": "Submariner", "Count": 4 } ] }
+```
+
+A bare `string[]` is accepted too — the service flattens either shape. Compare
+case-insensitively when aggregating, so `rolex` and `Rolex` are one entry.
+
+Until this exists the editor falls back to its seed list, and the request
+failing is expected rather than exceptional — do not treat the 404 in the
+console as a bug.
+
 ### `GET /api/blogs/:slugOrId` — detail
 
 Accepts the `Slug` (preferred) or the `_id`, so the old `blog-details/:id`

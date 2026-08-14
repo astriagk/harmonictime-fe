@@ -228,6 +228,7 @@ export const BLOGS = `${baseUrl}/blogs`; // GET published list (paginated), POST
 export const BLOG_BY_ID = `${baseUrl}/blogs/`; // append slug or id (GET/PUT/DELETE)
 export const BLOGS_ADMIN = `${baseUrl}/blogs/admin/list`; // GET all incl. drafts
 export const BLOG_CATEGORIES = `${baseUrl}/blogs/categories`; // GET label/slug/count
+export const BLOG_TAGS = `${baseUrl}/blogs/tags`; // GET tags already in use
 export const BLOG_RELATED = (slug: string) => `${baseUrl}/blogs/${slug}/related`; // GET
 
 // order charges applied on top of the cart subtotal at checkout
