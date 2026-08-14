@@ -30,11 +30,18 @@ const menuData: IMenuType[] = [
       { link: '/admin/manage-users', title: 'Manage Users' },
       { link: '/admin/products', title: 'Products' },
       { link: '/admin/offers', title: 'Offers' },
+      { link: '/admin/blogs', title: 'Manage Blogs' },
+      { link: '/admin/blogs/new', title: 'Add Blog Post' },
     ],
   },
   {
     link: '/pages/sell',
     title: 'Sell',
+    hasDropdown: false,
+  },
+  {
+    link: '/pages/blog-3-col',
+    title: 'Blog',
     hasDropdown: false,
   },
   {
@@ -69,11 +76,17 @@ export const mobile_menus: IMobileMenu[] = [
       { link: '/admin/manage-users', title: 'Manage Users' },
       { link: '/admin/products', title: 'Products' },
       { link: '/admin/offers', title: 'Offers' },
+      { link: '/admin/blogs', title: 'Manage Blogs' },
+      { link: '/admin/blogs/new', title: 'Add Blog Post' },
     ],
   },
   {
     title: 'Sell',
     link: '/pages/sell',
+  },
+  {
+    title: 'Blog',
+    link: '/pages/blog-3-col',
   },
   {
     title: 'Contact',

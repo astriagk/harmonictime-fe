@@ -476,6 +476,13 @@
             color: #333333;
             margin-right: 15px;
         }
+        // The comma between two tags is a span as well, and must not pick up
+        // the 15px gap the rule above gives the "Tags :" label — it carries its
+        // own single space instead.
+        & span.postbox__tag-sep{
+            margin-right: 0;
+            color: inherit;
+        }
         & a{
             color: $black-soft;
             &:hover{
@@ -710,5 +717,67 @@
                 margin-bottom: 2px;
             }
         }
+    }
+}
+
+/* ── Blog detail article body (shared/components/blogs/blog-details-area) ── */
+// The article is rebuilt into the template's own markup (see toTemplateMarkup
+// in the component), so `.postbox` above styles most of it. These are the few
+// rules the section-based body adds on top.
+
+// The cover image owns the gap below itself, so the article starts at the same
+// distance whether or not the first section opens with a sub-heading. This used
+// to be an `mt-65` applied only when there was no heading, which meant a post
+// that led with one had its text butted straight against the image.
+.postbox__thumb {
+    margin-bottom: 45px;
+
+    @media #{$md}, #{$sm}, #{$xs} {
+        margin-bottom: 30px;
+    }
+}
+
+// A section's optional sub-heading, above its text. The top margin separates it
+// from the previous section's text; the first one needs none, since the cover
+// image above already provides the gap.
+.postbox__section-heading {
+    font-size: 27px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    &:first-child {
+        margin-top: 0;
+    }
+}
+
+// Caption under a section image, inside the template's image wrapper.
+.postbox__caption {
+    display: block;
+    margin-top: 12px;
+    font-size: 13px;
+    color: $black-soft-3;
+    text-align: center;
+}
+
+// `_common.scss` resets `li { list-style: none }` globally for the nav menus.
+// The static page had no lists in its article, but an author can add them now,
+// so bullets and numbers are put back for the body only.
+.postbox__text {
+    ul,
+    ol {
+        margin: 0 0 27px 20px;
+        padding-left: 15px;
+    }
+
+    ul li {
+        list-style: disc;
+    }
+
+    ol li {
+        list-style: decimal;
+    }
+
+    li {
+        line-height: 30px;
     }
 }

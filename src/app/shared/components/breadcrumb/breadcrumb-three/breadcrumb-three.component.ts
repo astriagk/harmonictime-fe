@@ -14,6 +14,13 @@ export class BreadcrumbThreeComponent {
   @Input() title!: string;
   @Input() subtitle!: string;
 
+  // Optional third crumb. Leave both unset and the trail renders exactly as it
+  // always has — Home / <subtitle> — so no existing page changes.
+  // When `current` is given, `subtitle` steps back to being a link and
+  // `current` becomes the active page.
+  @Input() current?: string;
+  @Input() subtitleLink?: string;
+
   public bg_img = 'https://harmonic-time.s3.us-east-1.amazonaws.com/site-content/breadcrumb/c8fc84e8-2316-4bee-9e64-73b517f5318f-1779435215818';
 
   public sellerVerificationNote: string | null = null;

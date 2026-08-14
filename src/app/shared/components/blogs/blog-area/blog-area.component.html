@@ -1,6 +1,27 @@
 <section class="blog__area pt-100 pb-100">
   <div class="container">
-    <div class="row" *ngIf="!blog_2_col && !blog_3_col">
+    <!-- Loading / empty are shared by both layouts -->
+    <div class="row" *ngIf="loading">
+      <div
+        *ngFor="let slot of skeletonSlots"
+        [ngClass]="
+          blog_3_col
+            ? 'col-xl-4 col-lg-4 col-md-6'
+            : blog_2_col
+            ? 'col-xl-6 col-lg-6 col-md-6'
+            : 'col-xl-12'
+        "
+      >
+        <app-skeleton type="blog-card" [count]="1"></app-skeleton>
+      </div>
+    </div>
+
+    <app-empty-state
+      *ngIf="!loading && blogs.length === 0"
+      message="No Blog Posts Found"
+    ></app-empty-state>
+
+    <div class="row" *ngIf="!loading && blogs.length && !blog_2_col && !blog_3_col">
       <div *ngIf="left_side && !no_side" class="col-xl-3 col-lg-4">
         <!-- blog sidebar start -->
         <app-blog-sidebar></app-blog-sidebar>
@@ -32,7 +53,7 @@
       </div>
     </div>
 
-    <div class="blog__wrapper" *ngIf="blog_2_col">
+    <div class="blog__wrapper" *ngIf="!loading && blogs.length && blog_2_col">
       <div class="row">
         <div
           *ngFor="let blog of blogs"

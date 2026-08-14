@@ -19,6 +19,7 @@ import { sellerOffersReducer } from './reducers/seller-offers.reducer';
 import { adminUsersReducer } from './reducers/admin-users.reducer';
 import { adminProductsReducer } from './reducers/admin-products.reducer';
 import { adminWithdrawalsReducer } from './reducers/admin-withdrawals.reducer';
+import { adminBlogsReducer } from './reducers/admin-blogs.reducer';
 
 export const appReducer: ActionReducerMap<AppState> = {
   user: userReducer,
@@ -40,6 +41,7 @@ export const appReducer: ActionReducerMap<AppState> = {
   adminUsers: adminUsersReducer,
   adminProducts: adminProductsReducer,
   adminWithdrawals: adminWithdrawalsReducer,
+  adminBlogs: adminBlogsReducer,
   // profile: profileReducer,
   // recentlyViewed: recentlyViewedReducer,
   // offers: offersReducer,
