@@ -32,13 +32,18 @@ type SectionKey = 'publish' | 'seo';
 export class AdminBlogFormComponent implements OnInit, OnDestroy {
   form!: FormGroup;
 
-  // Seeded from the shared defaults, then topped up with whatever categories
-  // the API reports as already in use. [addTag] lets an admin coin a new one,
-  // since the API stores whatever label is sent.
+  // Both pickers accumulate from three sources: the seed lists in
+  // blog-options.ts, whatever the API reports as already in use, and anything
+  // an editor types into the "Add" box. See `mergeOptions` for how the union is
+  // de-duplicated.
   categories: string[] = [...BLOG_CATEGORY_OPTIONS];
+  tagOptions: string[] = [...BLOG_TAG_OPTIONS];
 
-  // Options offered by the Tags dropdown.
-  readonly tagOptions: string[] = BLOG_TAG_OPTIONS;
+  // The free-text boxes, revealed by "＋ Add new".
+  showNewCategory = false;
+  newCategory = '';
+  showNewTag = false;
+  newTag = '';
 
   isEditing = false;
   isLoadingBlog = false;
@@ -136,6 +141,7 @@ export class AdminBlogFormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initForm();
     this.loadCategories();
+    this.loadTags();
 
     this.blogId = this.route.snapshot.paramMap.get('id');
     this.isEditing = !!this.blogId;
@@ -195,21 +201,49 @@ export class AdminBlogFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Defaults first, then anything the API already has, de-duplicated — so the
-  // list is never empty and never loses a category an older post used.
+  // Defaults first, then anything the API already has — so the list is never
+  // empty and never loses a category an older post used.
   private loadCategories(): void {
     this.blogService.categories().subscribe({
       next: (list) => {
         const fromApi = (list ?? []).map((c) => c.Category).filter(Boolean);
-        this.categories = Array.from(
-          new Set([...BLOG_CATEGORY_OPTIONS, ...fromApi])
-        );
+        this.categories = this.mergeOptions(BLOG_CATEGORY_OPTIONS, fromApi);
       },
       error: () => {
-        // Keep the defaults; free-text entry still works either way.
+        // Keep the defaults; the "Add new" box still works either way.
         this.categories = [...BLOG_CATEGORY_OPTIONS];
       },
     });
+  }
+
+  // Same accumulation for tags. The endpoint does not exist server-side yet, so
+  // a failure here is expected rather than exceptional — it just leaves the
+  // seeds in place, and the "Add new" box still covers anything missing.
+  private loadTags(): void {
+    this.blogService.tags().subscribe({
+      next: (list) => {
+        this.tagOptions = this.mergeOptions(BLOG_TAG_OPTIONS, list ?? []);
+      },
+      error: () => {
+        this.tagOptions = [...BLOG_TAG_OPTIONS];
+      },
+    });
+  }
+
+  // Union of the seeds and whatever else turned up, compared case- and
+  // space-insensitively so an older post's `rolex` does not sit in the list
+  // beside the seed's `Rolex`. The seed's casing wins, since that is the one
+  // written for display; anything the seeds don't know about keeps the casing
+  // it arrived with. Sorted so a long list stays scannable.
+  private mergeOptions(seeds: string[], extra: string[]): string[] {
+    const byKey = new Map<string, string>();
+    [...seeds, ...extra].forEach((value) => {
+      const label = (value ?? '').trim();
+      if (!label) return;
+      const key = label.toLowerCase().replace(/\s+/g, ' ');
+      if (!byKey.has(key)) byKey.set(key, label);
+    });
+    return Array.from(byKey.values()).sort((a, b) => a.localeCompare(b));
   }
 
   // ── Sections ──────────────────────────────────────────────────────────────
@@ -331,6 +365,17 @@ export class AdminBlogFormComponent implements OnInit, OnDestroy {
 
   private patchFrom(blog: IBlogDetail): void {
     this.loadedSlug = blog.Slug ?? '';
+
+    // A post can carry a category or tags the pickers have not heard of — the
+    // API list is built from published posts, so a draft's own values may be
+    // missing. Fold them in before patching, or the <select> would find no
+    // matching <option> and render blank, silently dropping the value on save.
+    if (blog.Category) {
+      this.categories = this.mergeOptions(this.categories, [blog.Category]);
+    }
+    if (blog.Tags?.length) {
+      this.tagOptions = this.mergeOptions(this.tagOptions, blog.Tags);
+    }
 
     // Rebuild the FormArray to match the post's section count before patching.
     const incoming = blog.Sections?.length ? blog.Sections : [{ Content: '' }];
@@ -603,12 +648,51 @@ export class AdminBlogFormComponent implements OnInit, OnDestroy {
 
   // Hide what's already chosen so the list can't offer a duplicate.
   get availableTags(): string[] {
-    return this.tagOptions.filter((t) => !this.selectedTags.includes(t));
+    const chosen = this.selectedTags.map((t) => t.toLowerCase());
+    return this.tagOptions.filter((t) => !chosen.includes(t.toLowerCase()));
   }
 
   addTag(tag: string): void {
-    if (!tag || this.selectedTags.includes(tag)) return;
-    this.setTags([...this.selectedTags, tag]);
+    const label = (tag ?? '').trim();
+    if (!label) return;
+    // Case-insensitive, so picking "Rolex" after an older post left "rolex" on
+    // the form does not tag the post twice.
+    if (this.selectedTags.some((t) => t.toLowerCase() === label.toLowerCase())) {
+      return;
+    }
+    this.setTags([...this.selectedTags, label]);
+  }
+
+  // ── Free text ─────────────────────────────────────────────────────────────
+  // The dropdowns can only offer what has been seen before, so both fields keep
+  // an escape hatch. A value added here is stored on the post like any other,
+  // which is what puts it in the API's list for everyone else next time.
+
+  addNewCategory(): void {
+    const label = this.newCategory.trim();
+    if (!label) return;
+    this.categories = this.mergeOptions(this.categories, [label]);
+    // Select the match from the merged list, so an existing category typed in a
+    // different case selects that one rather than adding a near-duplicate.
+    const chosen =
+      this.categories.find((c) => c.toLowerCase() === label.toLowerCase()) ??
+      label;
+    this.form.get('Category')!.setValue(chosen);
+    this.form.get('Category')!.markAsDirty();
+    this.newCategory = '';
+    this.showNewCategory = false;
+  }
+
+  addNewTag(): void {
+    const label = this.newTag.trim();
+    if (!label) return;
+    this.tagOptions = this.mergeOptions(this.tagOptions, [label]);
+    const chosen =
+      this.tagOptions.find((t) => t.toLowerCase() === label.toLowerCase()) ??
+      label;
+    this.addTag(chosen);
+    this.newTag = '';
+    this.showNewTag = false;
   }
 
   removeTag(tag: string): void {

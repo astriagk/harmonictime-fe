@@ -7,6 +7,7 @@ import {
   BLOG_BY_ID,
   BLOG_CATEGORIES,
   BLOG_RELATED,
+  BLOG_TAGS,
   UPLOAD_SINGLE,
 } from '@config/index';
 import { GenericService } from './generic.service';
@@ -66,6 +67,21 @@ export class BlogService {
     return this.genericService
       .getObservable(BLOG_CATEGORIES)
       .pipe(map((res: any) => res?.data ?? []));
+  }
+
+  // Tags already used by published posts, so the editor's picker grows as
+  // authors coin new ones instead of being frozen to the seed list. The API
+  // may return plain strings or `{ Tag, Count }` objects; both are flattened
+  // to labels here. Not yet implemented server-side — callers must tolerate a
+  // failure and fall back to the seeds.
+  tags(): Observable<string[]> {
+    return this.genericService.getObservable(BLOG_TAGS).pipe(
+      map((res: any) =>
+        (res?.data ?? [])
+          .map((t: any) => (typeof t === 'string' ? t : t?.Tag ?? t?.Name))
+          .filter(Boolean)
+      )
+    );
   }
 
   // ── Admin ─────────────────────────────────────────────────────────────────
