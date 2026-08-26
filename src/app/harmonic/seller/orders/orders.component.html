@@ -76,7 +76,7 @@
               </div>
             </td>
             <td>{{ order.CheckoutDate | date: "mediumDate" }}</td>
-            <td>{{ order.DeliveryStatus }}</td>
+            <td>{{ statusLabel(order.DeliveryStatus) }}</td>
             <td (click)="$event.stopPropagation()">
               <ng-container [ngSwitch]="order.SellerApprovalStatus">
                 <div
@@ -361,9 +361,23 @@
             placeholder="Optional"
           />
         </div>
-        <div class="checkout-form-list">
-          <label>Shipment Status</label>
-          <p class="mb-0">{{ shipmentStatusLabel }}</p>
+        <!-- `.country-select` + native <select>, the same markup the blog and
+             GST onboarding forms use; all styling comes from that wrapper. -->
+        <div class="country-select mb-0">
+          <label for="shipmentStatus">Shipment Status</label>
+          <select
+            id="shipmentStatus"
+            [(ngModel)]="shipmentStatus"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option *ngFor="let s of shipmentStatuses" [value]="s.value">
+              {{ s.label }}
+            </option>
+          </select>
+          <small class="text-muted d-block mt-1">
+            Updated automatically from the courier. Only change this if the
+            tracking updates have stalled.
+          </small>
         </div>
         <span *ngIf="trackingError" class="text-danger">{{
           trackingError
