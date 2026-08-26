@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   CREATE_SHIPMENT,
   SELLER_ORDER_APPROVAL,
+  TRACK_SHIPMENT,
   UPDATE_SHIPMENT,
 } from '@config/index';
 import { Store } from '@ngrx/store';
@@ -62,6 +63,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
   public trackingError = '';
   public isSavingTracking = false;
   public editingShipmentId: string | null = null;
+  // The status the modal was opened with. The carrier (via the TrackingMore
+  // webhook) owns this field, so an edit only sends it when the seller has
+  // deliberately picked a different value — otherwise a courier/URL correction
+  // would PUT a stale cached status back over a carrier-advanced one.
+  private originalShipmentStatus = '';
+  private originalTrackingNumber = '';
   public readonly shipmentStatuses = [
     { value: 'Pending', label: 'Pending' },
     { value: 'Shipped', label: 'Shipped' },
@@ -70,8 +77,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
     { value: 'Delivered', label: 'Delivered' },
   ];
 
-  get shipmentStatusLabel(): string {
-    return this.shipmentStatuses.find(s => s.value === this.shipmentStatus)?.label ?? this.shipmentStatus ?? '—';
+  // The carrier-set values are camel-case (`InTransit`, `OutForDelivery`), so
+  // anything shown to a seller goes through this rather than rendering raw.
+  statusLabel(value: string | null | undefined): string {
+    if (!value) return '—';
+    return this.shipmentStatuses.find((s) => s.value === value)?.label ?? value;
   }
 
   private destroy$ = new Subject<void>();
@@ -157,6 +167,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.trackingId = shipment?.TrackingNumber ?? '';
     this.trackingUrl = shipment?.TrackingURL ?? '';
     this.shipmentStatus = shipment?.ShipmentStatus ?? 'Shipped';
+    this.originalShipmentStatus = this.shipmentStatus;
+    this.originalTrackingNumber = this.trackingId;
     this.trackingError = '';
     this.isTrackingModalOpen = true;
   }
@@ -169,6 +181,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.trackingId = '';
     this.trackingUrl = '';
     this.shipmentStatus = 'Shipped';
+    this.originalShipmentStatus = '';
+    this.originalTrackingNumber = '';
     this.trackingError = '';
     this.isSavingTracking = false;
   }
@@ -237,6 +251,18 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
   }
 
+  // POST/PUT /shipments store the AWB but never register it with TrackingMore —
+  // registration only happens inside fetchTracking, which GET /:id/track calls.
+  // Without this a shipment receives no webhook pushes until the nightly cron
+  // picks it up, up to 24h later. Fire-and-forget: this is a side effect of
+  // saving, so a failure must not surface as a "failed to save tracking" error.
+  private registerWithCarrier(shipmentId: string | null | undefined): void {
+    if (!shipmentId) return;
+    this.genericService
+      .getObservable(TRACK_SHIPMENT(shipmentId))
+      .subscribe({ next: () => {}, error: () => {} });
+  }
+
   saveTracking() {
     const courier = this.courier.trim();
     const trackingNumber = this.trackingId.trim();
@@ -245,17 +271,24 @@ export class OrdersComponent implements OnInit, OnDestroy {
       return;
     }
     const trackingUrl = this.trackingUrl.trim();
+    // Snapshot before the request — closeTracking() clears these, and the
+    // response callback runs after the modal may already have been reset.
+    const shipmentId = this.editingShipmentId;
+    const originalTrackingNumber = this.originalTrackingNumber.trim();
     this.isSavingTracking = true;
 
-    if (this.editingShipmentId) {
+    if (shipmentId) {
+      const isStatusOverride = this.shipmentStatus !== this.originalShipmentStatus;
       const payload: any = {
         Courier: courier,
         TrackingNumber: trackingNumber,
-        ShipmentStatus: this.shipmentStatus,
         TrackingURL: trackingUrl,
       };
+      // PUT /shipments/:id is a manual override and bypasses the webhook's
+      // STATUS_ORDER regression guard, so only send the field when overriding.
+      if (isStatusOverride) payload.ShipmentStatus = this.shipmentStatus;
       this.genericService
-        .putObservable(`${UPDATE_SHIPMENT}${this.editingShipmentId}`, payload)
+        .putObservable(`${UPDATE_SHIPMENT}${shipmentId}`, payload)
         .subscribe({
           next: () => {
             if (this.selectedOrder) {
@@ -263,10 +296,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
                 upsertSellerOrder({
                   order: {
                     ...this.selectedOrder,
-                    DeliveryStatus: this.shipmentStatus,
+                    DeliveryStatus: isStatusOverride
+                      ? this.shipmentStatus
+                      : this.selectedOrder.DeliveryStatus,
                     Shipment: {
                       ...(this.selectedOrder.Shipment ?? {}),
-                      _id: this.editingShipmentId,
+                      _id: shipmentId,
                       Courier: courier,
                       TrackingNumber: trackingNumber,
                       TrackingURL: trackingUrl,
@@ -275,6 +310,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
                   },
                 }),
               );
+            }
+            // A corrected AWB is as unregistered as a brand-new one, so
+            // re-register it rather than waiting for the nightly cron.
+            if (trackingNumber !== originalTrackingNumber) {
+              this.registerWithCarrier(shipmentId);
             }
             this.toastrService.success('Tracking details updated successfully.');
             this.closeTracking();
@@ -298,6 +338,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
     this.genericService.postObservable(CREATE_SHIPMENT, payload).subscribe({
       next: (response) => {
+        const newShipmentId = response?.data?._id;
+        this.registerWithCarrier(newShipmentId);
         if (this.selectedOrder) {
           this.store.dispatch(
             upsertSellerOrder({
@@ -305,7 +347,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
                 ...this.selectedOrder,
                 DeliveryStatus: this.shipmentStatus,
                 Shipment: {
-                  _id: response?.data?._id,
+                  _id: newShipmentId,
                   Courier: courier,
                   TrackingNumber: trackingNumber,
                   TrackingURL: trackingUrl,
