@@ -114,6 +114,8 @@ export interface Product {
   Images: Image[];
   DeliveryAndReturns: DeliveryAndReturns;
   IsPriceInclusiveOfTax?: boolean;
+  // GST added for tax-exclusive products; already included in DisplayPrice.
+  GSTAmount?: number;
   DisplayPrice?: number;
   Quantity?: number;
   SoldCount?: number;

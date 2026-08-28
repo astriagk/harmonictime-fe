@@ -597,6 +597,14 @@
       font-weight: 700;
       color: $heading-color;
     }
+
+    // Tax already contained in the total above — sits BELOW the grand total,
+    // deliberately quiet, so it never reads as a line to be added on.
+    &--note {
+      padding-top: 2px;
+      font-size: 12px;
+      color: $black-soft-3;
+    }
   }
 
   &__footer-note {

@@ -11,6 +11,10 @@ export interface Product {
   Quantity?: number;
   OfferApplied?: OfferApplied | null;
   EffectivePrice?: number;
+  // GST collected from the buyer on tax-exclusive products, per unit. Already
+  // inside DisplayPrice — 0 (or absent, on pre-pass-through orders) when the
+  // seller's price was tax-inclusive.
+  GSTAmount?: number;
   BuyerCommissionAmount?: number;
   DisplayPrice?: number;
   ImageURL: string;

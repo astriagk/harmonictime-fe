@@ -187,8 +187,10 @@
             {{ product.DisplayPrice | currency: "INR" }}
           </span>
         </div>
+        <!-- DisplayPrice carries GST for every product now: inside the
+             seller's price when tax-inclusive, added by the server otherwise. -->
         <p
-          *ngIf="product.IsPriceInclusiveOfTax"
+          *ngIf="product.IsPriceInclusiveOfTax || product.GSTAmount"
           class="product__tax-note mt-5 mb-0"
         >
           <i class="fas fa-check-circle"></i> Price inclusive of all taxes
