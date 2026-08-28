@@ -19,8 +19,13 @@ interface InvoiceItem {
   // per-unit price are derived from this — see unitDiscount()/unitFinal().
   offerPercentage: number | null;
   quantity: number | null;
-  // When true the row price already includes GST (no GST added on top).
+  // When true the seller's price was already GST-inclusive, so no GST was
+  // collected separately from the buyer for this row.
   isPriceInclusiveOfTax: boolean;
+  // Per-unit GST collected from the buyer on a tax-exclusive row (the order
+  // Product's GSTAmount). It is already contained in the price above — it is
+  // reported on the invoice, never added to the total.
+  gstAmount: number | null;
 }
 
 // Internal, unlisted tool: manually key in the same values the invoice normally
@@ -230,6 +235,7 @@ export class GenerateInvoiceComponent implements OnInit {
       offerPercentage: null,
       quantity: 1,
       isPriceInclusiveOfTax: false,
+      gstAmount: null,
     };
   }
 
@@ -274,24 +280,30 @@ export class GenerateInvoiceComponent implements OnInit {
     );
   }
 
-  // GST is only added for rows whose price is NOT inclusive of tax — same rule
-  // as computeCheckoutSummary / the account invoice.
+  // GST already contained in the row prices, summed from the per-unit amount
+  // keyed in for each tax-exclusive row — same rule as computeCheckoutSummary
+  // / the account invoice. Tax-inclusive rows contribute nothing: their tax
+  // sits inside the seller's own price and was never collected separately.
   get gstAmount(): number {
     if (!this.includeGst) {
       return 0;
     }
-    const taxableSubtotal = this.items.reduce(
-      (sum, i) => (i.isPriceInclusiveOfTax ? sum : sum + this.rowAmount(i)),
-      0,
+    return roundMoney(
+      this.items.reduce(
+        (sum, i) =>
+          i.isPriceInclusiveOfTax
+            ? sum
+            : sum + (i.gstAmount ?? 0) * (i.quantity ?? 1),
+        0,
+      ),
     );
-    return taxableSubtotal > 0
-      ? roundMoney((taxableSubtotal * this.gstPercent) / 100)
-      : 0;
   }
 
+  // The subtotal already includes GST, so the total is the subtotal — adding
+  // gstAmount here would charge the buyer tax twice.
   get invoiceTotal(): number {
     return this.autoTotal
-      ? roundMoney(this.invoiceSubtotal + this.gstAmount)
+      ? this.invoiceSubtotal
       : this.totalAmountPaidOverride ?? 0;
   }
 

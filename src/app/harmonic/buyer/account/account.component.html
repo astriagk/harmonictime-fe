@@ -684,22 +684,40 @@
                                   }}</span
                                 >
                               </div>
-                              <ng-container *ngIf="item.GSTAmount > 0">
-                                <div
-                                  class="wallet__breakdown-row wallet__breakdown-row--deduct"
-                                >
-                                  <span>GST ({{ item.GSTRate }}%)</span>
+                              <!-- Pass-through GST: collected from the buyer
+                                   and added to the payout, not deducted from
+                                   it. Shown only when we actually collected
+                                   it — NOT for tax-inclusive listings (the tax
+                                   sits inside the seller's own price, nothing
+                                   was collected on top), and NOT for earnings
+                                   predating the pass-through change, which
+                                   carry the old deducted GST figure and have
+                                   no NetPayableAmount. -->
+                              <ng-container
+                                *ngIf="
+                                  item.NetPayableAmount != null &&
+                                  !item.IsTaxInclusive &&
+                                  item.GSTAmount > 0
+                                "
+                              >
+                                <div class="wallet__breakdown-row">
                                   <span
-                                    >−
+                                    >GST ({{ item.GSTRate }}%)
+                                    <small class="d-block"
+                                      >collected on your behalf</small
+                                    ></span
+                                  >
+                                  <span
+                                    >+
                                     {{ item.GSTAmount | currency: "INR" }}</span
                                   >
                                 </div>
                                 <div
                                   class="wallet__breakdown-row wallet__breakdown-row--sub"
                                 >
-                                  <span>After GST</span>
+                                  <span>Net payable</span>
                                   <span>{{
-                                    item.NetAmountAfterGST | currency: "INR"
+                                    item.NetPayableAmount | currency: "INR"
                                   }}</span>
                                 </div>
                               </ng-container>
@@ -707,10 +725,8 @@
                           </td>
                           <td class="order__title pr-2 pl-2">
                             <strong>{{
-                              (item.GSTAmount > 0
-                                ? item.NetAmountAfterGST
-                                : item.NetAmount
-                              ) | currency: "INR"
+                              (item.NetPayableAmount ?? item.NetAmount)
+                                | currency: "INR"
                             }}</strong>
                           </td>
                           <td class="order__title pr-2 pl-2">
@@ -748,7 +764,9 @@
                       <thead>
                         <tr>
                           <th style="width: 130px">Requested</th>
-                          <th style="width: 110px" class="text-end">Amount</th>
+                          <th style="width: 110px" class="text-end">
+                            Payout Amount
+                          </th>
                           <th style="width: 200px">Bank</th>
                           <th style="width: 150px">Status</th>
                           <th style="width: 120px"></th>
@@ -759,8 +777,23 @@
                           <td class="order__title pr-2 pl-2">
                             {{ w.RequestedAt | date: "mediumDate" }}
                           </td>
+                          <!-- FinalPayableAmount is what actually reaches the
+                               bank: Amount (net of commission) plus the GST
+                               collected from buyers and passed through. Older
+                               records predate the field, so fall back to
+                               Amount. -->
                           <td class="order__title pr-2 pl-2 text-end">
-                            {{ w.Amount | currency: "INR" }}
+                            {{
+                              (w.FinalPayableAmount ?? w.Amount)
+                                | currency: "INR"
+                            }}
+                            <small
+                              *ngIf="w.TotalGSTCollected > 0"
+                              class="d-block text-muted"
+                              >incl. GST
+                              {{ w.TotalGSTCollected | currency: "INR" }}
+                              collected for you</small
+                            >
                           </td>
                           <td class="order__title pr-2 pl-2">
                             <span class="d-block">{{
@@ -1402,7 +1435,9 @@
                         | currency: "INR"
                     }}</strong>
                     <small
-                      *ngIf="product.IsPriceInclusiveOfTax"
+                      *ngIf="
+                        product.IsPriceInclusiveOfTax || product.GSTAmount
+                      "
                       class="d-block text-muted"
                       style="font-size: 10px"
                       >incl. GST</small
@@ -1419,13 +1454,18 @@
                 <span>{{ invoiceSubtotal | currency: "INR" }}</span>
               </div>
 
-              <div class="invoice__totals-row" *ngIf="gstAmount > 0">
-                <span>GST ({{ gstPercent }}%)</span>
-                <span>+ {{ gstAmount | currency: "INR" }}</span>
-              </div>
               <div class="invoice__totals-row invoice__totals-row--grand">
                 <span>Total Amount Paid</span>
                 <span>{{ invoiceTotal | currency: "INR" }}</span>
+              </div>
+              <!-- Breakdown of tax ALREADY inside the total above — placed
+                   after the grand total so it cannot read as an addend. -->
+              <div
+                class="invoice__totals-row invoice__totals-row--note"
+                *ngIf="gstAmount > 0"
+              >
+                <span>of which GST ({{ gstPercent }}%)</span>
+                <span>{{ gstAmount | currency: "INR" }}</span>
               </div>
             </div>
 

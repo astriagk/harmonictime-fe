@@ -562,7 +562,10 @@ export class CheckoutComponent implements OnDestroy {
     const grandTotal = this.cartService.computeCheckoutSummary(
       this.cartItems,
     ).grandTotal;
-    const amount = grandTotal * 100; // Razorpay expects the amount in paise
+    // Razorpay expects the amount in paise, as an integer. grandTotal is the
+    // sum of DisplayPrice (GST and buyer commission already inside it) — do
+    // not add GST on top here.
+    const amount = Math.round(grandTotal * 100);
 
     try {
       const cartItems = this.cartItems.flatMap((el: any) =>

@@ -179,9 +179,12 @@
                 >
                   <option [value]="null" disabled>- Please select -</option>
                   <option [value]="true">
-                    Yes — price already includes 18% GST
+                    Yes — buyers see your exact price; you remit the GST inside
+                    it
                   </option>
-                  <option [value]="false">No — GST will be added on top</option>
+                  <option [value]="false">
+                    No — 18% is added at checkout and paid to you to remit
+                  </option>
                 </select>
                 <span
                   *ngIf="

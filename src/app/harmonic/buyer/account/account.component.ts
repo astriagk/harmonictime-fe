@@ -749,25 +749,24 @@ export class AccountComponent implements OnInit, OnDestroy {
     }
   }
 
-  // GST applied on the platform charges.
+  // GST rate shown on the invoice tax line.
   get gstPercent(): number {
     return ORDER_CHARGES.gstPercent;
   }
 
-  // GST is only added on top for items where the price is NOT inclusive of tax,
-  // matching how computeCheckoutSummary builds TotalAmount at checkout.
+  // GST already contained in DisplayPrice, taken from the per-item GSTAmount
+  // captured in the order snapshot. It is a breakdown line only — never added
+  // to the subtotal, since the buyer already paid it inside DisplayPrice.
+  // Orders placed before the pass-through change carry no GSTAmount and
+  // correctly report 0.
   get gstAmount(): number {
     if (!this.selectedOrder) return 0;
-    const taxableSubtotal = (this.selectedOrder.Products ?? []).reduce(
-      (sum, p) =>
-        p.IsPriceInclusiveOfTax
-          ? sum
-          : sum + (p.DisplayPrice ?? 0) * (p.Quantity ?? 1),
-      0,
+    return roundMoney(
+      (this.selectedOrder.Products ?? []).reduce(
+        (sum, p) => sum + (p.GSTAmount ?? 0) * (p.Quantity ?? 1),
+        0,
+      ),
     );
-    return taxableSubtotal > 0
-      ? roundMoney((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100)
-      : 0;
   }
 
   // Subtotal = sum of (DisplayPrice × Quantity) across all items.
