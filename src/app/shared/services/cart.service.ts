@@ -196,28 +196,32 @@ export class CartService {
     }, 0);
   }
 
-  // Subtotal (offer discount already applied, platform fee baked in) + GST + additional charges.
-  // GST is only applied to items where IsPriceInclusiveOfTax is false.
+  // GST is now INSIDE DisplayPrice — the server adds it for tax-exclusive
+  // products before the buyer commission — so the order total is simply the
+  // subtotal. Never subtotal + GST, or the buyer is charged tax twice.
+  //
+  // `gst` is the tax already contained in that subtotal, summed from each
+  // item's server-provided GSTAmount. It exists only to render a breakdown
+  // line, and is 0 for tax-inclusive items where the tax sits inside the
+  // seller's own price. Do not add it to grandTotal.
   computeCheckoutSummary(cartItems: any) {
     const subtotal = this.computeCartTotal(cartItems).total;
     const offerDiscount = this.computeOfferDiscount(cartItems);
-    const taxableSubtotal = (cartItems as any[]).reduce(
-      (total: number, cartItem: any) => {
-        if (cartItem.IsPriceInclusiveOfTax) return total;
-        const base = cartItem.DisplayPrice;
-        const offer = cartItem.Offer;
-        const qty = cartItem.Quantity || 1;
-        const price =
-          offer?.IsActive && base
-            ? roundMoney(base * (1 - offer.DiscountPercentage / 100))
-            : base;
-        return roundMoney(total + (price || 0) * qty);
-      },
-      0,
-    );
-    const gst = roundMoney((taxableSubtotal * ORDER_CHARGES.gstPercent) / 100);
+    const gst = (cartItems as any[]).reduce((total: number, cartItem: any) => {
+      const unitGst = cartItem.GSTAmount ?? 0;
+      if (!unitGst) return total;
+      const offer = cartItem.Offer;
+      const qty = cartItem.Quantity || 1;
+      // The offer is applied client-side to DisplayPrice, which carries the
+      // GST, so scale the tax by the same factor to keep the breakdown
+      // consistent with the total.
+      const gstPerUnit = offer?.IsActive
+        ? roundMoney(unitGst * (1 - offer.DiscountPercentage / 100))
+        : unitGst;
+      return roundMoney(total + gstPerUnit * qty);
+    }, 0);
     const gstPercent = ORDER_CHARGES.gstPercent;
-    const grandTotal = roundMoney(subtotal + gst);
+    const grandTotal = subtotal;
     return { subtotal, offerDiscount, gst, gstPercent, grandTotal };
   }
 

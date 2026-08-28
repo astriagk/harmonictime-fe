@@ -2269,6 +2269,17 @@ p.checkout-coupon input[type="text"] {
   font-weight: 500;
 }
 
+// Tax already contained in the Order Total above. Sits below it, quiet and
+// borderless, so it never reads as a charge still to be added on.
+.your-order-table table tr.order-total__tax-note th,
+.your-order-table table tr.order-total__tax-note td {
+  border-bottom: 0;
+  padding-top: 0;
+  font-size: 12px;
+  font-weight: normal;
+  color: $black-soft-3;
+}
+
 .payment-method {
   margin-top: 40px;
 }

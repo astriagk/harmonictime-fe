@@ -106,6 +106,7 @@ const policy_data: IPolicyData = {
           'Payments will be withheld until the product is delivered. After confirmed delivery, withdrawal will be processed within 7 business days.',
           'Sellers must clearly mention their return policy in the product listing, stating what action will be taken in case of a return request.',
           'A 2% platform service charge will be deducted from the seller\'s withdrawal amount.',
+          'GST is never deducted from your earnings. If you list a price exclusive of tax, 18% GST is collected from the buyer at checkout and paid to you in full along with your payout — it is your responsibility to remit it. If you list a tax-inclusive price, buyers pay exactly that price and the GST inside it remains yours to remit.',
           'The payment will be sent to the bank account added by the seller. It is the seller\'s responsibility to add accurate and correct bank details — we are not liable for errors.',
           'Before posting any product, sellers must take clear photos and videos of the item to avoid disputes or claims regarding its condition.',
         ],

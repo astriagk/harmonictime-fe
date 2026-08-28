@@ -256,8 +256,15 @@
                   type="checkbox"
                   [(ngModel)]="item.isPriceInclusiveOfTax"
                   [name]="'incl' + i"
-                />Price is inclusive of GST</label
+                />Seller's price was inclusive of GST</label
               >
+              <label class="gi-full" *ngIf="!item.isPriceInclusiveOfTax"
+                >GST per unit (₹) — already inside the price above<input
+                  type="number"
+                  placeholder="0"
+                  [(ngModel)]="item.gstAmount"
+                  [name]="'gst' + i"
+              /></label>
             </div>
           </div>
           <button type="button" class="gi-add" (click)="addItem()">
@@ -279,8 +286,8 @@
         <div class="gi-section__body" *ngIf="openSections['totals']">
           <div class="gi-grid">
             <label class="gi-check gi-full"
-              ><input type="checkbox" [(ngModel)]="includeGst" />Add GST to this
-              invoice</label
+              ><input type="checkbox" [(ngModel)]="includeGst" />Show the GST
+              included in this invoice</label
             >
             <label *ngIf="includeGst"
               >GST %<input
@@ -290,7 +297,7 @@
             /></label>
             <label class="gi-check gi-full"
               ><input type="checkbox" [(ngModel)]="autoTotal" />Auto-calculate
-              total (Subtotal + GST)</label
+              total (= Subtotal; GST is already inside it)</label
             >
             <label class="gi-full" *ngIf="!autoTotal"
               >Total amount paid (₹)<input
@@ -445,7 +452,7 @@
                 <td class="text-end">
                   <strong>{{ rowAmount(item) | currency: "INR" }}</strong>
                   <small
-                    *ngIf="item.isPriceInclusiveOfTax"
+                    *ngIf="item.isPriceInclusiveOfTax || item.gstAmount"
                     class="d-block text-muted"
                     style="font-size: 10px"
                     >incl. GST</small
@@ -461,13 +468,18 @@
               <span>Subtotal</span>
               <span>{{ invoiceSubtotal | currency: "INR" }}</span>
             </div>
-            <div class="invoice__totals-row" *ngIf="gstAmount > 0">
-              <span>GST ({{ gstPercent }}%)</span>
-              <span>+ {{ gstAmount | currency: "INR" }}</span>
-            </div>
             <div class="invoice__totals-row invoice__totals-row--grand">
               <span>Total Amount Paid</span>
               <span>{{ invoiceTotal | currency: "INR" }}</span>
+            </div>
+            <!-- Breakdown of tax ALREADY inside the total above — placed
+                 after the grand total so it cannot read as an addend. -->
+            <div
+              class="invoice__totals-row invoice__totals-row--note"
+              *ngIf="gstAmount > 0"
+            >
+              <span>of which GST ({{ gstPercent }}%)</span>
+              <span>{{ gstAmount | currency: "INR" }}</span>
             </div>
           </div>
 

@@ -525,7 +525,9 @@
                     <tr *ngFor="let item of cartItems" class="cart_item">
                       <td class="product-name">
                         {{ item.ProductName }}
-                        <div *ngIf="item.IsPriceInclusiveOfTax">
+                        <div
+                          *ngIf="item.IsPriceInclusiveOfTax || item.GSTAmount"
+                        >
                           <small class="product__tax-note"
                             >Incl. all taxes</small
                           >
@@ -623,25 +625,6 @@
                       </td>
                     </tr>
 
-                    <tr
-                      *ngIf="
-                        cartService.computeCheckoutSummary(cartItems).gst > 0
-                      "
-                      class="cart-subtotal"
-                    >
-                      <th>
-                        GST ({{
-                          cartService.computeCheckoutSummary(cartItems)
-                            .gstPercent
-                        }}%)
-                      </th>
-                      <td>
-                        <span class="amount">{{
-                          cartService.computeCheckoutSummary(cartItems).gst
-                            | currency: "INR"
-                        }}</span>
-                      </td>
-                    </tr>
                     <tr class="order-total">
                       <th>Order Total</th>
                       <td>
@@ -653,6 +636,29 @@
                             }}
                           </span></strong
                         >
+                      </td>
+                    </tr>
+                    <!-- GST is ALREADY inside the Order Total above (the server
+                         builds it into DisplayPrice). Shown after the total, in
+                         muted type, so it reads as a breakdown of what the
+                         buyer paid rather than a charge still to be added. -->
+                    <tr
+                      *ngIf="
+                        cartService.computeCheckoutSummary(cartItems).gst > 0
+                      "
+                      class="order-total__tax-note"
+                    >
+                      <th>
+                        of which GST ({{
+                          cartService.computeCheckoutSummary(cartItems)
+                            .gstPercent
+                        }}%)
+                      </th>
+                      <td>
+                        <span>{{
+                          cartService.computeCheckoutSummary(cartItems).gst
+                            | currency: "INR"
+                        }}</span>
                       </td>
                     </tr>
                   </tfoot>
