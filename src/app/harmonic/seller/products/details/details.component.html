@@ -7,6 +7,15 @@
   *ngIf="product; else detailSkeleton"
   [product]="product"
 ></app-product-details-area-seller>
+
+<section *ngIf="product" class="product-barcode-section pb-60">
+  <div class="container">
+    <h3 class="text-center mb-25">Barcode Label</h3>
+    <app-product-barcode-label
+      [product]="product"
+    ></app-product-barcode-label>
+  </div>
+</section>
 <ng-template #detailSkeleton>
   <section class="shop__details-area pt-60 pb-60">
     <div class="container">

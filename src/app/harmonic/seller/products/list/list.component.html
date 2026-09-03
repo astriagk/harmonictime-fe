@@ -10,6 +10,9 @@
       <button type="button" class="os-btn" (click)="openOfferModal()">
         Manage Offers
       </button>
+      <a routerLink="/seller/scan-product" class="os-btn">
+        <i class="fa fa-qrcode mr-5"></i> Scan Product
+      </a>
       <!-- Same destination as the empty state's action, so adding a product
            doesn't mean going back out to the menu once the list is populated. -->
       <a routerLink="/seller/add-product" class="os-btn os-btn-black">
@@ -117,13 +120,10 @@
                 [routerLink]="['/seller/add-product', order._id]"
                 >Edit</a
               >
-              <span
-                *ngIf="
-                  order.ApprovalStatus === 'Approved' &&
-                  order.RemainingQuantity === 0
-                "
-                class="text-muted"
-                >—</span
+              <a
+                class="admin-table__action-link cursor-pointer ml-10"
+                (click)="openBarcodeModal(order)"
+                >Barcode</a
               >
             </td>
           </tr>
@@ -313,3 +313,33 @@
   </div>
 </div>
 <div *ngIf="isOfferModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- ── Barcode label modal ───────────────────────────────────────── -->
+<div
+  *ngIf="barcodeProduct"
+  class="modal fade show offer__modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeBarcodeModal()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+
+        <div class="product__modal-inner">
+          <h4 class="mb-20">Product Barcode</h4>
+
+          <app-product-barcode-label
+            [product]="barcodeProduct"
+            [bare]="true"
+          ></app-product-barcode-label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="barcodeProduct" class="modal-backdrop fade show"></div>

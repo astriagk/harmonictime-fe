@@ -55,6 +55,7 @@ import { ChatWindowComponent } from './components/chat-window/chat-window.compon
 import { BuyerChatModalComponent } from '../harmonic/buyer/chat/buyer-chat-modal.component';
 import { ProductMediaMobileCarouselComponent } from './components/product-media-mobile-carousel/product-media-mobile-carousel.component';
 import { GoogleSignInButtonComponent } from './components/google-signin-button/google-signin-button.component';
+import { ProductBarcodeLabelComponent } from './components/product-barcode-label/product-barcode-label.component';
 
 @NgModule({
   declarations: [
@@ -111,6 +112,7 @@ import { GoogleSignInButtonComponent } from './components/google-signin-button/g
     BuyerChatModalComponent,
     ProductMediaMobileCarouselComponent,
     GoogleSignInButtonComponent,
+    ProductBarcodeLabelComponent,
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -160,6 +162,7 @@ import { GoogleSignInButtonComponent } from './components/google-signin-button/g
     BuyerChatModalComponent,
     ProductMediaMobileCarouselComponent,
     GoogleSignInButtonComponent,
+    ProductBarcodeLabelComponent,
   ],
 })
 export class SharedModule {}

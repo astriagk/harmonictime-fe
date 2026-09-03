@@ -1,0 +1,101 @@
+<app-breadcrumb-three
+  title="Scan Product"
+  subtitle="Scan"
+></app-breadcrumb-three>
+
+<section class="scan container pt-40 pb-60">
+  <!-- ── Scanner ──────────────────────────────────────────────── -->
+  <div *ngIf="!product" class="scan__panel white-bg">
+    <h2 class="scan__title">Scan a product label</h2>
+    <p class="scan__lead">
+      Point the camera at the QR or barcode on a product label to pull up
+      everything recorded against that product.
+    </p>
+
+    <div class="scan__viewport">
+      <video #preview muted playsinline></video>
+      <div *ngIf="!scanning" class="scan__viewport-idle">
+        <i class="fa fa-camera"></i>
+        <span>{{ starting ? "Starting camera…" : "Camera is off" }}</span>
+      </div>
+      <div *ngIf="scanning" class="scan__reticle"></div>
+    </div>
+
+    <p *ngIf="cameraError" class="text-danger mt-15 mb-0">{{ cameraError }}</p>
+
+    <div class="scan__actions mt-25">
+      <button
+        *ngIf="!scanning"
+        type="button"
+        class="os-btn os-btn-black"
+        [disabled]="starting"
+        (click)="startCamera()"
+      >
+        {{ starting ? "Starting…" : "Start Camera" }}
+      </button>
+      <button
+        *ngIf="scanning"
+        type="button"
+        class="os-btn"
+        (click)="stopCamera()"
+      >
+        Stop Camera
+      </button>
+    </div>
+
+    <!-- Fallback + keyboard-wedge scanners, which just type and hit Enter. -->
+    <div class="scan__manual mt-30">
+      <form (ngSubmit)="submitManualCode()">
+        <div class="checkout-form-list">
+          <label for="scan-code">Or enter / scan the product code</label>
+          <input
+            id="scan-code"
+            type="text"
+            name="code"
+            autocomplete="off"
+            placeholder="e.g. 664A-1B2C-3D4E-5F6A-7B8C-9D0E"
+            [(ngModel)]="manualCode"
+          />
+          <span *ngIf="lookupError" class="text-danger">{{ lookupError }}</span>
+        </div>
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="os-btn" [disabled]="looking">
+            {{ looking ? "Looking…" : "Look Up" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="looking && !product" class="pt-40">
+    <app-skeleton type="product-detail"></app-skeleton>
+  </div>
+
+  <!-- ── Result ───────────────────────────────────────────────── -->
+  <ng-container *ngIf="product">
+    <header
+      class="scan__result-header d-flex justify-content-between align-items-center"
+    >
+      <div>
+        <span class="scan__result-caption">Scanned code</span>
+        <span class="scan__result-code">{{ scannedCode }}</span>
+      </div>
+      <button
+        type="button"
+        class="os-btn os-btn-black"
+        (click)="scanAnother()"
+      >
+        Scan Another
+      </button>
+    </header>
+
+    <app-product-details-area-seller
+      [product]="product"
+    ></app-product-details-area-seller>
+
+    <div class="scan__label-block">
+      <h3 class="scan__label-title">Label</h3>
+      <app-product-barcode-label [product]="product"></app-product-barcode-label>
+    </div>
+  </ng-container>
+</section>

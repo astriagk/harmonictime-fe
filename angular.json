@@ -29,7 +29,9 @@
               "core-js",
               "raf",
               "rgbcolor",
-              "html2canvas"
+              "html2canvas",
+              "jsbarcode",
+              "qrcode"
             ],
             "inlineStyleLanguage": "scss",
             "assets": [

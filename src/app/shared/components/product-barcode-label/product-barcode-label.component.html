@@ -1,0 +1,36 @@
+<div class="barcode-label" [class.barcode-label--bare]="bare">
+  <div *ngIf="rendering" class="barcode-label__placeholder">
+    <app-skeleton type="product-detail"></app-skeleton>
+  </div>
+
+  <p *ngIf="error" class="text-danger mb-0">{{ error }}</p>
+
+  <ng-container *ngIf="labelSrc && !rendering">
+    <div class="barcode-label__preview">
+      <img [src]="labelSrc" alt="Product barcode label" />
+    </div>
+
+    <div class="barcode-label__code">
+      <span class="barcode-label__code-caption">Product code</span>
+      <span class="barcode-label__code-value">{{ humanCode }}</span>
+    </div>
+
+    <p class="barcode-label__hint">
+      Scan the QR with any phone camera to open this product's full details, or
+      scan the barcode with a scanner on the
+      <a routerLink="/seller/scan-product">Scan Product</a> page.
+    </p>
+
+    <div class="barcode-label__actions">
+      <button type="button" class="os-btn os-btn-black" (click)="print()">
+        <i class="fa fa-print mr-5"></i> Print Label
+      </button>
+      <button type="button" class="os-btn" (click)="download()">
+        <i class="fa fa-download mr-5"></i> Download PNG
+      </button>
+      <button type="button" class="os-btn" (click)="copyLink()">
+        <i class="fa fa-link mr-5"></i> Copy Link
+      </button>
+    </div>
+  </ng-container>
+</div>

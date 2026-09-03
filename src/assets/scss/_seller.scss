@@ -383,3 +383,207 @@
     color: $white;
   }
 }
+
+/* ── Product barcode label (shared component, used on every seller product screen) ── */
+.barcode-label {
+  background-color: $white;
+  border: 1px solid $border;
+  padding: 30px;
+  text-align: center;
+
+  // The hosting modal already draws the card, so drop the chrome there.
+  &--bare {
+    border: none;
+    padding: 0;
+  }
+
+  &__preview img {
+    max-width: 100%;
+    width: 340px;
+    border: 1px solid $border;
+  }
+
+  &__code {
+    margin-top: 20px;
+  }
+
+  &__code-caption {
+    display: block;
+    font-family: $pop;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: $black-soft-3;
+  }
+
+  &__code-value {
+    display: block;
+    font-family: $pop;
+    font-size: 14px;
+    font-weight: 600;
+    color: $heading-color;
+    word-break: break-all;
+  }
+
+  &__hint {
+    margin: 15px auto 0;
+    max-width: 460px;
+    font-size: 13px;
+    color: $body-text-color;
+
+    a {
+      color: $theme-color;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+
+    .os-btn {
+      padding: 0 26px;
+    }
+  }
+
+  &__placeholder {
+    min-height: 200px;
+  }
+}
+
+/* ── Barcode label block on the product details page ── */
+.product-barcode-section app-product-barcode-label {
+  display: block;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ── Scan product page ── */
+.scan {
+  &__panel {
+    border: 1px solid $border;
+    padding: 40px;
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  &__title {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  &__lead {
+    color: $body-text-color;
+    font-size: 14px;
+    margin-bottom: 25px;
+  }
+
+  &__viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background-color: $grey;
+    border: 1px solid $border;
+    overflow: hidden;
+
+    // The video always stays laid out — browsers throttle frame delivery for
+    // `display: none` media, which would starve the decoder. The idle overlay
+    // covers it instead.
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__viewport-idle {
+    position: absolute;
+    inset: 0;
+    background-color: $grey;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: $black-soft-3;
+    font-size: 13px;
+
+    i {
+      font-size: 32px;
+      color: $grey-3;
+    }
+  }
+
+  // Framing guide so the seller knows where to hold the label.
+  &__reticle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 45%;
+    border: 2px solid $theme-color;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  // The field itself is a stock `.checkout-form-list`, so it inherits the
+  // global label/input styling used by every other seller form.
+  &__manual {
+    border-top: 1px solid $border;
+    padding-top: 25px;
+    text-align: left;
+  }
+
+  &__actions,
+  &__manual {
+    .os-btn[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__result-header {
+    border-bottom: 1px solid $border;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  &__result-caption {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: $black-soft-3;
+  }
+
+  &__result-code {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: $heading-color;
+    word-break: break-all;
+  }
+
+  &__label-block {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  &__label-title {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+}

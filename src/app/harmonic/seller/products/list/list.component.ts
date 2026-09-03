@@ -50,6 +50,10 @@ export class ListComponent implements OnInit, OnDestroy {
   selectedProductIds: Set<string> = new Set();
   isSavingOffer = false;
 
+  // Product whose barcode label is open. Available for every product, including
+  // ones still pending approval — the detail page isn't reachable for those.
+  barcodeProduct: any = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -145,6 +149,14 @@ export class ListComponent implements OnInit, OnDestroy {
     this.selectedProductIds = new Set();
     // The slice's loaded-guard fetches once and serves cache on later opens.
     this.store.dispatch(loadSellerOffers({}));
+  }
+
+  openBarcodeModal(product: any): void {
+    this.barcodeProduct = product;
+  }
+
+  closeBarcodeModal(): void {
+    this.barcodeProduct = null;
   }
 
   closeOfferModal(): void {

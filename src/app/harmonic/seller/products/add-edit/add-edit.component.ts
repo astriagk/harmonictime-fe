@@ -123,6 +123,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
   // a loading state and can't be double-clicked.
   isSubmitting = false;
   productId?: string;
+  // Set right after a successful create so the seller gets the new product's
+  // barcode label immediately, before leaving the page.
+  createdProduct: any = null;
   uploadedImages: UploadedImage[] = [];
   // IDs of already-saved images the seller removed; sent on update so the
   // backend deletes them. New (unsaved) images just drop from the array.
@@ -916,9 +919,17 @@ export class AddEditComponent implements OnInit, OnDestroy {
           this.toastrService.success(
             'Product created successfully! It will be visible once approved by admin.',
           );
+          // Build the label from what was just saved, before the form is
+          // cleared — a freshly created product is still pending approval, so
+          // its details page isn't reachable to read the values back from.
+          this.createdProduct = newProductId
+            ? this.buildLabelProduct(newProductId, productData)
+            : null;
           this.resetForm();
           this.store.dispatch(loadSellerProducts({ force: true }));
-          this.goToProductList();
+          if (!this.createdProduct) {
+            this.goToProductList();
+          }
         },
         error: (err) => {
           this.isSubmitting = false;
@@ -930,6 +941,30 @@ export class AddEditComponent implements OnInit, OnDestroy {
 
   private goToProductList(): void {
     this.router.navigate(['/seller/product-list']);
+  }
+
+  /**
+   * Shapes the just-saved form values like a product from the API so the
+   * barcode label can render. Only the few fields the label prints are needed —
+   * everything else is a scan away.
+   */
+  private buildLabelProduct(productId: string, productData: any): any {
+    return {
+      _id: productId,
+      ProductName: productData.productName,
+      Price: productData.price,
+      Details: {
+        BrandName:
+          this.brands.find((brand) => brand._id === productData.brandId)
+            ?.BrandName ?? '',
+      },
+    };
+  }
+
+  /** Closes the post-create barcode modal and moves on to the product list. */
+  closeCreatedProductModal(): void {
+    this.createdProduct = null;
+    this.goToProductList();
   }
 
   resetForm() {

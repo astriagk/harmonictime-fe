@@ -6,6 +6,7 @@ import { DetailsComponent } from './products/details/details.component';
 import { AddEditComponent } from './products/add-edit/add-edit.component';
 import { OrdersComponent } from './orders/orders.component';
 import { SellerChatInboxComponent } from './chat/seller-chat-inbox.component';
+import { ScanComponent } from './products/scan/scan.component';
 
 const routes: Routes = [
   {
@@ -26,6 +27,11 @@ const routes: Routes = [
         path: 'product-list',
         component: ListComponent,
         title: 'Product List',
+      },
+      {
+        path: 'scan-product',
+        component: ScanComponent,
+        title: 'Scan Product',
       },
       {
         path: 'product-details/:id',

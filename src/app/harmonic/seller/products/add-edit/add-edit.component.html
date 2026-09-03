@@ -865,3 +865,44 @@
   </div>
 </div>
 <div *ngIf="isAddLookupModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- Barcode for the product that was just created. Shown here because a
+     pending-approval product has no reachable details page yet. -->
+<div
+  *ngIf="createdProduct"
+  class="modal fade show add-lookup-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Product Barcode</h5>
+        <button
+          type="button"
+          class="add-lookup-close"
+          aria-label="Close"
+          (click)="closeCreatedProductModal()"
+        >
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-product-barcode-label
+          [product]="createdProduct"
+          [bare]="true"
+        ></app-product-barcode-label>
+      </div>
+      <div class="modal-footer d-flex justify-content-end">
+        <button
+          type="button"
+          class="os-btn"
+          (click)="closeCreatedProductModal()"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="createdProduct" class="modal-backdrop fade show"></div>
