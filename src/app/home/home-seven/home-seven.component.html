@@ -47,17 +47,31 @@
 
   <app-shop-category [shop_category_2]="true"></app-shop-category>
 
-  <div class="product__view-area pt-60 pb-60">
+  <!-- Bestseller block: hidden once we know the catalog came back empty -->
+  <div
+    class="product__view-area pt-60 pb-60"
+    *ngIf="!productsReady || sm_best_prd.length"
+  >
     <div class="container custom-container-2">
       <div class="row">
         <div class="col-xl-12">
           <div class="section__wrapper text-center">
             <h3 class="section__title-2"><span>BESTSELLER PRODUCTS</span></h3>
-            <p>Coming Soon...</p>
           </div>
         </div>
       </div>
-      <!-- <div class="row mt-40">
+
+      <!-- Loading: shimmer cards until the catalog lands -->
+      <div class="row mt-40" *ngIf="!productsReady">
+        <div
+          *ngFor="let slot of bestsellerSkeletonSlots"
+          class="col-xl-3 col-lg-6 col-md-6"
+        >
+          <app-skeleton type="product-card" [count]="1"></app-skeleton>
+        </div>
+      </div>
+
+      <div class="row mt-40" *ngIf="productsReady && sm_best_prd.length">
         <div class="col-xl-6 col-lg-6">
           <div class="row">
             <div class="col-lg-12">
@@ -66,14 +80,17 @@
                   *ngFor="let item of sm_best_prd.slice(0, 2); let i = index"
                   class="col-xl-6 col-lg-12 col-md-6"
                 >
-                  <app-product-item-two [product]="item"></app-product-item-two>
+                  <app-product-item [product]="item"></app-product-item>
                 </div>
               </div>
             </div>
-            <div class="col-lg-12">
+            <div class="col-lg-12" *ngIf="big_item_1">
               <div class="product__big-image effectThree mb-40">
-                <a [routerLink]="['/shop/shop-details', big_item_1?.id]">
-                  <img [src]="big_item_1?.img" alt="product-img" />
+                <a [routerLink]="['/buyer/product-details', big_item_1._id]">
+                  <img
+                    [src]="big_item_1.Images | primaryImage"
+                    [alt]="big_item_1.ProductName"
+                  />
                 </a>
               </div>
             </div>
@@ -81,10 +98,13 @@
         </div>
         <div class="col-lg-6 col-lg-6">
           <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-12" *ngIf="big_item_2">
               <div class="product__big-image effectThree mb-40">
-                <a [routerLink]="['/shop/shop-details', big_item_2?.id]">
-                  <img [src]="big_item_2?.img" alt="product-img" />
+                <a [routerLink]="['/buyer/product-details', big_item_2._id]">
+                  <img
+                    [src]="big_item_2.Images | primaryImage"
+                    [alt]="big_item_2.ProductName"
+                  />
                 </a>
               </div>
             </div>
@@ -94,13 +114,13 @@
                   *ngFor="let item of sm_best_prd.slice(2, 4); let i = index"
                   class="col-xl-6 col-lg-12 col-md-6"
                 >
-                  <app-product-item-two [product]="item"></app-product-item-two>
+                  <app-product-item [product]="item"></app-product-item>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div> -->
+      </div>
     </div>
   </div>
 
@@ -129,26 +149,40 @@
     </div>
   </div>
 
-  <div class="product__slider-area pt-95 pb-60">
+  <!-- Featured slider: hidden once we know the catalog came back empty -->
+  <div
+    class="product__slider-area pt-95 pb-60"
+    *ngIf="!productsReady || featured_products.length"
+  >
     <div class="container custom-container-2">
       <div class="row">
         <div class="col-xl-12">
           <div class="section__wrapper text-center">
             <h3 class="section__title-2"><span>FEATURED PRODUCTS</span></h3>
-            <p>Coming Soon...</p>
           </div>
         </div>
       </div>
-      <!-- <div class="row mt-40">
+
+      <!-- Loading: shimmer cards until the catalog lands -->
+      <div class="row mt-40" *ngIf="!productsReady">
+        <div
+          *ngFor="let slot of featuredSkeletonSlots"
+          class="col-xl-4 col-lg-4 col-md-6"
+        >
+          <app-skeleton type="product-card" [count]="1"></app-skeleton>
+        </div>
+      </div>
+
+      <div class="row mt-40" *ngIf="productsReady && featured_products.length">
         <div class="col-lg-12">
           <div class="product_slider p-relative" #productSliderContainer>
             <div class="product__slider-active swiper-container">
               <div class="swiper-wrapper product__slider-item">
                 <div
-                  *ngFor="let item of sm_best_prd; let i = index"
+                  *ngFor="let item of featured_products; let i = index"
                   class="swiper-slide"
                 >
-                  <app-product-item-two [product]="item"></app-product-item-two>
+                  <app-product-item [product]="item"></app-product-item>
                 </div>
               </div>
             </div>
@@ -172,15 +206,19 @@
             </div>
           </div>
         </div>
-      </div> -->
+      </div>
     </div>
   </div>
 
   <!-- <app-home-seven-testimonial></app-home-seven-testimonial> -->
 
-  <div class="blog__slider-area pt-100 pb-100">
+  <!-- Blog strip: hidden once we know there are no published posts -->
+  <div
+    class="blog__slider-area pt-100 pb-100"
+    *ngIf="!blogsReady || blog_items.length"
+  >
     <div class="container custom-container-2">
-      <div class="row">
+      <!-- <div class="row">
         <div class="col-xl-12">
           <div class="row">
             <div class="col-xl-12">
@@ -191,8 +229,18 @@
             </div>
           </div>
         </div>
+      </div> -->
+      <!-- Loading: shimmer cards in place of the slider until the posts land -->
+      <div class="row mt-40" *ngIf="!blogsReady">
+        <div
+          *ngFor="let slot of blogSkeletonSlots"
+          class="col-xl-6 col-lg-6 col-md-6"
+        >
+          <app-skeleton type="blog-card" [count]="1"></app-skeleton>
+        </div>
       </div>
-      <!-- <div class="row mt-40">
+
+      <div class="row mt-40" *ngIf="blogsReady && blog_items.length">
         <div class="col-xl-12">
           <div class="blog_slider">
             <div class="blog_slider-area p-relative">
@@ -206,10 +254,13 @@
                     class="blog__slider-item swiper-slide"
                   >
                     <div class="blog-thumb m-img">
-                      <img [src]="blog.img" alt="blog-img" />
+                      <img [src]="blog.Image" [alt]="blog.Title" />
                       <a
                         class="btn"
-                        [routerLink]="['/pages/blog-details', blog.id]"
+                        [routerLink]="[
+                          '/pages/blog-details',
+                          blogLink(blog)
+                        ]"
                       >
                         <i class="fa fa-link"></i>
                       </a>
@@ -217,18 +268,22 @@
                     <div class="blog__post-content">
                       <div class="blog__wrapper">
                         <h5 class="blog__post-title">
-                          <a [routerLink]="['/pages/blog-details', blog.id]">{{
-                            blog.title
-                          }}</a>
+                          <a
+                            [routerLink]="[
+                              '/pages/blog-details',
+                              blogLink(blog)
+                            ]"
+                            >{{ blog.Title }}</a
+                          >
                         </h5>
                         <div class="article-meta d-flex justify-content-center">
                           <span class="article-author"
-                            ><span>By</span> {{ blog.author }}</span
+                            ><span>By</span> {{ blog.Author }}</span
                           >
                           <span> /</span>
                           <span class="article-publish">
                             <i class="fa fa-calendar-o"></i>
-                            {{ blog.date }}
+                            {{ blog.PublishedAt | date: "dd MMM, yyyy" }}
                           </span>
                         </div>
                       </div>
@@ -247,7 +302,7 @@
             </div>
           </div>
         </div>
-      </div> -->
+      </div>
     </div>
   </div>
 
