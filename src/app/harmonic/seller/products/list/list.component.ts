@@ -127,7 +127,7 @@ export class ListComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     const newValue = !product.IsAvailable;
     this.genericService
-      .putObservable(`${UPDATE_PRODUCT_BY_ID}${product._id}`, { IsAvailable: newValue })
+      .putObservableToken(`${UPDATE_PRODUCT_BY_ID}${product._id}`, { IsAvailable: newValue })
       .subscribe({
         next: () => {
           this.toastrService.success(
