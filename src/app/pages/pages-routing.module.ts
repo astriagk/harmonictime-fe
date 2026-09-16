@@ -5,6 +5,7 @@ import { BlogLeftSideComponent } from './blog-left-side/blog-left-side.component
 import { BlogNoSideComponent } from './blog-no-side/blog-no-side.component';
 import { BlogTwoColComponent } from './blog-two-col/blog-two-col.component';
 import { BlogThreeColComponent } from './blog-three-col/blog-three-col.component';
+import { VideosComponent } from './videos/videos.component';
 import { BlogDetailsComponent } from './blog-details/blog-details.component';
 import { BlogDynamicDetailsComponent } from './blog-dynamic-details/blog-dynamic-details.component';
 import { ContactComponent } from './contact/contact.component';
@@ -36,6 +37,11 @@ const routes: Routes = [
     path: 'blog-3-col',
     component: BlogThreeColComponent,
     title: 'Blog Three Col',
+  },
+  {
+    path: 'videos',
+    component: VideosComponent,
+    title: 'Videos',
   },
   {
     path: 'blog-details',

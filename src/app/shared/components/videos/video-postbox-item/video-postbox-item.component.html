@@ -1,0 +1,25 @@
+<div class="video-post__item" [ngClass]="getClass()">
+  <div class="video-post__thumb fix">
+    <a
+      [href]="watchUrl"
+      target="_blank"
+      rel="noopener"
+      class="w-img"
+      [title]="video.Title"
+    >
+      <img [src]="thumbnail" [alt]="video.Title" />
+      <!-- The play button that replaces the blog card's plain cover: it fades
+           in on hover, and says the link leaves for YouTube. -->
+      <span class="video-post__play"><i class="fas fa-play"></i></span>
+    </a>
+  </div>
+  <div class="video-post__content">
+    <h4 [class.video-post__title]="title_cls">
+      <a [href]="watchUrl" target="_blank" rel="noopener">{{ video.Title }}</a>
+    </h4>
+    <div class="video-post__meta">
+      <span>By <span class="video-post__author">{{ video.Author }}</span></span>
+      <span>/ {{ video.PublishedAt | date: "dd MMM, yyyy" }}</span>
+    </div>
+  </div>
+</div>

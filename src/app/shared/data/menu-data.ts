@@ -31,7 +31,7 @@ const menuData: IMenuType[] = [
       { link: '/admin/products', title: 'Products' },
       { link: '/admin/offers', title: 'Offers' },
       { link: '/admin/blogs', title: 'Manage Blogs' },
-      { link: '/admin/blogs/new', title: 'Add Blog Post' },
+      { link: '/admin/youtube-videos', title: 'Manage Videos' },
     ],
   },
   {
@@ -42,6 +42,11 @@ const menuData: IMenuType[] = [
   {
     link: '/pages/blog-3-col',
     title: 'Blog',
+    hasDropdown: false,
+  },
+  {
+    link: '/pages/videos',
+    title: 'Videos',
     hasDropdown: false,
   },
   {
@@ -78,6 +83,7 @@ export const mobile_menus: IMobileMenu[] = [
       { link: '/admin/offers', title: 'Offers' },
       { link: '/admin/blogs', title: 'Manage Blogs' },
       { link: '/admin/blogs/new', title: 'Add Blog Post' },
+      { link: '/admin/youtube-videos', title: 'Manage Videos' },
     ],
   },
   {
@@ -87,6 +93,10 @@ export const mobile_menus: IMobileMenu[] = [
   {
     title: 'Blog',
     link: '/pages/blog-3-col',
+  },
+  {
+    title: 'Videos',
+    link: '/pages/videos',
   },
   {
     title: 'Contact',

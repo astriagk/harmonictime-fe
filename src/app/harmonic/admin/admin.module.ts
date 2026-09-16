@@ -12,6 +12,8 @@ import { AdminOffersComponent } from './offers/offers.component';
 import { AdminProductsComponent } from './products/products.component';
 import { AdminBlogsComponent } from './blogs/list/list.component';
 import { AdminBlogFormComponent } from './blogs/add-edit/add-edit.component';
+import { AdminYoutubeVideosComponent } from './youtube-videos/list/list.component';
+import { AdminYoutubeVideoFormComponent } from './youtube-videos/add-edit/add-edit.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,8 @@ import { AdminBlogFormComponent } from './blogs/add-edit/add-edit.component';
     AdminProductsComponent,
     AdminBlogsComponent,
     AdminBlogFormComponent,
+    AdminYoutubeVideosComponent,
+    AdminYoutubeVideoFormComponent,
   ],
   imports: [
     CommonModule,

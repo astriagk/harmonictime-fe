@@ -405,11 +405,18 @@
 }
 
 /* ── Blog create / edit form (admin/blogs/add-edit) ── */
+/* ── Video create / edit form (admin/youtube-videos/add-edit) ── */
 // Only what the global styles don't already provide: the section cards, the
 // small helper text, and Quill's chrome. Every field here is a stock
 // `.checkout-form-list` / `.country-select` control, so none of them are
 // restyled locally.
-.blog-form {
+//
+// One block serves both forms: the video form is the blog form minus the
+// article body — same cards, same helper text, same sticky action bar — so it
+// joins the selector instead of restating every rule. The handful of things
+// that differ live in `.video-form__*` at the end of this file.
+.blog-form,
+.video-form {
   // Room for the sticky action bar so the last field is never trapped under it.
   padding-bottom: 40px;
 
@@ -800,4 +807,55 @@
   .ql-snow.ql-toolbar button.ql-active .ql-fill {
     fill: $theme-color;
   }
+}
+
+/* ── Video list table (admin/youtube-videos/list) ── */
+// Stills are 16:9, unlike the blog covers, so the thumbnail column gets its
+// own size rather than borrowing `.admin-blogs__thumb`.
+.admin-videos__thumb {
+  width: 80px;
+  height: 45px;
+  object-fit: cover;
+  border: 1px solid $border;
+}
+
+// Same reasoning as `.admin-blogs__title-col`: the table is auto-layout, so
+// a long title has to be capped or it starves Status, Order and Actions.
+.admin-videos__title-col {
+  width: 32%;
+}
+
+.admin-videos__title {
+  max-width: 320px;
+  // Wrap rather than clamp — an admin scanning the list needs the whole title.
+  overflow-wrap: anywhere;
+}
+
+// Short, fixed-shape columns: an id, a number, a pill, a date and three icons
+// should never wrap.
+.admin-videos__nowrap {
+  white-space: nowrap;
+}
+
+// The video id is a reference, not prose: keep it monospaced but at the same
+// size as the rest of the row, and drop Bootstrap's pink <code> colour.
+.admin-videos__id {
+  font-size: 13px;
+  color: $black-soft-2;
+}
+
+/* ── Video form — the few rules the shared block above cannot cover ── */
+// The rejection card reaches its icon through the blog form's own class
+// (it is nested inside `&__server-error`, where `&` is `.blog-form`), so the
+// video form restates just that one selector.
+.video-form__server-error .video-form__section-title i {
+  margin-right: 6px;
+}
+
+// The thumbnail preview shows what the home page grid will crop to, so it
+// keeps the grid's 16:9 rather than the blog cover's 180px cap.
+.video-form__preview {
+  max-width: 320px;
+  max-height: none;
+  aspect-ratio: 16 / 9;
 }
