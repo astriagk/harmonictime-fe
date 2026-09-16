@@ -33,6 +33,9 @@ import { BlogPostboxItemComponent } from './components/blogs/blog-postbox-item/b
 import { BlogAreaComponent } from './components/blogs/blog-area/blog-area.component';
 import { BlogDetailsAreaComponent } from './components/blogs/blog-details-area/blog-details-area.component';
 import { BlogReplyFormComponent } from './components/forms/blog-reply-form/blog-reply-form.component';
+import { VideosAreaComponent } from './components/videos/videos-area/videos-area.component';
+import { VideoListAreaComponent } from './components/videos/video-list-area/video-list-area.component';
+import { VideoPostboxItemComponent } from './components/videos/video-postbox-item/video-postbox-item.component';
 import { ProductModalComponent } from './components/modals/product-modal/product-modal.component';
 import { ModalShellComponent } from './components/modals/modal-shell/modal-shell.component';
 import { ContactFormComponent } from './components/forms/contact-form/contact-form.component';
@@ -88,6 +91,9 @@ import { GoogleSignInButtonComponent } from './components/google-signin-button/g
     BlogAreaComponent,
     BlogDetailsAreaComponent,
     BlogReplyFormComponent,
+    VideosAreaComponent,
+    VideoListAreaComponent,
+    VideoPostboxItemComponent,
     ProductModalComponent,
     ModalShellComponent,
     ContactFormComponent,
@@ -139,6 +145,9 @@ import { GoogleSignInButtonComponent } from './components/google-signin-button/g
     BlogPostboxItemComponent,
     BlogAreaComponent,
     BlogDetailsAreaComponent,
+    VideosAreaComponent,
+    VideoListAreaComponent,
+    VideoPostboxItemComponent,
     ProductModalComponent,
     ModalShellComponent,
     ContactFormComponent,

@@ -1,0 +1,56 @@
+<section class="video-post__area pt-100 pb-100">
+  <div class="container">
+    <!-- Loading / empty are shared by both layouts -->
+    <div class="row" *ngIf="loading">
+      <div
+        *ngFor="let slot of skeletonSlots"
+        [ngClass]="
+          video_3_col
+            ? 'col-xl-4 col-lg-4 col-md-6'
+            : video_2_col
+            ? 'col-xl-6 col-lg-6 col-md-6'
+            : 'col-xl-12'
+        "
+      >
+        <app-skeleton type="blog-card" [count]="1"></app-skeleton>
+      </div>
+    </div>
+
+    <app-empty-state
+      *ngIf="!loading && videos.length === 0"
+      message="No Videos Found"
+    ></app-empty-state>
+
+    <div class="video-post__wrapper" *ngIf="!loading && videos.length">
+      <div class="row">
+        <div
+          *ngFor="let video of videos"
+          [ngClass]="[
+            video_3_col
+              ? 'col-xl-4 col-lg-4 col-md-6'
+              : 'col-xl-6 col-lg-6 col-md-6'
+          ]"
+        >
+          <app-video-postbox-item
+            [video]="video"
+            [cls]="video_3_col ? 'video-post__border-bottom mb-60 pb-60' : 'mb-60'"
+            [title_cls]="video_3_col ? false : true"
+          >
+          </app-video-postbox-item>
+        </div>
+        <div class="row">
+          <div class="col-xl-12">
+            <div class="shop-pagination-wrapper d-flex justify-content-end">
+              <app-pagination
+                [data]="videos"
+                [paginate]="paginate"
+                (setPage)="setPage($event)"
+              >
+              </app-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,82 @@
+<!-- Hidden entirely once we know nothing published came back, so the home page
+     can fall back to its own block instead of showing an empty strip. Laid out
+     exactly like the blog strip above it: one slider, two slides at desktop
+     width, arrows on hover. -->
+<div class="video__slider-area pt-100 pb-100" *ngIf="loading || videos.length">
+  <div class="container custom-container-2">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="section__wrapper text-center">
+          <h3 class="section__title-2"><span>{{ sectionTitle }}</span></h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading: shimmer cards in place of the slider until the videos land -->
+    <div class="row mt-40" *ngIf="loading">
+      <div
+        *ngFor="let slot of skeletonSlots"
+        class="col-xl-6 col-lg-6 col-md-6"
+      >
+        <app-skeleton type="blog-card" [count]="1"></app-skeleton>
+      </div>
+    </div>
+
+    <div class="row mt-40" *ngIf="!loading && videos.length">
+      <div class="col-xl-12">
+        <div class="video_slider">
+          <div class="video_slider-area p-relative">
+            <div
+              class="video__slider-active swiper-container"
+              #videoSliderContainer
+            >
+              <div class="swiper-wrapper">
+                <div
+                  *ngFor="let video of videos"
+                  class="video__slider-item swiper-slide"
+                >
+                  <div class="video-thumb m-img cursor-pointer" (click)="play(video)">
+                    <img [src]="thumbnail(video)" [alt]="video.Title" />
+                    <a class="btn"><i class="fas fa-play"></i></a>
+                  </div>
+                  <div class="video__post-content">
+                    <div class="video__wrapper">
+                      <h5 class="video__post-title">
+                        <a class="cursor-pointer" (click)="play(video)">
+                          {{ video.Title }}
+                        </a>
+                      </h5>
+                      <!-- Byline and date, same line as a blog card. Either
+                           can be missing, so the separator is tied to both -->
+                      <div
+                        *ngIf="video.Author || video.PublishedAt"
+                        class="article-meta d-flex justify-content-center"
+                      >
+                        <span *ngIf="video.Author" class="article-author">
+                          <span>By</span> {{ video.Author }}
+                        </span>
+                        <span *ngIf="video.Author && video.PublishedAt"> /</span>
+                        <span *ngIf="video.PublishedAt" class="article-publish">
+                          <i class="fa fa-calendar-o"></i>
+                          {{ video.PublishedAt | date: "dd MMM, yyyy" }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="owl-nav">
+              <div class="owl-prev" (click)="sliderInstance?.slidePrev()">
+                <button><i class="fal fa-angle-left"></i></button>
+              </div>
+              <div class="owl-next" (click)="sliderInstance?.slideNext()">
+                <button><i class="fal fa-angle-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

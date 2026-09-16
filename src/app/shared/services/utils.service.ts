@@ -76,10 +76,13 @@ export class UtilsService {
     this.videoUrl = `https://www.youtube.com/embed/${videoId}`;
     if (!this.iframeElement) {
       this.iframeElement = document.createElement('iframe');
-      this.iframeElement.setAttribute('src', this.videoUrl);
       this.iframeElement.style.width = '60%';
       this.iframeElement.style.height = '80%';
     }
+    // Always (re)point the frame at the requested video — the element is
+    // reused across opens, so setting src only on creation would replay the
+    // first video ever opened on the page.
+    this.iframeElement.setAttribute('src', this.videoUrl);
 
     this.isVideoOpen = true;
     videoOverlay?.classList.add('open');

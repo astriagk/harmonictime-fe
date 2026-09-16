@@ -47,6 +47,9 @@ export class HomeSevenComponent implements OnDestroy {
   public videoReady = false;
   // Drives the blog-strip shimmer: true once the blog list request settles.
   public blogsReady = false;
+  // The CMS `video_area` block is the fallback for the managed video grid:
+  // it only appears once <app-videos-area> reports that nothing is published.
+  public showFallbackVideo = false;
   // Drives the bestseller/featured shimmers: true once the catalog request
   // settles (the store starts `loading: true` on the very first load).
   public productsReady = false;
@@ -239,6 +242,12 @@ export class HomeSevenComponent implements OnDestroy {
   // before slugs existed.
   public blogLink(blog: IBlogCard): string {
     return blog?.Slug || blog?._id;
+  }
+
+  // <app-videos-area> emits how many published videos it rendered. Only when
+  // there are none do we fall back to the single CMS video block.
+  public onVideosLoaded(count: number) {
+    this.showFallbackVideo = count === 0;
   }
 
   // Pull the video area block from the CMS (/site-content); keep the static

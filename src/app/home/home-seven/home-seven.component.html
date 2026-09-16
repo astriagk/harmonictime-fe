@@ -124,12 +124,20 @@
     </div>
   </div>
 
+  <!-- Video blocks managed under /admin/youtube-videos. The component hides
+       itself when nothing is published, and reports the count so the legacy
+       single-video CMS block below can stand in. -->
+  <app-videos-area (loaded)="onVideosLoaded($event)"></app-videos-area>
+
   <!-- Loading: shimmer block in place of the video area until the CMS block resolves -->
-  <div *ngIf="!videoReady" class="video__area-df video__area-df--loading">
+  <div
+    *ngIf="showFallbackVideo && !videoReady"
+    class="video__area-df video__area-df--loading"
+  >
     <app-skeleton type="hero"></app-skeleton>
   </div>
   <div
-    *ngIf="videoReady"
+    *ngIf="showFallbackVideo && videoReady"
     class="video__area-df"
     [style.backgroundImage]="'url(' + video_area.bgImg + ')'"
   >

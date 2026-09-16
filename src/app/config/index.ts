@@ -231,6 +231,11 @@ export const BLOG_CATEGORIES = `${baseUrl}/blogs/categories`; // GET label/slug/
 export const BLOG_TAGS = `${baseUrl}/blogs/tags`; // GET tags already in use
 export const BLOG_RELATED = (slug: string) => `${baseUrl}/blogs/${slug}/related`; // GET
 
+// youtube videos — see spec/youtube-videos-api.md
+export const YOUTUBE_VIDEOS = `${baseUrl}/youtube-videos`; // GET published list (paginated), POST create
+export const YOUTUBE_VIDEO_BY_ID = `${baseUrl}/youtube-videos/`; // append id (PUT/DELETE)
+export const YOUTUBE_VIDEOS_ADMIN = `${baseUrl}/youtube-videos/admin/list`; // GET all incl. drafts
+
 // order charges applied on top of the cart subtotal at checkout
 export const ORDER_CHARGES = {
   gstPercent: environment.gstPercent, // % — configured per environment

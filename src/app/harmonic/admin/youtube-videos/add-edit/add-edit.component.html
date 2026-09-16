@@ -1,0 +1,229 @@
+<app-breadcrumb-three
+  [title]="isEditing ? 'Edit Video' : 'New Video'"
+  subtitle="Admin"
+></app-breadcrumb-three>
+
+<section class="order-info container video-form">
+  <header class="order-info__header pt-40 pb-20">
+    <h2 class="order-info__title">
+      {{ isEditing ? "Edit Video" : "New Video" }}
+    </h2>
+  </header>
+
+  <div *ngIf="isLoading" class="white-bg video-form__card">
+    <app-skeleton type="table-row" [count]="4"></app-skeleton>
+  </div>
+
+  <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="save()">
+    <!-- A 400 from the API is not the admin's mistake to guess at: say who
+         rejected it, with what status, and list every detail. -->
+    <div
+      *ngIf="errorSource === 'server'"
+      class="white-bg video-form__card video-form__server-error"
+    >
+      <h4 class="video-form__section-title text-danger mb-0">
+        <i class="fal fa-exclamation-triangle"></i>
+        Rejected by the server
+      </h4>
+      <p class="video-form__server-status">{{ serverStatus }}</p>
+      <ul class="video-form__server-list" *ngIf="serverErrorList.length">
+        <li *ngFor="let e of serverErrorList">
+          <strong>{{ e.field }}</strong> — {{ e.message }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="white-bg video-form__card">
+      <h4 class="video-form__section-title">Video</h4>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="checkout-form-list">
+            <label>Title <span class="required">*</span></label>
+            <input
+              type="text"
+              formControlName="Title"
+              placeholder="e.g. How A Mechanical Movement Works"
+            />
+            <span *ngIf="invalid('Title')" class="text-danger">
+              Title is required (max 200 characters)
+            </span>
+            <span *ngIf="serverErrors['Title']" class="text-danger">
+              Server: {{ serverErrors["Title"] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="checkout-form-list">
+            <label>YouTube Link <span class="required">*</span></label>
+            <input
+              type="text"
+              formControlName="YoutubeUrl"
+              placeholder="https://www.youtube.com/watch?v=…"
+            />
+            <small class="video-form__hint" *ngIf="parsedVideoId">
+              Video ID <strong>{{ parsedVideoId }}</strong>
+            </small>
+            <span *ngIf="hasError('YoutubeUrl', 'required')" class="text-danger">
+              A YouTube link is required
+            </span>
+            <span
+              *ngIf="hasError('YoutubeUrl', 'youtubeUrl')"
+              class="text-danger"
+            >
+              Paste a watch, youtu.be, embed or shorts link — or the 11-character
+              video ID on its own.
+            </span>
+            <span *ngIf="serverErrors['YoutubeUrl']" class="text-danger">
+              Server: {{ serverErrors["YoutubeUrl"] }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Byline and date, shown under the title on the home page exactly like
+           a blog card. Both optional — a card with neither just drops the
+           line. -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="checkout-form-list mb-0">
+            <label>Author <span class="required">*</span></label>
+            <input
+              type="text"
+              formControlName="Author"
+              placeholder="e.g. The Time Keeper"
+            />
+            <small class="video-form__hint">
+              Shown as "By …" under the title on the home page.
+            </small>
+            <span *ngIf="invalid('Author')" class="text-danger">
+              Author is required (max 120 characters)
+            </span>
+            <span *ngIf="serverErrors['Author']" class="text-danger">
+              Server: {{ serverErrors["Author"] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="checkout-form-list mb-0">
+            <label>Published Date <span class="required">*</span></label>
+            <input type="date" formControlName="PublishedAt" />
+            <small class="video-form__hint">
+              The date shown on the card — usually when the video went up on
+              YouTube. Defaults to today.
+            </small>
+            <span *ngIf="invalid('PublishedAt')" class="text-danger">
+              A published date is required
+            </span>
+            <span *ngIf="serverErrors['PublishedAt']" class="text-danger">
+              Server: {{ serverErrors["PublishedAt"] }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="white-bg video-form__card">
+      <h4 class="video-form__section-title">Appearance</h4>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="checkout-form-list">
+            <label>Thumbnail URL</label>
+            <input
+              type="text"
+              formControlName="Thumbnail"
+              placeholder="Leave blank to use YouTube's own still"
+            />
+            <div class="d-flex align-items-center">
+              <small class="video-form__hint">
+                Only set this to override the default still.
+              </small>
+              <a
+                *ngIf="form.get('Thumbnail')?.value"
+                class="cursor-pointer video-form__link ml-10"
+                (click)="clearThumbnail()"
+                >Use default</a
+              >
+            </div>
+            <span *ngIf="serverErrors['Thumbnail']" class="text-danger">
+              Server: {{ serverErrors["Thumbnail"] }}
+            </span>
+
+            <img
+              *ngIf="previewThumbnail"
+              [src]="previewThumbnail"
+              alt="Thumbnail preview"
+              class="video-form__preview mt-20"
+            />
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <div class="checkout-form-list">
+            <label>Order</label>
+            <input
+              type="number"
+              formControlName="Order"
+              placeholder="Auto"
+              min="0"
+            />
+            <small class="video-form__hint">
+              Lowest first. Leave blank to add it to the end.
+            </small>
+            <span *ngIf="serverErrors['Order']" class="text-danger">
+              Server: {{ serverErrors["Order"] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <!-- `.country-select` + native <select>, the same markup the blog and
+               GST forms use; all styling comes from that wrapper. -->
+          <div class="country-select mb-0">
+            <label for="videoStatus">Status</label>
+            <select id="videoStatus" formControlName="Status">
+              <option *ngFor="let s of statusOptions" [value]="s.value">
+                {{ s.label }}
+              </option>
+            </select>
+            <span *ngIf="serverErrors['Status']" class="text-danger">
+              Server: {{ serverErrors["Status"] }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-form__actions white-bg">
+      <span class="video-form__status">
+        <span *ngIf="formError" class="text-danger">
+          <strong *ngIf="errorSource === 'server'">Server:</strong>
+          {{ formError }}
+        </span>
+        <span *ngIf="!formError && form.dirty" class="video-form__hint">
+          Unsaved changes
+        </span>
+      </span>
+      <span class="d-flex align-items-center">
+        <button
+          type="button"
+          class="os-btn mr-10"
+          (click)="cancel()"
+          [disabled]="isSubmitting"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="os-btn os-btn-black"
+          [disabled]="isSubmitting"
+        >
+          {{ isSubmitting ? "Saving…" : isEditing ? "Save Changes" : "Add Video" }}
+        </button>
+      </span>
+    </div>
+  </form>
+</section>

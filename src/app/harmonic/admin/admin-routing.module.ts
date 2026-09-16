@@ -8,6 +8,8 @@ import { AdminOffersComponent } from './offers/offers.component';
 import { AdminProductsComponent } from './products/products.component';
 import { AdminBlogsComponent } from './blogs/list/list.component';
 import { AdminBlogFormComponent } from './blogs/add-edit/add-edit.component';
+import { AdminYoutubeVideosComponent } from './youtube-videos/list/list.component';
+import { AdminYoutubeVideoFormComponent } from './youtube-videos/add-edit/add-edit.component';
 
 const routes: Routes = [
   {
@@ -53,6 +55,21 @@ const routes: Routes = [
         path: 'blogs/:id/edit',
         component: AdminBlogFormComponent,
         title: 'Edit Blog Post',
+      },
+      {
+        path: 'youtube-videos',
+        component: AdminYoutubeVideosComponent,
+        title: 'Manage Videos',
+      },
+      {
+        path: 'youtube-videos/new',
+        component: AdminYoutubeVideoFormComponent,
+        title: 'Add Video',
+      },
+      {
+        path: 'youtube-videos/:id/edit',
+        component: AdminYoutubeVideoFormComponent,
+        title: 'Edit Video',
       },
     ],
   },
