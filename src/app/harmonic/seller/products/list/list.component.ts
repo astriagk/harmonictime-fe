@@ -2,7 +2,7 @@ import { ViewportScroller } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BULK_OFFER, UPDATE_PRODUCT_BY_ID } from '@config/index';
+import { BULK_OFFER, MARK_PRODUCT_OFFLINE_SALE, UPDATE_PRODUCT_BY_ID } from '@config/index';
 import { GenericService } from '@shared/services/generic.service';
 import { UtilsService } from '@shared/services/utils.service';
 import { ToastrService } from 'ngx-toastr';
@@ -49,6 +49,10 @@ export class ListComponent implements OnInit, OnDestroy {
   selectedOfferId: string | null = null;
   selectedProductIds: Set<string> = new Set();
   isSavingOffer = false;
+
+  offlineSaleProduct: any = null;
+  offlineSaleQuantity = 1;
+  isSavingOfflineSale = false;
 
   private destroy$ = new Subject<void>();
 
@@ -136,6 +140,37 @@ export class ListComponent implements OnInit, OnDestroy {
           this.store.dispatch(loadSellerProducts({ force: true }));
         },
         error: () => this.toastrService.error('Failed to update availability.'),
+      });
+  }
+
+  openOfflineSaleModal(product: any, event: Event): void {
+    event.stopPropagation();
+    this.offlineSaleProduct = product;
+    this.offlineSaleQuantity = 1;
+  }
+
+  closeOfflineSaleModal(): void {
+    this.offlineSaleProduct = null;
+    this.offlineSaleQuantity = 1;
+  }
+
+  submitOfflineSale(): void {
+    if (!this.offlineSaleProduct || this.offlineSaleQuantity < 1) return;
+    const productId = this.offlineSaleProduct._id;
+    this.isSavingOfflineSale = true;
+    this.genericService
+      .postObservableToken(`${MARK_PRODUCT_OFFLINE_SALE}${productId}/offline-sale`, {
+        Quantity: this.offlineSaleQuantity,
+      })
+      .pipe(finalize(() => (this.isSavingOfflineSale = false)))
+      .subscribe({
+        next: () => {
+          this.toastrService.success('Offline sale recorded.');
+          this.closeOfflineSaleModal();
+          this.store.dispatch(loadSellerProducts({ force: true }));
+        },
+        error: (err) =>
+          this.toastrService.error(err?.error?.message ?? 'Failed to record offline sale.'),
       });
   }
 
