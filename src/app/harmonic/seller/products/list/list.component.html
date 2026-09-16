@@ -125,6 +125,15 @@
                 class="text-muted"
                 >—</span
               >
+              <a
+                *ngIf="
+                  order.ApprovalStatus === 'Approved' &&
+                  order.RemainingQuantity > 0
+                "
+                class="admin-table__action-link cursor-pointer ml-10"
+                (click)="openOfflineSaleModal(order, $event)"
+                >Mark Sold Offline</a
+              >
             </td>
           </tr>
         </ng-container>
@@ -312,4 +321,71 @@
     </div>
   </div>
 </div>
-<div *ngIf="isOfferModalOpen" class="modal-backdrop fade show"></div>
+
+<!-- ── Mark Sold Offline modal ───────────────────────────────────── -->
+<div
+  *ngIf="offlineSaleProduct"
+  class="modal fade show offer__modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="product__modal-wrapper p-relative">
+        <div class="product__modal-close p-absolute">
+          <button type="button" aria-label="Close" (click)="closeOfflineSaleModal()">
+            <i class="fal fa-times"></i>
+          </button>
+        </div>
+
+        <div class="product__modal-inner">
+          <h4 class="mb-5">Mark Sold Offline</h4>
+          <p class="text-muted mb-20" style="font-size: 13px">
+            Record units of <strong>{{ offlineSaleProduct.ProductName }}</strong>
+            sold outside the platform. This reduces its remaining stock here.
+            {{ offlineSaleProduct.RemainingQuantity }} unit(s) currently remaining.
+          </p>
+
+          <div class="form-group mb-20">
+            <label for="offlineSaleQty">Quantity sold offline</label>
+            <input
+              id="offlineSaleQty"
+              type="number"
+              class="form-control"
+              min="1"
+              [max]="offlineSaleProduct.RemainingQuantity"
+              [(ngModel)]="offlineSaleQuantity"
+            />
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button
+              type="button"
+              class="os-btn mr-10"
+              (click)="closeOfflineSaleModal()"
+              [disabled]="isSavingOfflineSale"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="os-btn os-btn-black"
+              [disabled]="
+                isSavingOfflineSale ||
+                offlineSaleQuantity < 1 ||
+                offlineSaleQuantity > offlineSaleProduct.RemainingQuantity
+              "
+              (click)="submitOfflineSale()"
+            >
+              {{ isSavingOfflineSale ? "Saving…" : "Confirm" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="isOfferModalOpen || offlineSaleProduct"
+  class="modal-backdrop fade show"
+></div>
