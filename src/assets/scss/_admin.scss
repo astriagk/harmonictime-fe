@@ -3,6 +3,13 @@
 /*----------------------------------------*/
 
 /* ── Table action buttons (Edit / Delete) ── */
+.admin-table__actions-cell {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
 .admin-table__action-icon {
   display: inline-flex;
   align-items: center;
@@ -22,6 +29,27 @@
 
   &--delete:hover {
     color: $heading-color;
+  }
+}
+
+/* ── Table pill action (icon + label, e.g. "Mark Sold") ── */
+.admin-table__action-pill {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba($theme-color, 0.1);
+  color: $theme-color;
+  transition:
+    background 0.3s,
+    color 0.3s;
+
+  &:hover {
+    background: $theme-color;
+    color: $white;
   }
 }
 
@@ -47,6 +75,7 @@
   font-size: 13px;
   font-weight: 500;
   color: $theme-color;
+  white-space: nowrap;
   transition: color 0.3s;
 
   &:hover {

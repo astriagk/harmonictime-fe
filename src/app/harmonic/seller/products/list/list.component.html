@@ -106,34 +106,40 @@
               </label>
             </td>
             <td (click)="$event.stopPropagation()">
-              <a
-                *ngIf="
-                  !(
+              <div class="admin-table__actions-cell">
+                <a
+                  *ngIf="
+                    !(
+                      order.ApprovalStatus === 'Approved' &&
+                      order.RemainingQuantity === 0
+                    )
+                  "
+                  class="admin-table__action-icon cursor-pointer mr-15"
+                  title="Edit"
+                  [routerLink]="['/seller/add-product', order._id]"
+                >
+                  <i class="fal fa-edit"></i>
+                </a>
+                <span
+                  *ngIf="
                     order.ApprovalStatus === 'Approved' &&
                     order.RemainingQuantity === 0
-                  )
-                "
-                class="admin-table__action-link cursor-pointer"
-                [routerLink]="['/seller/add-product', order._id]"
-                >Edit</a
-              >
-              <span
-                *ngIf="
-                  order.ApprovalStatus === 'Approved' &&
-                  order.RemainingQuantity === 0
-                "
-                class="text-muted"
-                >—</span
-              >
-              <a
-                *ngIf="
-                  order.ApprovalStatus === 'Approved' &&
-                  order.RemainingQuantity > 0
-                "
-                class="admin-table__action-link cursor-pointer ml-10"
-                (click)="openOfflineSaleModal(order, $event)"
-                >Mark Sold Offline</a
-              >
+                  "
+                  class="text-muted"
+                  >—</span
+                >
+                <a
+                  *ngIf="
+                    order.ApprovalStatus === 'Approved' &&
+                    order.RemainingQuantity > 0
+                  "
+                  class="admin-table__action-pill cursor-pointer"
+                  title="Mark Sold Offline"
+                  (click)="openOfflineSaleModal(order, $event)"
+                >
+                  <i class="fal fa-tag mr-5"></i>Mark Sold
+                </a>
+              </div>
             </td>
           </tr>
         </ng-container>
