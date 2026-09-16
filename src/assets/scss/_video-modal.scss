@@ -42,3 +42,326 @@
   width: 80%;
   height: 80%;
 }
+
+// videos page (<app-video-list-area> / <app-video-postbox-item>)
+// The blog listing card, mirroring `.blog__item` in _blog.scss: the still
+// zooms on hover and the type below is identical. What differs is the play
+// button over the image and the missing excerpt — a video has no summary, and
+// the card leaves for YouTube instead of a detail page.
+//
+// The block is `video-post`, not `video`: the theme already owns `.video`
+// (_banner.scss), where `__content` is absolutely positioned and `__title` is
+// 40px white for the full-width CMS video banner. Naming these cards
+// `.video__content` stacked every one of them on the same spot.
+.video-post__item {
+  & .video-post__thumb {
+    & a {
+      display: block;
+      position: relative;
+    }
+
+    & img {
+      // 16:9 stills — crop rather than letterbox so the grid rows stay even.
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      @include transition(0.3s);
+    }
+  }
+
+  // Hidden until the card is hovered, so the grid stays calm at rest.
+  & .video-post__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    line-height: 56px;
+    text-align: center;
+    border-radius: 50%;
+    border: 2px solid $white;
+    background-color: rgba($black, 0.45);
+    color: $white;
+    opacity: 0;
+    visibility: hidden;
+    @include transform(translate(-50%, -50%));
+    @include transition(0.3s);
+
+    & i {
+      font-size: 16px;
+      // Nudge the glyph off the optical centre of the circle.
+      margin-left: 3px;
+    }
+  }
+
+  &:hover {
+    & .video-post__thumb {
+      & img {
+        @include transform(scale(1.1));
+      }
+    }
+
+    & .video-post__play {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  & .video-post__content {
+    padding-top: 27px;
+
+    & h4 {
+      & a {
+        &:hover {
+          color: $theme-color;
+        }
+      }
+    }
+  }
+
+  // Byline and date, identical to `.blog__meta`: body text with the author
+  // picked out in the theme gold. The blog card makes the author a link to
+  // nowhere; here it is a plain span, since a video has no author page either.
+  & .video-post__meta {
+    margin-bottom: 13px;
+
+    & .video-post__author {
+      color: $theme-color;
+    }
+  }
+
+  & .video-post__title {
+    font-size: 30px;
+
+    @media #{$sm,$xs} {
+      font-size: 20px;
+    }
+  }
+
+  // Modifier on the card itself, like `.blog__border-bottom`.
+  &.video-post__border-bottom {
+    border-bottom: 1px solid $grey;
+  }
+}
+
+// video strip (home page blocks — <app-videos-area>)
+// The blog strip's slider with a still in place of the cover image: same
+// arrows, same dark content panel overlapping the image, same hover overlay —
+// only the icon differs, since a card opens the overlay above rather than a
+// detail page. The nav chrome is restated here rather than shared with
+// `.blog__slider-area` (_blog.scss) because the theme keeps one block per
+// slider section — see also `.client_slider` and `.product__slider-area`.
+.video__slider {
+  &-area {
+    .owl-carousel {
+      position: relative;
+    }
+    .owl-carousel .owl-nav > div.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      filter: alpha(opacity=50);
+    }
+    .owl-carousel:hover .owl-nav > div {
+      opacity: 1;
+      filter: alpha(opacity=100);
+      visibility: visible;
+    }
+    .owl-nav > div {
+      position: absolute;
+      top: 50%;
+      margin: -25px auto 0;
+      cursor: pointer;
+      width: 50px;
+      height: 50px;
+      z-index: 1;
+      padding: 0;
+      text-align: center;
+      line-height: 48px;
+      border-radius: 50%;
+      border: 1px solid $theme-2-color;
+      color: $white;
+      background: $theme-2-color;
+      font-size: 0;
+      @include transition(0.35s);
+
+      &:hover {
+        background: $black-2;
+        color: $white;
+        border-color: $white;
+      }
+    }
+    .owl-nav > div:before {
+      font-size: 20px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .owl-nav .owl-prev:before {
+      content: "\f104";
+      margin-right: 2px;
+      font-family: "Font Awesome 5 pro";
+    }
+    .owl-nav .owl-next:before {
+      content: "\f105";
+      margin-left: 3px;
+      font-family: "Font Awesome 5 pro";
+    }
+    .owl-nav .owl-prev {
+      left: -15px;
+
+      @media #{$xs} {
+        left: 0;
+      }
+    }
+    .owl-nav .owl-next {
+      right: -15px;
+
+      @media #{$xs} {
+        right: 0;
+      }
+    }
+  }
+
+  &-item {
+    & .video-thumb {
+      position: relative;
+
+      // The dark wash that fades in behind the play button on hover.
+      &::before {
+        background-color: #00000061;
+        position: absolute;
+        left: 25px;
+        right: 25px;
+        top: 25px;
+        bottom: 25px;
+        margin: auto;
+        @include transform(scale(0));
+        display: block;
+        content: "";
+        @include transition(0.35s);
+      }
+
+      & img {
+        width: 100%;
+        // 16:9 stills — crop rather than letterbox so the slides stay even.
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+      }
+
+      &:hover {
+        &::before,
+        .btn {
+          @include transform(scale(1));
+          z-index: 1;
+        }
+      }
+
+      & a.btn {
+        background-color: $theme-2-color;
+        border-radius: 50%;
+        bottom: 0;
+        color: $white;
+        font-size: 18px;
+        height: 55px;
+        left: 0;
+        line-height: 36px;
+        margin: auto;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 55px;
+        @include transform(scale(0));
+        @include transition(0.35s);
+
+        // Nudge the glyph off the optical centre of the circle.
+        & i {
+          margin-left: 3px;
+        }
+      }
+
+      & a.btn:hover {
+        background-color: $black-2;
+        color: $white;
+      }
+    }
+  }
+}
+
+.video__post {
+  &-content {
+    position: relative;
+    z-index: 2;
+    // Centred in a fixed-height panel: a one-line and a two-line title then
+    // produce the same card, so the slides line up instead of ending at
+    // different heights.
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    padding: 20px 25px;
+    margin: -70px 12% 0;
+    text-align: center;
+    background-color: $black-2;
+
+    // The short vertical rule that ties the panel back to the image above. It
+    // hangs off the panel rather than the title, which is clipped to two lines
+    // and would cut the rule off with it.
+    &::before {
+      background-color: $theme-2-color;
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -55px;
+      margin: auto;
+      width: 2px;
+      height: 55px;
+    }
+
+    @media #{$xs} {
+      min-height: 100px;
+      padding: 16px 15px;
+    }
+  }
+
+  &-title {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    color: $white;
+    margin-bottom: 0;
+
+    // Two lines at most — a long channel title must not push the panel out of
+    // shape.
+    & a {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    &:hover {
+      color: $theme-2-color;
+    }
+  }
+}
+
+.video__wrapper {
+  & .article {
+    &-author {
+      color: $theme-2-color;
+    }
+
+    &-meta {
+      margin-top: 10px;
+      color: $grey-3;
+
+      & span {
+        font-size: 12px;
+      }
+
+      & i {
+        margin-right: 5px;
+      }
+    }
+  }
+}
+
