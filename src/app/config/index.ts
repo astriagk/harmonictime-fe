@@ -53,6 +53,8 @@ export const SEARCH_PRODUCTS = `${baseUrl}/products/search`;
 export const GET_PRODUCT_BY_ID = `${baseUrl}/products/`;
 // update editable fields of a single product (append the product id)
 export const UPDATE_PRODUCT_BY_ID = `${baseUrl}/products/`;
+// record units sold off-platform against a product's stock (append the product id + "/offline-sale")
+export const MARK_PRODUCT_OFFLINE_SALE = `${baseUrl}/products/`;
 
 // only availability update exists in backend
 export const UPDATE_PRODUCT_AVAILABILITY = `${baseUrl}/products/availability`;
